@@ -4,7 +4,7 @@
 
 This plugin does a lot of the heavy lifting needed to have an external MySQL based global id generator as described in this article from Flickr
 
-http://code.flickr.com/blog/2010/02/08/ticket-servers-distributed-unique-primary-keys-on-the-cheap/
+*http://code.flickr.com/blog/2010/02/08/ticket-servers-distributed-unique-primary-keys-on-the-cheap/)
 
 There are three parts to it: configuration, migration and object creation
 
@@ -41,31 +41,31 @@ Then setup these servers, and other defaults in your environment.rb:
 
 Here's a complete list of the options you can use:
 
-Name                  Default
-:disabled             false                         
-	Disable GlobalUid entirely
+    Name                  Default
+    :disabled             false                         
+            Disable GlobalUid entirely
 
-:dry_run              false                         
-	Setting this parameter causes the REPLACE INTO statements to run, but the id picked up will not be used.
+    :dry_run              false                         
+            Setting this parameter causes the REPLACE INTO statements to run, but the id picked up will not be used.
 
-:connection_timeout   3 seconds                    
-	Timeout for connecting to a global UID server
+    :connection_timeout   3 seconds                    
+            Timeout for connecting to a global UID server
 
-:query_timeout        10 seconds                    
-	Timeout for retrieving a global UID from a server before we move on to the next server
+    :query_timeout        10 seconds                    
+            Timeout for retrieving a global UID from a server before we move on to the next server
 
-:connection_retry     10.minutes
-	After failing to connect or query a UID server, how long before we retry
+    :connection_retry     10.minutes
+            After failing to connect or query a UID server, how long before we retry
 
-:use_server_variables false
-	If set, this gem will call "set @@auto_increment_offset" in order to setup the global uid servers.
-	good for test/development, not so much for production.
+    :use_server_variables false
+            If set, this gem will call "set @@auto_increment_offset" in order to setup the global uid servers.
+            good for test/development, not so much for production.
 '
-:notifier             A proc calling ActiveRecord::Base.logger
-	This proc is called with two parameters upon UID server failure -- an exception and a message
+    :notifier             A proc calling ActiveRecord::Base.logger
+            This proc is called with two parameters upon UID server failure -- an exception and a message
 
-:increment_by         5
-	Chooses the step size for the increment.  This will define the maximum number of UID servers you can have.
+    :increment_by         5
+            Chooses the step size for the increment.  This will define the maximum number of UID servers you can have.
 
 ### Testing
 
@@ -82,9 +82,9 @@ your primary keys from signature "PRIMARY KEY AUTO_INCREMENT NOT NULL" to "PRIMA
 
 If you'd like to disable this behavior, you can write:
 
-class CreateFoos < ActiveRecord::Migration
-  def self.up
-    create_table :foos, :use_global_uid => false do |t|
+    class CreateFoos < ActiveRecord::Migration
+      def self.up
+        create_table :foos, :use_global_uid => false do |t|
 
 
 ## Model-level stuff
@@ -96,9 +96,9 @@ It's the Rails way.
 
 ### Disabling global uid per table
 
-class Foo < ActiveRecord::Base
-  disable_global_uid
-end
+    class Foo < ActiveRecord::Base
+      disable_global_uid
+    end
 
 
 ## Taking matters into your own hands:
