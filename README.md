@@ -41,14 +41,31 @@ Then setup these servers, and other defaults in your environment.rb:
 
 Here's a complete list of the options you can use:
 
-  Name                  Default                       Explains
-  :increment_by         5                             Chooses the step size for the increment.  This will define the maximum number of UID servers you can have.
-  :connection_timeout   10 seconds                    Timeout for connecting to a global UID server
-  :query_timeout        10 seconds                    Timeout for retrieving a global UID from a server
-  :connection_retry     10.minutes                    After failing to connect or query a UID server, how long before we retry
-  :notifier             A proc calling Rails.logger   This proc is called with two parameters upon UID server failure -- an exception and a message
-  :disabled             false                         Disable GlobalUid, either globally or on a per class basis.
-  :dry_run              false                         Setting this parameter causes the REPLACE INTO statements to run, but the id picked up will not be used.
+Name                  Default
+:disabled             false                         
+	Disable GlobalUid entirely
+
+:dry_run              false                         
+	Setting this parameter causes the REPLACE INTO statements to run, but the id picked up will not be used.
+
+:connection_timeout   3 seconds                    
+	Timeout for connecting to a global UID server
+
+:query_timeout        10 seconds                    
+	Timeout for retrieving a global UID from a server before we move on to the next server
+
+:connection_retry     10.minutes
+	After failing to connect or query a UID server, how long before we retry
+
+:use_server_variables false
+	If set, this gem will call "set @@auto_increment_offset" in order to setup the global uid servers.
+	good for test/development, not so much for production.
+'
+:notifier             A proc calling ActiveRecord::Base.logger
+	This proc is called with two parameters upon UID server failure -- an exception and a message
+
+:increment_by         5
+	Chooses the step size for the increment.  This will define the maximum number of UID servers you can have.
 
 === Testing
 
@@ -60,34 +77,15 @@ Copy test/config/database.yml.example to test/config/database.yml and make the m
 
 === Migration
 
-Create a migration as normal but pass in the option
+Migrations will now add global_uid tables for you by default.  They will also change
+your primary keys from signature "PRIMARY KEY AUTO_INCREMENT NOT NULL" to "PRIMARY KEY NOT NULL".
 
-  :use_global_uid => true
+If you'd like to disable this behavior, you can write:
 
-to both create_table and drop_table.
+class CreateFoos < ActiveRecord::Migration
+  def self.up
+    create_table :foos, :use_global_uid => false do |t|
 
-You must have describe an id column which is primary. It can be called whatever you want.
-
-    class CreateFoos < ActiveRecord::Migration
-      def self.up
-        create_table :foos, :use_global_uid => true do |t|
-          t.integer :id, :limit => 8, :primary => true, :null => false
-          t.string  :description
-        end
-      end
-
-      def self.down
-        drop_table :foos, :use_global_uid => true
-      end
-    end
-
-This will set up the table properly for you and also create the corresponding id table on each of the id servers.
-
-You can specify the name of the id table by passing in
-
-    :global_uid_table => '<name>'
-
-Remember: you must pass the same value into drop_table as well.
 
 == Model-level stuff
 
@@ -102,13 +100,6 @@ class Foo < ActiveRecord::Base
   disable_global_uid
 end
 
-
-=== Setting per model global uid parameters
-
-class Foo < ActiveRecord::Base
-  global_uid_options[:table_name] = 'bar_ids'
-  global_uid_options[:dry_run] = true
-end
 
 == Taking matters into your own hands:
 
@@ -133,6 +124,7 @@ If you're using a non standard uid table then pass that in.
 I welcome your feedback, bug reports, patches and improvements. Please e-mail these
 to
     simon at zendesk.com
+    
 
 with [mysqlbigint global uid] in the subject line. I'll get back to you as soon as I can.
 
