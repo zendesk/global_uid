@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency("shoulda")
   s.add_development_dependency("mocha")
   s.add_development_dependency("ruby-debug")
-  s.add_development_dependency("mysql2")
+  s.add_development_dependency("mysql")
 
   s.files        = Dir.glob("lib/**/*")
   s.test_files   = Dir.glob("test/**/*")

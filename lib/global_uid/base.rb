@@ -1,5 +1,6 @@
 require "active_record"
 require "system_timer"
+require "mysql"
 
 module GlobalUid
   class Base
