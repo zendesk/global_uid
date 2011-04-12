@@ -52,6 +52,10 @@ Here's a complete list of the options you can use:
 
 === Testing
 
+  mysqladmin -uroot create global_uid_test
+  mysqladmin -uroot create global_uid_test_id_server_1
+  mysqladmin -uroot create global_uid_test_id_server_2
+
 Copy test/config/database.yml.example to test/config/database.yml and make the modifications you need to point it to 2 local MySQL databases. Then +rake test+
 
 === Migration

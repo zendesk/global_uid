@@ -9,13 +9,17 @@ require "active_support/test_case"
 require "shoulda"
 require "global_uid"
 
-test_options = {
-  'global_uid_options' => {
-    'use_server_variables' => true,
-    'disabled'   => false,
-    'id_servers' => [
+GlobalUid::Base.global_uid_options = {
+  :global_uid_options => {
+  :use_server_variables => true,
+    :disabled   => false,
+    :id_servers => [
       'test_id_server_1',
       'test_id_server_2'
     ]
   }
 }
+
+ActiveRecord::Base.configurations = YAML::load(IO.read(File.dirname(__FILE__) + "/config/database.yml"))
+ActiveRecord::Base.establish_connection("test")
+ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/test.log")

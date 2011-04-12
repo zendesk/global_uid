@@ -61,7 +61,7 @@ class GlobalUIDTest < ActiveSupport::TestCase
     context "without explicit parameters" do
       context "with global-uid enabled" do
         setup do
-          GlobalUid::Base.default_options[:disabled] = false
+          GlobalUid::Base.global_uid_options[:disabled] = false
           CreateWithNoParams.up
           @create_table = WithGlobalUID.connection.select_value("show create table with_global_uids").split("\n")
         end
@@ -95,7 +95,7 @@ class GlobalUIDTest < ActiveSupport::TestCase
 
       context "with global-uid disabled, globally" do
         setup do
-          GlobalUid::Base.default_options[:disabled] = true
+          GlobalUid::Base.global_uid_options[:disabled] = true
           CreateWithNoParams.up
         end
 
@@ -107,7 +107,7 @@ class GlobalUIDTest < ActiveSupport::TestCase
 
         teardown do
           CreateWithNoParams.down
-          GlobalUid::Base.default_options[:disabled] = false
+          GlobalUid::Base.global_uid_options[:disabled] = false
         end
       end
 
@@ -249,7 +249,7 @@ class GlobalUIDTest < ActiveSupport::TestCase
 
     context "with per-process_affinity" do
       setup do
-        GlobalUid::Base.default_options[:per_process_affinity] = true
+        GlobalUid::Base.global_uid_options[:per_process_affinity] = true
       end
 
       should "increment sequentially" do
@@ -261,7 +261,7 @@ class GlobalUIDTest < ActiveSupport::TestCase
       end
 
       teardown do
-        GlobalUid::Base.default_options[:per_process_affinity] = false
+        GlobalUid::Base.global_uid_options[:per_process_affinity] = false
       end
     end
 
@@ -294,7 +294,7 @@ class GlobalUIDTest < ActiveSupport::TestCase
     setup do
       reset_connections!
       drop_old_test_tables!
-      GlobalUid::Base.default_options[:dry_run] = true
+      GlobalUid::Base.global_uid_options[:dry_run] = true
       CreateWithNoParams.up
     end
 
@@ -321,7 +321,7 @@ class GlobalUIDTest < ActiveSupport::TestCase
     teardown do
       reset_connections!
       CreateWithNoParams.down
-      GlobalUid::Base.default_options[:dry_run] = false
+      GlobalUid::Base.global_uid_options[:dry_run] = false
     end
   end
 
@@ -349,9 +349,9 @@ class GlobalUIDTest < ActiveSupport::TestCase
   end
 
   def restore_defaults!
-    GlobalUid::Base.default_options[:disabled] = false
-    GlobalUid::Base.default_options[:use_server_variables] = true
-    GlobalUid::Base.default_options[:dry_run] = false
+    GlobalUid::Base.global_uid_options[:disabled] = false
+    GlobalUid::Base.global_uid_options[:use_server_variables] = true
+    GlobalUid::Base.global_uid_options[:dry_run] = false
   end
 end
 

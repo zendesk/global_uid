@@ -2,3 +2,4 @@
 .bundle
 .rvmrc
 test/config/database.yml
+test/test.log
