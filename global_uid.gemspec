@@ -13,13 +13,13 @@ Gem::Specification.new do |s|
   s.add_dependency("activerecord", "~>2.3.10")
   s.add_dependency("activesupport", "~>2.3.10")
   s.add_dependency("SystemTimer", "1.2")
+  s.add_dependency("mysql", "2.8.1")
 
   s.add_development_dependency("rake")
   s.add_development_dependency("bundler")
   s.add_development_dependency("shoulda")
   s.add_development_dependency("mocha")
   s.add_development_dependency("ruby-debug")
-  s.add_development_dependency("mysql")
 
   s.files        = Dir.glob("lib/**/*")
   s.test_files   = Dir.glob("test/**/*")
