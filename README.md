@@ -16,7 +16,7 @@ This plugin shouldn't fail with Databases other than MySQL but neither will it d
 
 Shove this in your Gemfile and smoke it
 
-  gem "global_uid", :git => "git://github.com/zendesk/global_uid.git"
+    gem "global_uid", :git => "git://github.com/zendesk/global_uid.git"
 
 ### Configuration
 
@@ -60,7 +60,6 @@ Here's a complete list of the options you can use:
     :use_server_variables false
             If set, this gem will call "set @@auto_increment_offset" in order to setup the global uid servers.
             good for test/development, not so much for production.
-'
     :notifier             A proc calling ActiveRecord::Base.logger
             This proc is called with two parameters upon UID server failure -- an exception and a message
 
@@ -69,9 +68,9 @@ Here's a complete list of the options you can use:
 
 ### Testing
 
-  mysqladmin -uroot create global_uid_test
-  mysqladmin -uroot create global_uid_test_id_server_1
-  mysqladmin -uroot create global_uid_test_id_server_2
+    mysqladmin -uroot create global_uid_test
+    mysqladmin -uroot create global_uid_test_id_server_1
+    mysqladmin -uroot create global_uid_test_id_server_2
 
 Copy test/config/database.yml.example to test/config/database.yml and make the modifications you need to point it to 2 local MySQL databases. Then +rake test+
 
