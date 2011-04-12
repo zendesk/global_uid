@@ -44,8 +44,8 @@ module GlobalUid
     end
 
     def self.new_connection(name, connection_timeout, offset, increment_by, use_server_variables)
-      raise "No id server '#{name}' configured in database.yml" unless ActiveRecord::Base.connections.has_key?(name)
-      config = ActiveRecord::Base.connections[name]
+      raise "No id server '#{name}' configured in database.yml" unless ActiveRecord::Base.configurations.has_key?(name)
+      config = ActiveRecord::Base.configurations[name]
 
       con = nil
       begin
