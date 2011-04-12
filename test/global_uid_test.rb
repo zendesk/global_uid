@@ -314,7 +314,7 @@ class GlobalUIDTest < ActiveSupport::TestCase
     end
 
     should "log the results" do
-      Rails.logger.expects(:info).at_least(10)
+      ActiveRecord::Base.logger.expects(:info).at_least(10)
       10.times { WithGlobalUID.create! }
     end
 

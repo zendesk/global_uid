@@ -16,7 +16,7 @@ module GlobalUid
         global_uid = self.class.generate_uid
       end
       if GlobalUid::Base.global_uid_options[:dry_run]
-        Rails.logger.info("GlobalUid dry-run: #{self.class.name}\t#{global_uid}\t#{"%.4f" % realtime}")
+        ActiveRecord::Base.logger.info("GlobalUid dry-run: #{self.class.name}\t#{global_uid}\t#{"%.4f" % realtime}")
         return
       end
 

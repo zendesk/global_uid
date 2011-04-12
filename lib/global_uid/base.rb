@@ -4,10 +4,6 @@ module GlobalUid
   class Base
     @@servers = nil
 
-    class NoServersAvailableException < Exception ; end
-    class ConnectionTimeoutException < Exception ; end
-    class TimeoutException < Exception ; end
-
     GLOBAL_UID_DEFAULTS = {
       :connection_timeout   => 3,
       :connection_retry     => 10.minutes,
