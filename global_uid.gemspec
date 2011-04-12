@@ -12,6 +12,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency("activerecord", "~>2.3.10")
   s.add_dependency("activesupport", "~>2.3.10")
+  s.add_dependency("SystemTimer", "1.2")
 
   s.add_development_dependency("rake")
   s.add_development_dependency("bundler")

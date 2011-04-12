@@ -2,12 +2,14 @@ PATH
   remote: .
   specs:
     Global UID (1.0.0)
+      SystemTimer (= 1.2)
       activerecord (~> 2.3.10)
       activesupport (~> 2.3.10)
 
 GEM
   remote: http://rubygems.org/
   specs:
+    SystemTimer (1.2)
     activerecord (2.3.11)
       activesupport (= 2.3.11)
     activesupport (2.3.11)

@@ -1,4 +1,5 @@
-require 'activerecord'
+require "active_record"
+require "system_timer"
 
 module GlobalUid
   class Base
@@ -115,7 +116,6 @@ module GlobalUid
 
     def self.with_connections(options = {})
       options = self.global_uid_options.merge(options)
-
       servers = setup_connections!(options)
 
       if !options[:per_process_affinity]
