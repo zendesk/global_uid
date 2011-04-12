@@ -1,6 +1,6 @@
-= Global UID Plugin
+# Global UID Plugin
 
-== Summary
+## Summary
 
 This plugin does a lot of the heavy lifting needed to have an external MySQL based global id generator as described in this article from Flickr
 
@@ -8,17 +8,17 @@ http://code.flickr.com/blog/2010/02/08/ticket-servers-distributed-unique-primary
 
 There are three parts to it: configuration, migration and object creation
 
-=== Interactions with other databases
+### Interactions with other databases
 
 This plugin shouldn't fail with Databases other than MySQL but neither will it do anything either. There's theoretically nothing that should stop it from being *ported* to other DBs, we just don't need to.
 
-== Installation
+## Installation
 
 Shove this in your Gemfile and smoke it
 
   gem "global_uid", :git => "git://github.com/zendesk/global_uid.git"
 
-=== Configuration
+### Configuration
 
 First configure some databases in database.yml in the normal way.
 
@@ -67,7 +67,7 @@ Name                  Default
 :increment_by         5
 	Chooses the step size for the increment.  This will define the maximum number of UID servers you can have.
 
-=== Testing
+### Testing
 
   mysqladmin -uroot create global_uid_test
   mysqladmin -uroot create global_uid_test_id_server_1
@@ -75,7 +75,7 @@ Name                  Default
 
 Copy test/config/database.yml.example to test/config/database.yml and make the modifications you need to point it to 2 local MySQL databases. Then +rake test+
 
-=== Migration
+### Migration
 
 Migrations will now add global_uid tables for you by default.  They will also change
 your primary keys from signature "PRIMARY KEY AUTO_INCREMENT NOT NULL" to "PRIMARY KEY NOT NULL".
@@ -87,21 +87,21 @@ class CreateFoos < ActiveRecord::Migration
     create_table :foos, :use_global_uid => false do |t|
 
 
-== Model-level stuff
+## Model-level stuff
 
 If you want GlobalUIDs created, you don't have to do anything except set up the GlobalUID tables
 with your migration.  Everything will be taken care you.  It's calm, and soothing like aloe.
 It's the Rails way.
 
 
-=== Disabling global uid per table
+### Disabling global uid per table
 
 class Foo < ActiveRecord::Base
   disable_global_uid
 end
 
 
-== Taking matters into your own hands:
+## Taking matters into your own hands:
 
 
   class Foo < ActiveRecord::Base
@@ -119,7 +119,7 @@ If you're using a non standard uid table then pass that in.
 
     generate_uid(:uid_table => '<name>')
 
-== Submitting Bug reports, patches or improvements
+## Submitting Bug reports, patches or improvements
 
 I welcome your feedback, bug reports, patches and improvements. Please e-mail these
 to
