@@ -1,0 +1,36 @@
+PATH
+  remote: .
+  specs:
+    Global UID (1.0.0)
+      activerecord (~> 2.3.10)
+      activesupport (~> 2.3.10)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    activerecord (2.3.11)
+      activesupport (= 2.3.11)
+    activesupport (2.3.11)
+    columnize (0.3.2)
+    linecache (0.43)
+    mocha (0.9.12)
+    mysql2 (0.2.7)
+    rake (0.8.7)
+    ruby-debug (0.10.4)
+      columnize (>= 0.1)
+      ruby-debug-base (~> 0.10.4.0)
+    ruby-debug-base (0.10.4)
+      linecache (>= 0.3)
+    shoulda (2.11.3)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  Global UID!
+  bundler
+  mocha
+  mysql2
+  rake
+  ruby-debug
+  shoulda

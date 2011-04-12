@@ -1,0 +1,13 @@
+test_id_server_1:
+  adapter: sqlite3
+  encoding: utf8
+  database: db/global_uid_test_id_server_1.sqlite
+  username: root
+  password:
+
+test_id_server_2:
+  adapter: sqlite3
+  encoding: utf8
+  database: db/global_uid_test_id_server_2.sqlite
+  username: root
+  password:
