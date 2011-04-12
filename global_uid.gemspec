@@ -1,5 +1,5 @@
 Gem::Specification.new do |s|
-  s.name        = "Global UID"
+  s.name        = "global_uid"
   s.version     = "1.0.0"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Ben Osheroff"]
