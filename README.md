@@ -4,7 +4,7 @@
 
 This plugin does a lot of the heavy lifting needed to have an external MySQL based global id generator as described in this article from Flickr
 
-*http://code.flickr.com/blog/2010/02/08/ticket-servers-distributed-unique-primary-keys-on-the-cheap/)
+(http://code.flickr.com/blog/2010/02/08/ticket-servers-distributed-unique-primary-keys-on-the-cheap/)
 
 There are three parts to it: configuration, migration and object creation
 
@@ -103,16 +103,16 @@ It's the Rails way.
 ## Taking matters into your own hands:
 
 
-  class Foo < ActiveRecord::Base
-    disable_global_uid
+	class Foo < ActiveRecord::Base
+		disable_global_uid
 
-    def before_create
-      self.id = generate_uid()
-      # other stuff
-      ....
-    end
+		def before_create
+		  self.id = generate_uid()
+		  # other stuff
+		  ....
+		end
 
-  end
+	end
 
 If you're using a non standard uid table then pass that in.
 
