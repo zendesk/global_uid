@@ -118,7 +118,7 @@ module GlobalUid
     end
 
     def self.with_connections(options = {})
-      options = global_uid_options.merge(options)
+      options = self.global_uid_options.merge(options)
 
       servers = setup_connections!(options)
 
@@ -174,7 +174,6 @@ module GlobalUid
       raise NoServersAvailableException, "All global UID servers are gone!"
     end
 
-    # a tick hacky, but nice for proper config evaluation order
     def self.global_uid_options=(options)
       @global_uid_options = GLOBAL_UID_DEFAULTS.merge(options.symbolize_keys)
     end
@@ -184,7 +183,7 @@ module GlobalUid
     end
 
     def self.global_uid_servers
-      global_uid_options[:id_servers]
+      self.global_uid_options[:id_servers]
     end
 
     def self.id_table_from_name(name)
