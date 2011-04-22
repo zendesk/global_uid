@@ -1,6 +1,7 @@
 require "active_record"
-require "system_timer"
+require "system_timer" if Gem.available?("system_timer")
 require "mysql"
+require "timeout"
 
 module GlobalUid
   class Base
@@ -41,13 +42,19 @@ module GlobalUid
       end
     end
 
+    if const_defined?("SystemTimer")
+      GlobalUidTimer = SystemTimer
+    else
+      GlobalUidTimer = Timeout
+    end
+
     def self.new_connection(name, connection_timeout, offset, increment_by, use_server_variables)
       raise "No id server '#{name}' configured in database.yml" unless ActiveRecord::Base.configurations.has_key?(name)
       config = ActiveRecord::Base.configurations[name]
 
       con = nil
       begin
-        SystemTimer.timeout_after(connection_timeout, ConnectionTimeoutException) do
+        GlobalUidTimer.timeout(connection_timeout, ConnectionTimeoutException) do
           con = ActiveRecord::Base.mysql_connection(config)
         end
       rescue ConnectionTimeoutException => e
@@ -163,7 +170,7 @@ module GlobalUid
     def self.get_uid_for_class(klass, options = {})
       with_connections do |connection|
         timeout = self.global_uid_options[:query_timeout]
-        SystemTimer.timeout_after(self.global_uid_options[:query_timeout], TimeoutException) do
+        GlobalUidTimer.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
           id = connection.insert("REPLACE INTO #{klass.global_uid_table} (stub) VALUES ('a')")
           return id
         end
