@@ -10,16 +10,18 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = ">= 1.3.6"
 
+  is_1_8 = Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("1.9")
+
   s.add_dependency("activerecord", "~>2.3.10")
   s.add_dependency("activesupport", "~>2.3.10")
-  s.add_dependency("SystemTimer", "1.2")
+  s.add_dependency("SystemTimer", "1.2") if is_1_8
   s.add_dependency("mysql", "2.8.1")
 
   s.add_development_dependency("rake")
   s.add_development_dependency("bundler")
   s.add_development_dependency("shoulda")
   s.add_development_dependency("mocha")
-  s.add_development_dependency("ruby-debug")
+  s.add_development_dependency("ruby-debug") if is_1_8
 
   s.files        = Dir.glob("lib/**/*")
   s.test_files   = Dir.glob("test/**/*")

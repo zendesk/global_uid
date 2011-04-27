@@ -63,7 +63,7 @@ class GlobalUIDTest < ActiveSupport::TestCase
         setup do
           GlobalUid::Base.global_uid_options[:disabled] = false
           CreateWithNoParams.up
-          @create_table = WithGlobalUID.connection.select_value("show create table with_global_uids").split("\n")
+          @create_table = show_create_sql(WithGlobalUID, "with_global_uids").split("\n")
         end
 
         should "create the global_uids table" do
@@ -117,7 +117,7 @@ class GlobalUIDTest < ActiveSupport::TestCase
         end
 
         should "preserve the name of the ID key" do
-          @create_table = WithGlobalUID.connection.select_value("show create table with_global_uids").split("\n")
+          @create_table = show_create_sql(WithGlobalUID, "with_global_uids").split("\n")
           assert(@create_table.grep(/hello.*int/i))
           assert(@create_table.grep(/primary key.*hello/i))
         end
@@ -131,7 +131,7 @@ class GlobalUIDTest < ActiveSupport::TestCase
     context "with global-uid disabled in the migration" do
       setup do
         CreateWithoutGlobalUIDs.up
-        @create_table = WithoutGlobalUID.connection.select_value("show create table without_global_uids").split("\n")
+        @create_table = show_create_sql(WithoutGlobalUID, "without_global_uids").split("\n")
       end
 
       should "not create the global_uids table" do
@@ -141,7 +141,7 @@ class GlobalUIDTest < ActiveSupport::TestCase
       end
 
       should "create standard auto-increment tables" do
-        id_line = @create_table.grep(/\`id\` int/i).first
+        id_line = @create_table.grep(/.id. int/i).first
         assert_match /auto_increment/i, id_line
       end
 
@@ -352,6 +352,10 @@ class GlobalUIDTest < ActiveSupport::TestCase
     GlobalUid::Base.global_uid_options[:disabled] = false
     GlobalUid::Base.global_uid_options[:use_server_variables] = true
     GlobalUid::Base.global_uid_options[:dry_run] = false
+  end
+
+  def show_create_sql(klass, table)
+    klass.connection.select_all("show create table #{table}")[0]["Create Table"]
   end
 end
 
