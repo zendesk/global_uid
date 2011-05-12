@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    Global UID (1.0.0)
+    global_uid (1.0.0)
       SystemTimer (= 1.2)
       activerecord (~> 2.3.10)
       activesupport (~> 2.3.10)
@@ -30,8 +30,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  Global UID!
   bundler
+  global_uid!
   mocha
   rake
   ruby-debug
