@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     global_uid (1.0.0)
-      SystemTimer (= 1.2)
+      SystemTimer (~> 1.2)
       activerecord (~> 2.3.10)
       activesupport (~> 2.3.10)
       mysql (= 2.8.1)
@@ -10,7 +10,7 @@ PATH
 GEM
   remote: http://rubygems.org/
   specs:
-    SystemTimer (1.2)
+    SystemTimer (1.2.3)
     activerecord (2.3.11)
       activesupport (= 2.3.11)
     activesupport (2.3.11)
