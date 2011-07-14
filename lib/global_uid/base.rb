@@ -41,6 +41,11 @@ module GlobalUid
       end
     end
 
+    begin
+      require 'system_timer'
+    rescue LoadError
+    end
+
     if const_defined?("SystemTimer")
       GlobalUidTimer = SystemTimer
     else

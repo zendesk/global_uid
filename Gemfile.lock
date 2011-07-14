@@ -1,20 +1,24 @@
 PATH
   remote: .
   specs:
-    global_uid (1.0.0)
-      SystemTimer (~> 1.2)
+    global_uid (1.0.1)
       activerecord (~> 2.3.10)
       activesupport (~> 2.3.10)
+      global_uid
       mysql (= 2.8.1)
 
 GEM
   remote: http://rubygems.org/
   specs:
-    SystemTimer (1.2.3)
     activerecord (2.3.11)
       activesupport (= 2.3.11)
     activesupport (2.3.11)
     columnize (0.3.2)
+    git (1.2.5)
+    jeweler (1.6.4)
+      bundler (~> 1.0)
+      git (>= 1.2.5)
+      rake
     linecache (0.43)
     mocha (0.9.12)
     mysql (2.8.1)
@@ -32,6 +36,7 @@ PLATFORMS
 DEPENDENCIES
   bundler
   global_uid!
+  jeweler
   mocha
   rake
   ruby-debug
