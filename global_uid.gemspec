@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{global_uid}
-  s.version = "1.0.2"
+  s.version = "1.0.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.3.6") if s.respond_to? :required_rubygems_version=
   s.authors = ["Ben Osheroff"]
-  s.date = %q{2011-07-14}
+  s.date = %q{2011-08-29}
   s.description = %q{Zendesk GUID}
   s.email = ["ben@zendesk.com"]
   s.extra_rdoc_files = [
@@ -23,9 +23,9 @@ Gem::Specification.new do |s|
   ]
   s.homepage = %q{http://github.com/zendesk/global_uid}
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.5.2}
+  s.rubygems_version = %q{1.5.3}
   s.summary = %q{Zendesk GUID}
-  s.test_files = ["test/config", "test/config/database.yml.example", "test/global_uid_test.rb", "test/test_helper.rb"]
+  s.test_files = ["test/config", "test/config/database.yml.example", "test/test_helper.rb", "test/global_uid_test.rb"]
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
@@ -42,6 +42,11 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<shoulda>, [">= 0"])
       s.add_development_dependency(%q<mocha>, [">= 0"])
       s.add_development_dependency(%q<ruby-debug>, [">= 0"])
+      s.add_development_dependency(%q<rake>, [">= 0"])
+      s.add_development_dependency(%q<jeweler>, [">= 0"])
+      s.add_development_dependency(%q<bundler>, [">= 0"])
+      s.add_development_dependency(%q<shoulda>, [">= 0"])
+      s.add_development_dependency(%q<mocha>, [">= 0"])
       s.add_development_dependency(%q<rake>, [">= 0"])
       s.add_development_dependency(%q<jeweler>, [">= 0"])
       s.add_development_dependency(%q<bundler>, [">= 0"])
@@ -92,6 +97,11 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<bundler>, [">= 0"])
       s.add_dependency(%q<shoulda>, [">= 0"])
       s.add_dependency(%q<mocha>, [">= 0"])
+      s.add_dependency(%q<rake>, [">= 0"])
+      s.add_dependency(%q<jeweler>, [">= 0"])
+      s.add_dependency(%q<bundler>, [">= 0"])
+      s.add_dependency(%q<shoulda>, [">= 0"])
+      s.add_dependency(%q<mocha>, [">= 0"])
       s.add_dependency(%q<activerecord>, ["~> 2.3.10"])
       s.add_dependency(%q<activesupport>, ["~> 2.3.10"])
       s.add_dependency(%q<mysql>, ["= 2.8.1"])
@@ -113,6 +123,11 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<shoulda>, [">= 0"])
     s.add_dependency(%q<mocha>, [">= 0"])
     s.add_dependency(%q<ruby-debug>, [">= 0"])
+    s.add_dependency(%q<rake>, [">= 0"])
+    s.add_dependency(%q<jeweler>, [">= 0"])
+    s.add_dependency(%q<bundler>, [">= 0"])
+    s.add_dependency(%q<shoulda>, [">= 0"])
+    s.add_dependency(%q<mocha>, [">= 0"])
     s.add_dependency(%q<rake>, [">= 0"])
     s.add_dependency(%q<jeweler>, [">= 0"])
     s.add_dependency(%q<bundler>, [">= 0"])
