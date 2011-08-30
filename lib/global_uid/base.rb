@@ -114,6 +114,10 @@ module GlobalUid
       end
     end
 
+    def self.disconnect!
+      @@servers = nil
+    end
+
     def self.setup_connections!(options)
       connection_timeout = options[:connection_timeout]
       increment_by       = options[:increment_by]
