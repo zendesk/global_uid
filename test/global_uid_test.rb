@@ -200,7 +200,7 @@ class GlobalUIDTest < ActiveSupport::TestCase
       setup do
         reset_connections!
         @old_size = GlobalUid::Base.get_connections.size # prime them
-        GlobalUid::Base.get_connections.first.stubs(:execute).raises(GlobalUid::TimeoutException)
+        GlobalUid::Base.get_connections.first.stubs(:insert).raises(GlobalUid::TimeoutException)
         # trigger the failure -- have to do it it a bunch of times, as one call might not hit the server
         # Even so there's a 1/(2^32) possibility of this test failing.
         32.times do WithGlobalUID.create! end
@@ -227,7 +227,7 @@ class GlobalUIDTest < ActiveSupport::TestCase
         # would prefer to do the below, but need Mocha 0.9.10 to do so
         # ActiveRecord::ConnectionAdapters::MysqlAdapter.any_instance.stubs(:execute).raises(ActiveRecord::StatementInvalid)
         GlobalUid::Base.with_connections do |cx|
-          cx.stubs(:execute).raises(ActiveRecord::StatementInvalid)
+          cx.stubs(:insert).raises(ActiveRecord::StatementInvalid)
         end
       end
 
@@ -355,10 +355,7 @@ class GlobalUIDTest < ActiveSupport::TestCase
   end
 
   def show_create_sql(klass, table)
-    require 'pp'
-    debugger
-    klass.connection.select_all("show create table #{table}")
-    klass.connection.select_all("show create table #{table}")[0]["Create Table"]
+    klass.connection.select_rows("show create table #{table}")[0][1]
   end
 end
 
