@@ -355,6 +355,9 @@ class GlobalUIDTest < ActiveSupport::TestCase
   end
 
   def show_create_sql(klass, table)
+    require 'pp'
+    debugger
+    klass.connection.select_all("show create table #{table}")
     klass.connection.select_all("show create table #{table}")[0]["Create Table"]
   end
 end

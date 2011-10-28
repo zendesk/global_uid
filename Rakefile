@@ -12,8 +12,8 @@ Jeweler::Tasks.new do |s|
 
   s.required_rubygems_version = ">= 1.3.6"
 
-  s.add_dependency("activerecord", "~>2.3.10")
-  s.add_dependency("activesupport", "~>2.3.10")
+  s.add_dependency("activerecord")
+  s.add_dependency("activesupport")
   s.add_dependency("mysql", "2.8.1")
 
   s.add_development_dependency("rake")

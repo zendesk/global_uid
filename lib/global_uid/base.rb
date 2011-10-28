@@ -1,5 +1,6 @@
 require "active_record"
-require "system_timer" if Gem.available?("system_timer")
+require "active_support/all"
+
 require "timeout"
 
 module GlobalUid
