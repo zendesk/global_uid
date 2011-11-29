@@ -80,5 +80,5 @@ Gem::Specification.new do |s|
 
   ## Test files will be grabbed from the file list. Make sure the path glob
   ## matches what you actually use.
-  s.test_files = s.files.select { |path| path =~ /^test\/test_.*\.rb/ }
+  s.test_files = s.files.select { |path| path =~ /^test\/(test_.*|.*_test)\.rb/ }
 end
