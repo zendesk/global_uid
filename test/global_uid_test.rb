@@ -14,6 +14,20 @@ class CreateWithNoParams < ActiveRecord::Migration
   end
 end
 
+class CreateWithExplicitUidTrue < ActiveRecord::Migration
+  group :change if self.respond_to?(:group)
+
+  def self.up
+    create_table :with_global_uids, :use_global_uid => true do |t|
+      t.string  :description
+    end
+  end
+
+  def self.down
+    drop_table :with_global_uids, :use_global_uid => true
+  end
+end
+
 class CreateWithNamedID < ActiveRecord::Migration
   group :change if self.respond_to?(:group)
 
@@ -93,6 +107,22 @@ class GlobalUIDTest < ActiveSupport::TestCase
         end
       end
 
+      context "dropping a table" do
+        should "not drop the global-uid tables" do
+          CreateWithNoParams.up
+          GlobalUid::Base.with_connections do |cx|
+            assert cx.table_exists?('with_global_uids_ids')
+          end
+
+          CreateWithNoParams.down
+          GlobalUid::Base.with_connections do |cx|
+            assert cx.table_exists?('with_global_uids_ids')
+          end
+
+
+        end
+      end
+
       context "with global-uid disabled, globally" do
         setup do
           GlobalUid::Base.global_uid_options[:disabled] = true
@@ -124,6 +154,22 @@ class GlobalUIDTest < ActiveSupport::TestCase
 
         teardown do
           CreateWithNamedID.down
+        end
+      end
+    end
+
+    context "with :use_global_uid => true" do
+      context "dropping a table" do
+        should "drop the global-uid tables" do
+          CreateWithExplicitUidTrue.up
+          GlobalUid::Base.with_connections do |cx|
+            assert cx.table_exists?('with_global_uids_ids')
+          end
+
+          CreateWithExplicitUidTrue.down
+          GlobalUid::Base.with_connections do |cx|
+            assert !cx.table_exists?('with_global_uids_ids')
+          end
         end
       end
     end
