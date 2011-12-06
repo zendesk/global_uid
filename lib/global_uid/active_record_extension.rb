@@ -3,7 +3,6 @@ module GlobalUid
 
     def self.included(base)
       base.extend(ClassMethods)
-      base.class_inheritable_accessor :global_uid_disabled
       base.before_create :global_uid_before_create
     end
 
@@ -26,16 +25,26 @@ module GlobalUid
     end
 
     module ClassMethods
+      def global_uid_disabled
+        if @global_uid_disabled.nil?
+          if superclass.respond_to?(:global_uid_disabled)
+            @global_uid_disabled = superclass.send(:global_uid_disabled)
+          else
+            @global_uid_disabled = false
+          end
+        end
+
+        @global_uid_disabled
+      end
+
       def generate_uid(options = {})
         uid_table_name  = self.global_uid_table
-
         self.ensure_global_uid_table
-
         GlobalUid::Base.get_uid_for_class(self, options)
       end
 
       def disable_global_uid
-        self.global_uid_disabled = true
+        @global_uid_disabled = true
       end
 
       def global_uid_table
