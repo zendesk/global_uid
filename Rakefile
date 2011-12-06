@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'rake'
 require 'date'
+require 'appraisal'
 
 #############################################################################
 #
