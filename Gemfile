@@ -2,7 +2,5 @@ source "http://rubygems.org"
 
 gemspec
 
-group "test" do 
-  gem "ruby-debug"
-end
-
+gem "ruby-debug", :platform => "mri_18", :group => "test"
+gem "ruby-debug19", :platform => "mri_19", :require => "ruby-debug", :group => "test"

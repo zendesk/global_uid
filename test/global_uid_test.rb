@@ -62,8 +62,38 @@ end
 class WithoutGlobalUID < ActiveRecord::Base
 end
 
+class Parent < ActiveRecord::Base
+end
+
+class ParentSubclass < Parent
+end
+
+class ParentSubclassSubclass < ParentSubclass
+end
+
 class GlobalUIDTest < ActiveSupport::TestCase
   ActiveRecord::Migration.verbose = false
+
+  context "inheritance of :global_uid_disabled" do
+    should "not bleed through" do
+      assert !Parent.global_uid_disabled
+      assert !ParentSubclass.global_uid_disabled
+      assert !ParentSubclassSubclass.global_uid_disabled
+
+      Parent.disable_global_uid
+
+      assert Parent.global_uid_disabled
+      assert !ParentSubclass.global_uid_disabled
+      assert !ParentSubclassSubclass.global_uid_disabled
+
+      Parent.instance_variable_set(:@global_uid_disabled, false)
+      ParentSubclass.disable_global_uid
+
+      assert !Parent.global_uid_disabled
+      assert ParentSubclass.global_uid_disabled
+      assert !ParentSubclassSubclass.global_uid_disabled
+    end
+  end
 
   context "migrations" do
     setup do
@@ -118,8 +148,6 @@ class GlobalUIDTest < ActiveSupport::TestCase
           GlobalUid::Base.with_connections do |cx|
             assert cx.table_exists?('with_global_uids_ids')
           end
-
-
         end
       end
 

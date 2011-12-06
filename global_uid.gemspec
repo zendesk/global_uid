@@ -53,6 +53,7 @@ Gem::Specification.new do |s|
   ## List your development dependencies here. Development dependencies are
   ## those that are only needed during development
   s.add_development_dependency('mysql', '2.8.1')
+  s.add_development_dependency("appraisal")
   s.add_development_dependency('rake')
   s.add_development_dependency('bundler')
   s.add_development_dependency('shoulda')
