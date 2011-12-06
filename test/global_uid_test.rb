@@ -62,8 +62,42 @@ end
 class WithoutGlobalUID < ActiveRecord::Base
 end
 
+class Parent < ActiveRecord::Base
+  def self.reset
+    @global_uid_disabled = nil
+  end
+end
+
+class ParentSubclass < Parent
+end
+
+class ParentSubclassSubclass < ParentSubclass
+end
+
 class GlobalUIDTest < ActiveSupport::TestCase
   ActiveRecord::Migration.verbose = false
+
+  context "#global_uid_disabled" do
+    setup do
+      [ Parent, ParentSubclass, ParentSubclassSubclass ].each { |k| k.reset }
+    end
+
+    should "default to the parent value or false" do
+      assert !ParentSubclass.global_uid_disabled
+
+      ParentSubclass.disable_global_uid
+      assert ParentSubclass.global_uid_disabled
+      assert ParentSubclassSubclass.global_uid_disabled
+
+      ParentSubclass.reset
+      assert !ParentSubclass.global_uid_disabled
+      assert ParentSubclassSubclass.global_uid_disabled
+
+      ParentSubclassSubclass.reset
+      assert !ParentSubclass.global_uid_disabled
+      assert !ParentSubclassSubclass.global_uid_disabled
+    end
+  end
 
   context "migrations" do
     setup do
@@ -118,8 +152,6 @@ class GlobalUIDTest < ActiveSupport::TestCase
           GlobalUid::Base.with_connections do |cx|
             assert cx.table_exists?('with_global_uids_ids')
           end
-
-
         end
       end
 
