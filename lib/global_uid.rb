@@ -3,7 +3,7 @@ require "global_uid/active_record_extension"
 require "global_uid/migration_extension"
 
 module GlobalUid
-  VERSION = "1.2.0"
+  VERSION = "1.2.2"
 
   class NoServersAvailableException < Exception ; end
   class ConnectionTimeoutException < Exception ; end

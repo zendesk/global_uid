@@ -13,8 +13,8 @@ Gem::Specification.new do |s|
   ## If your rubyforge_project name is different, then edit it and comment out
   ## the sub! line in the Rakefile
   s.name              = 'global_uid'
-  s.version           = '1.2.0'
-  s.date              = '2011-11-29'
+  s.version           = '1.2.2'
+  s.date              = '2011-12-07'
   s.rubyforge_project = 'global_uid'
 
   ## Make sure your summary is short. The description may be as long
@@ -64,10 +64,14 @@ Gem::Specification.new do |s|
   ## THE MANIFEST COMMENTS, they are used as delimiters by the task.
   # = MANIFEST =
   s.files = %w[
+    Appraisals
     Gemfile
-    Gemfile.lock
     README.md
     Rakefile
+    gemfiles/rails2.gemfile
+    gemfiles/rails2.gemfile.lock
+    gemfiles/rails3.gemfile
+    gemfiles/rails3.gemfile.lock
     global_uid.gemspec
     lib/global_uid.rb
     lib/global_uid/active_record_extension.rb
