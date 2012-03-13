@@ -36,7 +36,7 @@ module GlobalUid
         id_table_name = options[:global_uid_table] || GlobalUid::Base.id_table_from_name(name)
         GlobalUid::Base.drop_uid_tables(id_table_name,options)
       end
-      drop_table_without_global_uid(name,options)
+      drop_table_without_global_uid(name)
     end
 
   end
