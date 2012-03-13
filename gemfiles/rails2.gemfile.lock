@@ -1,7 +1,7 @@
 PATH
-  remote: /Users/primdahl/Git/global_uid
+  remote: /Users/ben/src/global_uid
   specs:
-    global_uid (1.2.0)
+    global_uid (1.2.2)
       activerecord
       activesupport
 
