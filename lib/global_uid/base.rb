@@ -3,6 +3,12 @@ require "active_support/all"
 
 require "timeout"
 
+begin
+  require 'mysql2'
+rescue LoadError
+end
+
+
 module GlobalUid
   class Base
     @@servers = nil
@@ -53,27 +59,17 @@ module GlobalUid
       GlobalUidTimer = Timeout
     end
 
-    def self.connection_method
-      @@connection_method ||= begin
-        if ActiveRecord::Base.respond_to?(:mysql2_connection)
-          :mysql2_connection
-        elsif ActiveRecord::Base.respond_to?(:mysql_connection)
-          :mysql_connection
-        else
-          raise "No Mysql Connection Adapter found..."
-        end
-      end
-    end
-
-
     def self.new_connection(name, connection_timeout, offset, increment_by, use_server_variables)
       raise "No id server '#{name}' configured in database.yml" unless ActiveRecord::Base.configurations.has_key?(name)
       config = ActiveRecord::Base.configurations[name]
+      c = config.symbolize_keys
+
+      raise "No global_uid support for adapter #{c[:adapter]}" unless ['mysql', 'mysql2'].include?(c[:adapter])
 
       con = nil
       begin
         GlobalUidTimer.timeout(connection_timeout, ConnectionTimeoutException) do
-          con = ActiveRecord::Base.send(self.connection_method, config)
+          con = ActiveRecord::Base.send("#{c[:adapter]}_connection", config)
         end
       rescue ConnectionTimeoutException => e
         notify e, "Timed out establishing a connection to #{name}"
