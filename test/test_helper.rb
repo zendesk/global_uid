@@ -20,6 +20,14 @@ GlobalUid::Base.global_uid_options = {
   ]
 }
 
-ActiveRecord::Base.configurations = YAML::load(IO.read(File.dirname(__FILE__) + "/config/database.yml"))
+yaml = YAML::load(IO.read(File.dirname(__FILE__) + "/config/database.yml"))
+
+if !Gem::Specification.find_all_by_name("mysql2").empty?
+  yaml.each do |k, v|
+    v['adapter'] = 'mysql2'
+  end
+end
+
+ActiveRecord::Base.configurations = yaml
 ActiveRecord::Base.establish_connection("test")
 ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/test.log")
