@@ -1,7 +1,7 @@
 PATH
   remote: /Users/ben/src/global_uid
   specs:
-    global_uid (1.2.2)
+    global_uid (1.2.3)
       activerecord
       activesupport
 
@@ -14,12 +14,16 @@ GEM
     appraisal (0.4.0)
       bundler
       rake
-    archive-tar-minitar (0.5.2)
     columnize (0.3.5)
+    debugger (1.1.1)
+      columnize (>= 0.3.1)
+      debugger-linecache (~> 1.1)
+      debugger-ruby_core_source (~> 1.1)
+    debugger-linecache (1.1.1)
+      debugger-ruby_core_source (>= 1.1.1)
+    debugger-ruby_core_source (1.1.1)
     linecache (0.46)
       rbx-require-relative (> 0.0.4)
-    linecache19 (0.5.12)
-      ruby_core_source (>= 0.1.4)
     metaclass (0.0.1)
     mocha (0.10.0)
       metaclass (~> 0.0.1)
@@ -31,16 +35,6 @@ GEM
       ruby-debug-base (~> 0.10.4.0)
     ruby-debug-base (0.10.4)
       linecache (>= 0.3)
-    ruby-debug-base19 (0.11.25)
-      columnize (>= 0.3.1)
-      linecache19 (>= 0.5.11)
-      ruby_core_source (>= 0.1.4)
-    ruby-debug19 (0.11.6)
-      columnize (>= 0.3.1)
-      linecache19 (>= 0.5.11)
-      ruby-debug-base19 (>= 0.11.19)
-    ruby_core_source (0.1.5)
-      archive-tar-minitar (>= 0.5.2)
     shoulda (2.11.3)
 
 PLATFORMS
@@ -50,10 +44,10 @@ DEPENDENCIES
   activerecord (= 2.3.14)
   appraisal
   bundler
+  debugger
   global_uid!
   mocha
   mysql (= 2.8.1)
   rake
   ruby-debug
-  ruby-debug19
   shoulda
