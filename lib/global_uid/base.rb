@@ -164,11 +164,11 @@ module GlobalUid
         end
       end
 
-      if errors.size == servers.size
-        # The INCREDIBLY BAD CASE WHERE EVERYONE IS ERRORING!
-        # Might as well start drinking if we hit this spot in the code.
-        # note that at this point we're trying to retry on the next request.
-        servers.each { |s| s[:retry_at] = Time.now - 5.minutes }
+      # in the case where all servers are gone, put everyone back in.
+      if servers.all? { |info| info[:cx].nil? }
+        servers.each do |info|
+          info[:retry_at] = Time.now - 5.minutes
+        end
         raise NoServersAvailableException, "Errors hit: #{errors.map(&:to_s).join(',')}"
       end
 
