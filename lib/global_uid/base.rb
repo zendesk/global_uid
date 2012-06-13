@@ -160,7 +160,7 @@ module GlobalUid
           notify e, "#{e.message}"
           errors << e
           s[:cx] = nil
-          s[:retry_at] = Time.now + 10.minutes
+          s[:retry_at] = Time.now + 1.minute
         end
       end
 
