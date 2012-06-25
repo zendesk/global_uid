@@ -1,7 +1,7 @@
 PATH
   remote: /Users/ben/src/global_uid
   specs:
-    global_uid (1.2.3)
+    global_uid (1.2.6)
       activerecord
       activesupport
 

@@ -242,6 +242,28 @@ class GlobalUIDTest < ActiveSupport::TestCase
       should "get a unique id" do
         test_unique_ids
       end
+
+      should "get bulk ids" do
+        res = GlobalUid::Base.get_many_uids_for_class(WithGlobalUID, 10)
+        assert res.size == 10
+        res += GlobalUid::Base.get_many_uids_for_class(WithGlobalUID, 10)
+        assert res.uniq.size == 20
+      end
+    end
+
+    context "reserving ids" do
+      should "get 10 in bulk" do
+        WithGlobalUID.with_reserved_global_uids(10) do
+          WithGlobalUID.create!
+          # now we should be able to run without ever touching the cx again
+          GlobalUid::Base.get_connections.each.expects(:insert).never
+          GlobalUid::Base.get_connections.each.expects(:select_value).never
+          9.times { WithGlobalUID.create! }
+        end
+
+        GlobalUid::Base.get_connections.first.expects(:insert).once.returns(50)
+        WithGlobalUID.create!
+      end
     end
 
     context "With a timing out server" do
