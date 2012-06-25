@@ -260,6 +260,9 @@ class GlobalUIDTest < ActiveSupport::TestCase
           GlobalUid::Base.get_connections.each.expects(:select_value).never
           9.times { WithGlobalUID.create! }
         end
+
+        GlobalUid::Base.get_connections.first.expects(:insert).once.returns(50)
+        WithGlobalUID.create!
       end
     end
 
