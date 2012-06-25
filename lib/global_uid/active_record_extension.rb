@@ -76,7 +76,7 @@ module GlobalUid
         return id if id
 
         if @should_reserve_global_uids
-          @reserved_global_uids += GlobalUid::Base.get_multiples_for_class(self, @should_reserve_global_uids)
+          @reserved_global_uids += GlobalUid::Base.get_many_uids_for_class(self, @should_reserve_global_uids)
           @reserved_global_uids.shift
         else
           nil

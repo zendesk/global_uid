@@ -244,9 +244,9 @@ class GlobalUIDTest < ActiveSupport::TestCase
       end
 
       should "get bulk ids" do
-        res = GlobalUid::Base.get_multiples_for_class(WithGlobalUID, 10)
+        res = GlobalUid::Base.get_many_uids_for_class(WithGlobalUID, 10)
         assert res.size == 10
-        res += GlobalUid::Base.get_multiples_for_class(WithGlobalUID, 10)
+        res += GlobalUid::Base.get_many_uids_for_class(WithGlobalUID, 10)
         assert res.uniq.size == 20
       end
     end

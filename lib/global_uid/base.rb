@@ -195,7 +195,7 @@ module GlobalUid
       raise NoServersAvailableException, "All global UID servers are gone!"
     end
 
-    def self.get_multiples_for_class(klass, n, options = {})
+    def self.get_many_uids_for_class(klass, n, options = {})
       with_connections do |connection|
         GlobalUidTimer.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
           connection.transaction do
