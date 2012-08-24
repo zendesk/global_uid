@@ -248,6 +248,10 @@ class GlobalUIDTest < ActiveSupport::TestCase
         assert res.size == 10
         res += GlobalUid::Base.get_many_uids_for_class(WithGlobalUID, 10)
         assert res.uniq.size == 20
+        # starting value of 1 with a step of 5, so we should get 6,11,16...
+        res.each_with_index do |val, i|
+          assert_equal val, ((i + 1) * 5) + 1
+        end
       end
     end
 
