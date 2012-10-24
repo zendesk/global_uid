@@ -22,9 +22,7 @@ module GlobalUid
         return
       end
 
-      # Morten, Josh, and Ben have discussed this particular line of code, whether "||=" or "=" is correct.
-      # "||=" allows for more flexibility and more correct behavior (crashing) upon EBCAK
-      self.id ||= global_uid
+      self.id = global_uid
     end
 
     module ClassMethods
