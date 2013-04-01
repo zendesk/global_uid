@@ -110,6 +110,7 @@ class GlobalUIDTest < ActiveSupport::TestCase
       context "with global-uid enabled" do
         setup do
           GlobalUid::Base.global_uid_options[:disabled] = false
+          GlobalUid::Base.global_uid_options[:storage_engine] = "InnoDB"
           CreateWithNoParams.up
           @create_table = show_create_sql(WithGlobalUID, "with_global_uids").split("\n")
         end
@@ -125,6 +126,14 @@ class GlobalUIDTest < ActiveSupport::TestCase
             foo = cx.select_all("select id from with_global_uids_ids")
             assert(foo.first['id'].to_i == 1)
           end
+        end
+
+        should "create tables with the given storage_engine" do
+          GlobalUid::Base.with_connections do |cx|
+            foo = cx.select_all("show create table with_global_uids_ids")
+            assert_match /ENGINE=InnoDB/, foo.first.values.join
+          end
+
         end
 
         should "tear off the auto_increment part of the primary key from the created table" do

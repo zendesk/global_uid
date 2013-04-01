@@ -28,6 +28,8 @@ module GlobalUid
       type     = options[:uid_type] || "bigint(21) UNSIGNED"
       start_id = options[:start_id] || 1
 
+      engine_stmt = global_uid_options[:storage_engine] ? "ENGINE=#{global_uid_options[:storage_engine]}" : ""
+
       # TODO it would be nice to be able to set the engine or something to not be MySQL specific
       with_connections do |connection|
         connection.execute("CREATE TABLE IF NOT EXISTS `#{id_table_name}` (
@@ -35,7 +37,7 @@ module GlobalUid
         `stub` char(1) NOT NULL DEFAULT '',
         PRIMARY KEY (`id`),
         UNIQUE KEY `stub` (`stub`)
-        )")
+        ) #{engine_stmt}")
 
         # prime the pump on each server
         connection.execute("INSERT IGNORE INTO `#{id_table_name}` VALUES(#{start_id}, 'a')")
