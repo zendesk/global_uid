@@ -4,6 +4,6 @@ source "http://rubygems.org"
 
 gem "ruby-debug", :platform=>"mri_18", :group=>"test"
 gem "debugger", :platform=>"mri_19", :require=>"ruby-debug", :group=>"test"
-gem "activerecord", "3.2.2"
+gem "activerecord", "~> 3.2.2"
 
 gemspec :path=>"../"
