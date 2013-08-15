@@ -61,7 +61,7 @@ module GlobalUid
       GlobalUidTimer = Timeout
     end
 
-    def self.new_connection(name, connection_timeout, offset, increment_by, use_server_variables)
+    def self.new_connection(name, connection_timeout, offset, increment_by)
       raise "No id server '#{name}' configured in database.yml" unless ActiveRecord::Base.configurations.has_key?(name)
       config = ActiveRecord::Base.configurations[name]
       c = config.symbolize_keys
@@ -79,14 +79,6 @@ module GlobalUid
       rescue Exception => e
         notify e, "establishing a connection to #{name}: #{e.message}"
         return nil
-      end
-
-      # Please note that this is unreliable -- if you lose your CX to the server
-      # and auto-reconnect, you will be utterly hosed.  Much better to dedicate a server
-      # or two to the cause, and set their auto_increment_increment globally.
-      if use_server_variables
-        con.execute("set @@auto_increment_increment = #{increment_by}")
-        con.execute("set @@auto_increment_offset = #{offset}")
       end
 
       con
@@ -133,7 +125,7 @@ module GlobalUid
         if info[:new?] || ( info[:retry_at] && Time.now > info[:retry_at] )
           info[:new?] = false
 
-          connection = new_connection(info[:name], connection_timeout, info[:offset], increment_by, options[:use_server_variables])
+          connection = new_connection(info[:name], connection_timeout, info[:offset], increment_by)
           info[:cx]  = connection
           info[:retry_at] = Time.now + options[:connection_retry] if connection.nil?
         end

@@ -57,9 +57,6 @@ Here's a complete list of the options you can use:
     :connection_retry     10.minutes
             After failing to connect or query a UID server, how long before we retry
 
-    :use_server_variables false
-            If set, this gem will call "set @@auto_increment_offset" in order to setup the global uid servers.
-            good for test/development, not so much for production.
     :notifier             A proc calling ActiveRecord::Base.logger
             This proc is called with two parameters upon UID server failure -- an exception and a message
 
