@@ -62,6 +62,7 @@ module GlobalUid
     end
 
     def self.new_connection(name, connection_timeout, offset, increment_by, use_server_variables)
+      raise "Can't use use_server_variables configuration in production environment" if use_server_variables && production?
       raise "No id server '#{name}' configured in database.yml" unless ActiveRecord::Base.configurations.has_key?(name)
       config = ActiveRecord::Base.configurations[name]
       c = config.symbolize_keys
@@ -227,6 +228,10 @@ module GlobalUid
 
     def self.id_table_from_name(name)
       "#{name}_ids".to_sym
+    end
+
+    def self.production?
+      (defined?(Rails) && (Rails.env.production?)) || ENV['RAILS_ENV']=='production'
     end
   end
 end
