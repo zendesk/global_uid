@@ -34,7 +34,7 @@ First configure some databases in database.yml in the normal way.
 
 Then setup these servers, and other defaults in your environment.rb:
 
-    GlobalUid.default_options = {
+    GlobalUid::Base.global_uid_options = {
       :id_servers => [ 'id_server_1', 'id_server_2' ],
       :increment_by => 3
     }
