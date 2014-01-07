@@ -4,7 +4,6 @@ require 'bundler'
 Bundler.setup
 Bundler.setup(:test)
 
-require 'ruby-debug'
 require "active_record"
 require "active_support"
 require "active_support/test_case"
