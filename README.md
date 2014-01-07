@@ -115,13 +115,4 @@ If you're using a non standard uid table then pass that in.
 
     generate_uid(:uid_table => '<name>')
 
-## Submitting Bug reports, patches or improvements
-
-I welcome your feedback, bug reports, patches and improvements. Please e-mail these
-to
-    simon at zendesk.com
-    
-
-with [mysqlbigint global uid] in the subject line. I'll get back to you as soon as I can.
-
 Copyright (c) 2010 Zendesk, released under the MIT license
