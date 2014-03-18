@@ -1,59 +1,44 @@
 PATH
-  remote: /Users/staugaard/code/global_uid
+  remote: /Users/ben/src/global_uid
   specs:
     global_uid (1.4.0)
       activerecord
       activesupport
 
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
-    activemodel (3.2.14)
-      activesupport (= 3.2.14)
+    activemodel (3.2.17)
+      activesupport (= 3.2.17)
       builder (~> 3.0.0)
-    activerecord (3.2.14)
-      activemodel (= 3.2.14)
-      activesupport (= 3.2.14)
+    activerecord (3.2.17)
+      activemodel (= 3.2.17)
+      activesupport (= 3.2.17)
       arel (~> 3.0.2)
       tzinfo (~> 0.3.29)
-    activesupport (3.2.14)
+    activesupport (3.2.17)
       i18n (~> 0.6, >= 0.6.4)
       multi_json (~> 1.0)
     appraisal (0.5.2)
       bundler
       rake
-    arel (3.0.2)
+    arel (3.0.3)
     builder (3.0.4)
-    columnize (0.3.6)
-    debugger (1.6.1)
-      columnize (>= 0.3.1)
-      debugger-linecache (~> 1.2.0)
-      debugger-ruby_core_source (~> 1.2.3)
-    debugger-linecache (1.2.0)
-    debugger-ruby_core_source (1.2.3)
-    i18n (0.6.5)
-    linecache (0.46)
-      rbx-require-relative (> 0.0.4)
-    metaclass (0.0.1)
-    mocha (0.14.0)
+    i18n (0.6.9)
+    metaclass (0.0.4)
+    mocha (1.0.0)
       metaclass (~> 0.0.1)
-    multi_json (1.7.9)
+    multi_json (1.9.0)
     mysql (2.8.1)
-    rake (10.1.0)
-    rbx-require-relative (0.0.9)
-    ruby-debug (0.10.4)
-      columnize (>= 0.1)
-      ruby-debug-base (~> 0.10.4.0)
-    ruby-debug-base (0.10.4)
-      linecache (>= 0.3)
+    rake (10.1.1)
     shoulda (3.5.0)
       shoulda-context (~> 1.0, >= 1.0.1)
       shoulda-matchers (>= 1.4.1, < 3.0)
-    shoulda-context (1.1.5)
-    shoulda-matchers (2.2.0)
+    shoulda-context (1.1.6)
+    shoulda-matchers (2.5.0)
       activesupport (>= 3.0.0)
     test-unit (2.5.5)
-    tzinfo (0.3.37)
+    tzinfo (0.3.39)
 
 PLATFORMS
   ruby
@@ -62,11 +47,9 @@ DEPENDENCIES
   activerecord (~> 3.2.2)
   appraisal
   bundler
-  debugger
   global_uid!
   mocha
   mysql (= 2.8.1)
   rake
-  ruby-debug
   shoulda
   test-unit
