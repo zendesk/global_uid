@@ -48,6 +48,10 @@ module GlobalUid
         @global_uid_disabled = true
       end
 
+      def enable_global_uid
+        @global_uid_disabled = false
+      end
+
       def global_uid_table
         GlobalUid::Base.id_table_from_name(self.table_name)
       end
