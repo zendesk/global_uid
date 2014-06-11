@@ -28,7 +28,7 @@ module GlobalUid
       type     = options[:uid_type] || "bigint(21) UNSIGNED"
       start_id = options[:start_id] || 1
 
-      engine_stmt = global_uid_options[:storage_engine] ? "ENGINE=#{global_uid_options[:storage_engine]}" : "ENGINE=MyISAM"
+      engine_stmt = "ENGINE=#{global_uid_options[:storage_engine] || "MyISAM"}"
 
       # TODO it would be nice to be able to set the engine or something to not be MySQL specific
       with_connections do |connection|
