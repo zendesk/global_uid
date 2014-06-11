@@ -28,7 +28,7 @@ module GlobalUid
       type     = options[:uid_type] || "bigint(21) UNSIGNED"
       start_id = options[:start_id] || 1
 
-      engine_stmt = global_uid_options[:storage_engine] ? "ENGINE=#{global_uid_options[:storage_engine]}" : ""
+      engine_stmt = global_uid_options[:storage_engine] ? "ENGINE=#{global_uid_options[:storage_engine]}" : "ENGINE=MyISAM"
 
       # TODO it would be nice to be able to set the engine or something to not be MySQL specific
       with_connections do |connection|
@@ -195,6 +195,10 @@ module GlobalUid
           connection.transaction do
             start_id = connection.select_value("SELECT id from #{klass.global_uid_table} where stub='a' FOR UPDATE").to_i
             connection.execute("update #{klass.global_uid_table} set id = id + #{n} * @@auto_increment_increment where stub='a'")
+            if self.global_uid_options[:storage_engine] =~ /InnoDB/i
+              # This is needed to reset the auto_increment counter on an InnoDB table.
+              connection.execute("ALTER TABLE #{klass.global_uid_table} AUTO_INCREMENT = 1")
+            end
             end_res = connection.select_one("SELECT id, @@auto_increment_increment as inc from #{klass.global_uid_table} where stub='a'")
             increment_by = end_res['inc'].to_i
             end_id = end_res['id'].to_i
