@@ -238,6 +238,28 @@ class GlobalUIDTest < ActiveSupport::TestCase
     end
   end
 
+  context "With InnoDB engine" do
+    setup do
+      reset_connections!
+      drop_old_test_tables!
+      restore_defaults!
+      GlobalUid::Base.global_uid_options[:storage_engine] = "InnoDB"
+      CreateWithNoParams.up
+      CreateWithoutGlobalUIDs.up
+    end
+
+    should "interleave single and multiple uids" do
+      test_interleave
+    end
+
+    teardown do
+      GlobalUid::Base.global_uid_options[:storage_engine] = nil
+      reset_connections!
+      CreateWithNoParams.down
+      CreateWithoutGlobalUIDs.down
+    end
+  end
+
   context "With GlobalUID" do
     setup do
       reset_connections!
@@ -248,6 +270,13 @@ class GlobalUIDTest < ActiveSupport::TestCase
     end
 
     context "normally" do
+      should "create tables with the default MyISAM storage engine" do
+        GlobalUid::Base.with_connections do |cx|
+          foo = cx.select_all("show create table with_global_uids_ids")
+          assert_match /ENGINE=MyISAM/, foo.first.values.join
+        end
+      end
+
       should "get a unique id" do
         test_unique_ids
       end
@@ -261,6 +290,10 @@ class GlobalUIDTest < ActiveSupport::TestCase
         res.each_with_index do |val, i|
           assert_equal val, ((i + 1) * 5) + 1
         end
+      end
+
+      should "interleave single and multiple uids" do
+        test_interleave
       end
     end
 
@@ -359,7 +392,6 @@ class GlobalUIDTest < ActiveSupport::TestCase
       end
     end
 
-
     context "with per-process_affinity" do
       setup do
         GlobalUid::Base.global_uid_options[:per_process_affinity] = true
@@ -375,23 +407,6 @@ class GlobalUIDTest < ActiveSupport::TestCase
 
       teardown do
         GlobalUid::Base.global_uid_options[:per_process_affinity] = false
-      end
-    end
-
-    context "with global-uid disabled" do
-      setup do
-        WithoutGlobalUID.disable_global_uid
-      end
-
-      should "never call various unsafe methods" do
-        GlobalUid::Base.expects(:new_connection).never
-        GlobalUid::Base.expects(:get_uid_for_class).never
-        WithoutGlobalUID.expects(:generate_uid).never
-        WithoutGlobalUID.expects(:ensure_global_uid).never
-        GlobalUid::Base.expects(:get_uid_for_class).never
-      end
-
-      teardown do
       end
     end
 
@@ -448,6 +463,27 @@ class GlobalUIDTest < ActiveSupport::TestCase
       assert foo.description.nil?
       assert !seen.has_key?(foo.id)
       seen[foo.id] = 1
+    end
+  end
+
+  def test_interleave
+    old_per_process_affinity = GlobalUid::Base.global_uid_options[:per_process_affinity]
+    begin
+      # Set per process affinity to get deterministic results
+      GlobalUid::Base.global_uid_options[:per_process_affinity] = true
+      first_id = GlobalUid::Base.get_uid_for_class(WithGlobalUID)
+      res = [first_id]
+      res += GlobalUid::Base.get_many_uids_for_class(WithGlobalUID, 10)
+      assert_equal 11, res.uniq.size
+      res += [GlobalUid::Base.get_uid_for_class(WithGlobalUID)]
+      res += GlobalUid::Base.get_many_uids_for_class(WithGlobalUID, 10)
+      assert_equal 22, res.uniq.size
+      # starting value of first_id with a step of 5
+      res.each_with_index do |val, i|
+        assert_equal val, i * 5 + first_id
+      end
+    ensure
+      GlobalUid::Base.global_uid_options[:per_process_affinity] = old_per_process_affinity
     end
   end
 
