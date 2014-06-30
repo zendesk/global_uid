@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'rake'
 require 'date'
-require 'appraisal'
+require 'wwtd/tasks'
 
 #############################################################################
 #
@@ -44,7 +44,7 @@ end
 #
 #############################################################################
 
-task :default => :test
+task :default => 'wwtd:local'
 
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
