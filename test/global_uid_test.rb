@@ -239,7 +239,28 @@ class GlobalUIDTest < ActiveSupport::TestCase
 
     if ActiveRecord::VERSION::MAJOR == 4
       context "schema dumping" do
+        setup do
+          CreateWithoutGlobalUIDs.up
+          CreateWithNoParams.up
+        end
 
+        should "set global_uid flags as appropriate" do
+          stream = StringIO.new
+          ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection, stream)
+          stream.rewind
+          schema = stream.read
+
+          with_line = schema.split("\n").grep(/with_global_uids/).first
+          assert with_line =~ /use_global_uid: true/
+
+          without_line = schema.split("\n").grep(/without_global_uids/).first
+          assert without_line =~ /use_global_uid: false/
+        end
+
+        teardown do
+          CreateWithoutGlobalUIDs.down
+          CreateWithNoParams.down
+        end
       end
     end
   end
