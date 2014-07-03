@@ -2,7 +2,7 @@ PATH
   remote: ../
   specs:
     global_uid (1.4.1)
-      activerecord
+      activerecord (>= 3.2.0, < 5.0)
       activesupport
 
 GEM
@@ -31,7 +31,7 @@ GEM
     mocha (1.1.0)
       metaclass (~> 0.0.1)
     multi_json (1.10.1)
-    mysql (2.8.1)
+    mysql2 (0.3.16)
     rake (10.3.2)
     shoulda (3.5.0)
       shoulda-context (~> 1.0, >= 1.0.1)
@@ -53,7 +53,7 @@ DEPENDENCIES
   bundler
   global_uid!
   mocha
-  mysql (= 2.8.1)
+  mysql2
   rake
   shoulda
   test-unit

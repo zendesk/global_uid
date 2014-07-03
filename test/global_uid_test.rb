@@ -322,7 +322,7 @@ class GlobalUIDTest < ActiveSupport::TestCase
       setup do
         reset_connections!
         @a_decent_cx = GlobalUid::Base.new_connection(GlobalUid::Base.global_uid_servers.first, 50, 1, 5)
-        ActiveRecord::Base.stubs(:mysql_connection).raises(GlobalUid::ConnectionTimeoutException).then.returns(@a_decent_cx)
+        ActiveRecord::Base.stubs(:mysql2_connection).raises(GlobalUid::ConnectionTimeoutException).then.returns(@a_decent_cx)
         @connections = GlobalUid::Base.get_connections
       end
 
@@ -333,8 +333,8 @@ class GlobalUIDTest < ActiveSupport::TestCase
 
       should "eventually retry the connection and get it back in place" do
         # clear the state machine expectation
-        ActiveRecord::Base.mysql_connection rescue nil
-        ActiveRecord::Base.mysql_connection rescue nil
+        ActiveRecord::Base.mysql2_connection rescue nil
+        ActiveRecord::Base.mysql2_connection rescue nil
 
         awhile = Time.now + 10.hours
         Time.stubs(:now).returns(awhile)

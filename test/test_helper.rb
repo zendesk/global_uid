@@ -9,6 +9,7 @@ require "active_support"
 require "active_support/test_case"
 require "shoulda"
 require "mocha/setup"
+require 'minitest/autorun'
 require "global_uid"
 
 GlobalUid::Base.global_uid_options = {
