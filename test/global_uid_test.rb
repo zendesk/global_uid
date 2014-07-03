@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative 'test_helper'
 
 class CreateWithNoParams < ActiveRecord::Migration
   group :change if self.respond_to?(:group)
@@ -234,6 +234,12 @@ class GlobalUIDTest < ActiveSupport::TestCase
 
       teardown do
         CreateWithoutGlobalUIDs.down
+      end
+    end
+
+    if ActiveRecord::VERSION::MAJOR == 4
+      context "schema dumping" do
+
       end
     end
   end
