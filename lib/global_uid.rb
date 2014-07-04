@@ -16,5 +16,5 @@ end
 ActiveRecord::Base.send(:include, GlobalUid::ActiveRecordExtension)
 ActiveRecord::ConnectionAdapters::AbstractAdapter.send(:include, GlobalUid::MigrationExtension)
 if ActiveRecord::VERSION::MAJOR == 4
-  ActiveRecord::SchemaDumper.prepend(GlobalUid::SchemaDumperExtension)
+  ActiveRecord::SchemaDumper.send(:prepend, GlobalUid::SchemaDumperExtension)
 end
