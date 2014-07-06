@@ -2,8 +2,7 @@ module GlobalUid
   module SchemaDumperExtension
     def table(table, stream)
       io = super(table, StringIO.new)
-      io.rewind
-      schema = io.read
+      schema = io.string
 
       pk = get_pk(table)
       columns = @connection.columns(table)
