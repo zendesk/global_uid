@@ -2,6 +2,7 @@ require 'rubygems'
 require 'rake'
 require 'date'
 require 'wwtd/tasks'
+require 'bump/tasks'
 
 #############################################################################
 #

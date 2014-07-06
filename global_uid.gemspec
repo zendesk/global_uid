@@ -15,6 +15,7 @@ Gem::Specification.new 'global_uid', '1.4.1' do |s|
   s.add_development_dependency('shoulda')
   s.add_development_dependency('mocha')
   s.add_development_dependency('test-unit')
+  s.add_development_dependency('bump')
   s.add_development_dependency('wwtd', '>= 0.5.3')
 
   s.files = `git ls-files lib`.split("\n")
