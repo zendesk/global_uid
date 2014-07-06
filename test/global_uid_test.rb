@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative 'test_helper'
 
 class CreateWithNoParams < ActiveRecord::Migration
   group :change if self.respond_to?(:group)
@@ -236,6 +236,33 @@ class GlobalUIDTest < ActiveSupport::TestCase
         CreateWithoutGlobalUIDs.down
       end
     end
+
+    if ActiveRecord::VERSION::MAJOR == 4
+      context "schema dumping" do
+        setup do
+          CreateWithoutGlobalUIDs.up
+          CreateWithNoParams.up
+        end
+
+        should "set global_uid flags as appropriate" do
+          stream = StringIO.new
+          ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection, stream)
+          stream.rewind
+          schema = stream.read
+
+          with_line = schema.split("\n").grep(/with_global_uids/).first
+          assert with_line =~ /use_global_uid: true/
+
+          without_line = schema.split("\n").grep(/without_global_uids/).first
+          assert without_line =~ /use_global_uid: false/
+        end
+
+        teardown do
+          CreateWithoutGlobalUIDs.down
+          CreateWithNoParams.down
+        end
+      end
+    end
   end
 
   context "With InnoDB engine" do
@@ -316,7 +343,7 @@ class GlobalUIDTest < ActiveSupport::TestCase
       setup do
         reset_connections!
         @a_decent_cx = GlobalUid::Base.new_connection(GlobalUid::Base.global_uid_servers.first, 50, 1, 5)
-        ActiveRecord::Base.stubs(:mysql_connection).raises(GlobalUid::ConnectionTimeoutException).then.returns(@a_decent_cx)
+        ActiveRecord::Base.stubs(:mysql2_connection).raises(GlobalUid::ConnectionTimeoutException).then.returns(@a_decent_cx)
         @connections = GlobalUid::Base.get_connections
       end
 
@@ -327,8 +354,8 @@ class GlobalUIDTest < ActiveSupport::TestCase
 
       should "eventually retry the connection and get it back in place" do
         # clear the state machine expectation
-        ActiveRecord::Base.mysql_connection rescue nil
-        ActiveRecord::Base.mysql_connection rescue nil
+        ActiveRecord::Base.mysql2_connection rescue nil
+        ActiveRecord::Base.mysql2_connection rescue nil
 
         awhile = Time.now + 10.hours
         Time.stubs(:now).returns(awhile)

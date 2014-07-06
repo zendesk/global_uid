@@ -1,6 +1,7 @@
 require "global_uid/base"
 require "global_uid/active_record_extension"
 require "global_uid/migration_extension"
+require "global_uid/schema_dumper_extension"
 
 module GlobalUid
   VERSION = "1.4.1"
@@ -14,4 +15,6 @@ end
 
 ActiveRecord::Base.send(:include, GlobalUid::ActiveRecordExtension)
 ActiveRecord::ConnectionAdapters::AbstractAdapter.send(:include, GlobalUid::MigrationExtension)
-
+if ActiveRecord::VERSION::MAJOR == 4
+  ActiveRecord::SchemaDumper.send(:prepend, GlobalUid::SchemaDumperExtension)
+end

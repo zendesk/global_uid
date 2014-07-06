@@ -38,6 +38,5 @@ module GlobalUid
       end
       drop_table_without_global_uid(name)
     end
-
   end
 end
