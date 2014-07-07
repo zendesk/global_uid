@@ -23,12 +23,12 @@ Shove this in your Gemfile and smoke it
 First configure some databases in database.yml in the normal way.
 
     id_server_1:
-      adapter: mysql
+      adapter: mysql2
       host: id_server_db1.prod
       port: 3306
 
     id_server_2:
-        adapter: mysql
+        adapter: mysql2
         host: id_server_db2.prod
         port: 3306
 

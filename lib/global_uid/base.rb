@@ -66,7 +66,7 @@ module GlobalUid
       config = ActiveRecord::Base.configurations[name]
       c = config.symbolize_keys
 
-      raise "No global_uid support for adapter #{c[:adapter]}" unless ['mysql', 'mysql2'].include?(c[:adapter])
+      raise "No global_uid support for adapter #{c[:adapter]}" if c[:adapter] != 'mysql2'
 
       con = nil
       begin
