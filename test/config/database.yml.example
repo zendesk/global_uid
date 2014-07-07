@@ -1,19 +1,19 @@
 test:
-  adapter: mysql
+  adapter: mysql2
   encoding: utf8
   database: global_uid_test
   username: root
   password:
 
 test_id_server_1:
-  adapter: mysql
+  adapter: mysql2
   encoding: utf8
   database: global_uid_test_id_server_1
   username: root
   password:
 
 test_id_server_2:
-  adapter: mysql
+  adapter: mysql2
   encoding: utf8
   database: global_uid_test_id_server_2
   username: root
