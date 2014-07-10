@@ -16,11 +16,6 @@ module GlobalUid
         options.merge!(:id => false)
       end
 
-      if uid_enabled
-        id_table_name = options[:global_uid_table] || GlobalUid::Base.id_table_from_name(name)
-        GlobalUid::Base.create_uid_tables(id_table_name, options)
-      end
-
       create_table_without_global_uid(name, options) { |t|
         if remove_auto_increment
           # need to honor specifically named tables
@@ -29,6 +24,12 @@ module GlobalUid
         end
         blk.call(t) if blk
       }
+
+      if uid_enabled
+        id_table_name = options[:global_uid_table] || GlobalUid::Base.id_table_from_name(name)
+        GlobalUid::Base.create_uid_tables(id_table_name, options)
+      end
+
     end
 
     def drop_table_with_global_uid(name, options = {})
