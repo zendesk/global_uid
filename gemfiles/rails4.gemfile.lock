@@ -1,7 +1,7 @@
 PATH
   remote: ../
   specs:
-    global_uid (1.4.1)
+    global_uid (2.0.2)
       activerecord (>= 3.2.0, < 5.0)
       activesupport
 

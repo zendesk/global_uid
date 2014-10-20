@@ -453,10 +453,6 @@ class GlobalUIDTest < ActiveSupport::TestCase
       CreateWithNoParams.up
     end
 
-    should "create a normal looking table" do
-
-    end
-
     should "increment normally1" do
       (1..10).each do |i|
         assert_equal i, WithGlobalUID.create!.id
@@ -477,6 +473,28 @@ class GlobalUIDTest < ActiveSupport::TestCase
       reset_connections!
       CreateWithNoParams.down
       GlobalUid::Base.global_uid_options[:dry_run] = false
+    end
+  end
+
+  context "threads" do
+    setup do
+      reset_connections!
+      drop_old_test_tables!
+      restore_defaults!
+      CreateWithNoParams.up
+    end
+
+    should "work" do
+      reset_connections!
+      2.times.map do
+        Thread.new do
+          100.times { WithGlobalUID.create! }
+        end
+      end.each(&:join)
+    end
+
+    teardown do
+      CreateWithNoParams.down
     end
   end
 
@@ -521,7 +539,7 @@ class GlobalUIDTest < ActiveSupport::TestCase
   end
 
   def reset_connections!
-    GlobalUid::Base.class_eval "@@servers = nil"
+    GlobalUid::Base.servers = nil
   end
 
   def restore_defaults!
