@@ -11,8 +11,6 @@ end
 
 module GlobalUid
   class Base
-    @@servers = nil
-
     GLOBAL_UID_DEFAULTS = {
       :connection_timeout   => 3,
       :connection_retry     => 10.minutes,
@@ -23,6 +21,14 @@ module GlobalUid
       :per_process_affinity => true,
       :dry_run              => false
     }
+
+    def self.servers
+      Thread.current[:servers]
+    end
+
+    def self.servers=(s)
+      Thread.current[:servers] = s
+    end
 
     def self.create_uid_tables(id_table_name, options={})
       type     = options[:uid_type] || "bigint(21) UNSIGNED"
@@ -106,20 +112,20 @@ module GlobalUid
     end
 
     def self.disconnect!
-      @@servers = nil
+      self.servers = nil
     end
 
     def self.setup_connections!(options)
       connection_timeout = options[:connection_timeout]
       increment_by       = options[:increment_by]
 
-      if @@servers.nil?
-        @@servers = init_server_info(options)
+      if self.servers.nil?
+        self.servers = init_server_info(options)
         # sorting here sets up each process to have affinity to a particular server.
-        @@servers = @@servers.sort_by { |s| s[:rand] }
+        self.servers = self.servers.sort_by { |s| s[:rand] }
       end
 
-      @@servers.each do |info|
+      self.servers.each do |info|
         next if info[:cx]
 
         if info[:new?] || ( info[:retry_at] && Time.now > info[:retry_at] )
@@ -131,7 +137,7 @@ module GlobalUid
         end
       end
 
-      @@servers
+      self.servers
     end
 
     def self.with_connections(options = {})
