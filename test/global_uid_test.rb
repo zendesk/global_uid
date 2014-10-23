@@ -112,7 +112,7 @@ describe GlobalUid do
 
         it "create the global_uids table" do
           GlobalUid::Base.with_connections do |cx|
-            assert cx.table_exists?('with_global_uids_ids')
+            assert cx.table_exists?('with_global_uids_ids'), 'Table should exist'
           end
         end
 
@@ -148,12 +148,12 @@ describe GlobalUid do
         it "not drop the global-uid tables" do
           CreateWithNoParams.up
           GlobalUid::Base.with_connections do |cx|
-            assert cx.table_exists?('with_global_uids_ids')
+            assert cx.table_exists?('with_global_uids_ids'), 'Table should exist'
           end
 
           CreateWithNoParams.down
           GlobalUid::Base.with_connections do |cx|
-            assert cx.table_exists?('with_global_uids_ids')
+            assert cx.table_exists?('with_global_uids_ids'), 'Table should be dropped'
           end
         end
       end
@@ -166,7 +166,7 @@ describe GlobalUid do
 
         it "not create the global_uids table" do
           GlobalUid::Base.with_connections do |cx|
-            assert !cx.table_exists?('with_global_uids_ids')
+            assert !cx.table_exists?('with_global_uids_ids'), 'Table should not have been created'
           end
         end
 
@@ -197,12 +197,12 @@ describe GlobalUid do
         it "drop the global-uid tables" do
           CreateWithExplicitUidTrue.up
           GlobalUid::Base.with_connections do |cx|
-            assert cx.table_exists?('with_global_uids_ids')
+            assert cx.table_exists?('with_global_uids_ids'), 'Table should exist'
           end
 
           CreateWithExplicitUidTrue.down
           GlobalUid::Base.with_connections do |cx|
-            assert !cx.table_exists?('with_global_uids_ids')
+            assert !cx.table_exists?('with_global_uids_ids'), 'Table should be dropped'
           end
         end
       end
@@ -216,7 +216,7 @@ describe GlobalUid do
 
       it "not create the global_uids table" do
         GlobalUid::Base.with_connections do |cx|
-          assert !cx.table_exists?('without_global_uids_ids')
+          assert !cx.table_exists?('without_global_uids_ids'), 'Table should not not have been created'
         end
       end
 
@@ -537,5 +537,3 @@ describe GlobalUid do
     klass.connection.select_rows("show create table #{table}")[0][1]
   end
 end
-
-
