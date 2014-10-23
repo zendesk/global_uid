@@ -16,6 +16,6 @@ GlobalUid::Base.extend(GlobalUid::ServerVariables)
 
 yaml = YAML.load(IO.read(File.dirname(__FILE__) + "/config/database.yml"))
 ActiveRecord::Base.configurations = yaml
-ActiveRecord::Base.establish_connection("test")
+ActiveRecord::Base.establish_connection(:test)
 ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/test.log")
 ActiveSupport.test_order = :sorted if ActiveSupport.respond_to?(:test_order=)
