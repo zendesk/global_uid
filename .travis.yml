@@ -7,7 +7,7 @@ before_script:
   - mysql -e 'create database global_uid_test_id_server_1;'
   - mysql -e 'create database global_uid_test_id_server_2;'
 gemfile:
-  - gemfiles/rails3.gemfile
-  - gemfiles/rails4.gemfile
+  - gemfiles/rails3.2.gemfile
+  - gemfiles/rails4.0.gemfile
 bundler_args: --no-deployment
 script: "rake test"
