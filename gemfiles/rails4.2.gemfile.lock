@@ -1,0 +1,55 @@
+PATH
+  remote: ../
+  specs:
+    global_uid (2.0.2)
+      activerecord (>= 3.2.0, < 5.0)
+      activesupport
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    activemodel (4.2.0.beta4)
+      activesupport (= 4.2.0.beta4)
+      builder (~> 3.1)
+    activerecord (4.2.0.beta4)
+      activemodel (= 4.2.0.beta4)
+      activesupport (= 4.2.0.beta4)
+      arel (>= 6.0.0.beta2, < 6.1)
+    activesupport (4.2.0.beta4)
+      i18n (>= 0.7.0.beta1, < 0.8)
+      json (~> 1.7, >= 1.7.7)
+      minitest (~> 5.1)
+      thread_safe (~> 0.1)
+      tzinfo (~> 1.1)
+    arel (6.0.0.beta2)
+    builder (3.2.2)
+    bump (0.5.0)
+    i18n (0.7.0.beta1)
+    json (1.8.1)
+    metaclass (0.0.4)
+    minitest (5.4.3)
+    minitest-rg (5.1.0)
+      minitest (~> 5.0)
+    mocha (1.1.0)
+      metaclass (~> 0.0.1)
+    mysql2 (0.3.16)
+    rake (10.3.2)
+    thread_safe (0.3.4)
+    tzinfo (1.2.2)
+      thread_safe (~> 0.1)
+    wwtd (0.5.5)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  activerecord (= 4.2.0.beta4)
+  bump
+  bundler
+  global_uid!
+  minitest
+  minitest-rg
+  mocha
+  mysql2
+  rake
+  wwtd (>= 0.5.3)
