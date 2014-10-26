@@ -29,18 +29,13 @@ GEM
     i18n (0.6.9)
     metaclass (0.0.4)
     minitest (4.7.5)
+    minitest-rg (1.1.1)
+      minitest (< 5.0)
     mocha (1.1.0)
       metaclass (~> 0.0.1)
     multi_json (1.10.1)
     mysql2 (0.3.16)
     rake (10.3.2)
-    shoulda (3.5.0)
-      shoulda-context (~> 1.0, >= 1.0.1)
-      shoulda-matchers (>= 1.4.1, < 3.0)
-    shoulda-context (1.2.1)
-    shoulda-matchers (2.6.1)
-      activesupport (>= 3.0.0)
-    test-unit (2.5.5)
     thread_safe (0.3.4)
     tzinfo (0.3.39)
     wwtd (0.5.3)
@@ -50,13 +45,12 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord (~> 4.0.6)
-  activesupport (~> 4.0.6)
   bump
   bundler
   global_uid!
+  minitest
+  minitest-rg
   mocha
   mysql2
   rake
-  shoulda
-  test-unit
   wwtd (>= 0.5.3)

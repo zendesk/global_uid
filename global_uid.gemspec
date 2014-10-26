@@ -12,9 +12,9 @@ Gem::Specification.new 'global_uid', '2.0.2' do |s|
   s.add_development_dependency('mysql2')
   s.add_development_dependency('rake')
   s.add_development_dependency('bundler')
-  s.add_development_dependency('shoulda')
+  s.add_development_dependency('minitest')
+  s.add_development_dependency('minitest-rg')
   s.add_development_dependency('mocha')
-  s.add_development_dependency('test-unit')
   s.add_development_dependency('bump')
   s.add_development_dependency('wwtd', '>= 0.5.3')
 
