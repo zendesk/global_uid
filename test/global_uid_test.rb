@@ -310,9 +310,9 @@ describe GlobalUid do
 
       it "get bulk ids" do
         res = GlobalUid::Base.get_many_uids_for_class(WithGlobalUID, 10)
-        assert res.size == 10
+        res.size.must_equal 10
         res += GlobalUid::Base.get_many_uids_for_class(WithGlobalUID, 10)
-        assert res.uniq.size == 20
+        res.uniq.size.must_equal 20
         # starting value of 1 with a step of 5, so we it get 6,11,16...
         res.each_with_index do |val, i|
           assert_equal val, ((i + 1) * 5) + 1
@@ -360,7 +360,7 @@ describe GlobalUid do
         awhile = Time.now + 10.hours
         Time.stubs(:now).returns(awhile)
 
-        assert GlobalUid::Base.get_connections.size == GlobalUid::Base.global_uid_servers.size
+        GlobalUid::Base.get_connections.size.must_equal GlobalUid::Base.global_uid_servers.size
 
       end
 
@@ -380,7 +380,7 @@ describe GlobalUid do
       end
 
       it "pull the server out of the pool" do
-        assert GlobalUid::Base.get_connections.size == @old_size - 1
+        GlobalUid::Base.get_connections.size.must_equal @old_size - 1
       end
 
       it "get ids from the remaining server" do
@@ -391,7 +391,7 @@ describe GlobalUid do
         awhile = Time.now + 10.hours
         Time.stubs(:now).returns(awhile)
 
-        assert GlobalUid::Base.get_connections.size == GlobalUid::Base.global_uid_servers.size
+        GlobalUid::Base.get_connections.size.must_equal GlobalUid::Base.global_uid_servers.size
       end
     end
 
