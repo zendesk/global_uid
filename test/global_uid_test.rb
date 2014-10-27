@@ -74,15 +74,15 @@ end
 class ParentSubclassSubclass < ParentSubclass
 end
 
-class GlobalUIDTest < ActiveSupport::TestCase
+describe GlobalUid do
   ActiveRecord::Migration.verbose = false
 
-  context "#global_uid_disabled" do
-    setup do
+  describe "#global_uid_disabled" do
+    before do
       [ Parent, ParentSubclass, ParentSubclassSubclass ].each { |k| k.reset }
     end
 
-    should "default to the parent value or false" do
+    it "default to the parent value or false" do
       assert !ParentSubclass.global_uid_disabled
 
       ParentSubclass.disable_global_uid
@@ -99,36 +99,36 @@ class GlobalUIDTest < ActiveSupport::TestCase
     end
   end
 
-  context "migrations" do
-    setup do
+  describe "migrations" do
+    before do
       restore_defaults!
       reset_connections!
       drop_old_test_tables!
     end
 
-    context "without explicit parameters" do
-      context "with global-uid enabled" do
-        setup do
+    describe "without explicit parameters" do
+      describe "with global-uid enabled" do
+        before do
           GlobalUid::Base.global_uid_options[:disabled] = false
           GlobalUid::Base.global_uid_options[:storage_engine] = "InnoDB"
           CreateWithNoParams.up
           @create_table = show_create_sql(WithGlobalUID, "with_global_uids").split("\n")
         end
 
-        should "create the global_uids table" do
+        it "create the global_uids table" do
           GlobalUid::Base.with_connections do |cx|
             assert cx.table_exists?('with_global_uids_ids')
           end
         end
 
-        should "create global_uids tables with matching ids" do
+        it "create global_uids tables with matching ids" do
           GlobalUid::Base.with_connections do |cx|
             foo = cx.select_all("select id from with_global_uids_ids")
             assert(foo.first['id'].to_i == 1)
           end
         end
 
-        should "create tables with the given storage_engine" do
+        it "create tables with the given storage_engine" do
           GlobalUid::Base.with_connections do |cx|
             foo = cx.select_all("show create table with_global_uids_ids")
             assert_match /ENGINE=InnoDB/, foo.first.values.join
@@ -136,22 +136,22 @@ class GlobalUIDTest < ActiveSupport::TestCase
 
         end
 
-        should "tear off the auto_increment part of the primary key from the created table" do
+        it "tear off the auto_increment part of the primary key from the created table" do
           id_line = @create_table.grep(/\`id\` int/i).first
-          assert_no_match /auto_increment/i, id_line
+          refute_match /auto_increment/i, id_line
         end
 
-        should "create a primary key on id" do
+        it "create a primary key on id" do
           assert @create_table.grep(/primary key/i).size > 0
         end
 
-        teardown do
+        after do
           CreateWithNoParams.down
         end
       end
 
-      context "dropping a table" do
-        should "not drop the global-uid tables" do
+      describe "dropping a table" do
+        it "not drop the global-uid tables" do
           CreateWithNoParams.up
           GlobalUid::Base.with_connections do |cx|
             assert cx.table_exists?('with_global_uids_ids')
@@ -164,44 +164,44 @@ class GlobalUIDTest < ActiveSupport::TestCase
         end
       end
 
-      context "with global-uid disabled, globally" do
-        setup do
+      describe "with global-uid disabled, globally" do
+        before do
           GlobalUid::Base.global_uid_options[:disabled] = true
           CreateWithNoParams.up
         end
 
-        should "not create the global_uids table" do
+        it "not create the global_uids table" do
           GlobalUid::Base.with_connections do |cx|
             assert !cx.table_exists?('with_global_uids_ids')
           end
         end
 
-        teardown do
+        after do
           CreateWithNoParams.down
           GlobalUid::Base.global_uid_options[:disabled] = false
         end
       end
 
-      context "with a named ID key" do
-        setup do
+      describe "with a named ID key" do
+        before do
           CreateWithNamedID.up
         end
 
-        should "preserve the name of the ID key" do
+        it "preserve the name of the ID key" do
           @create_table = show_create_sql(WithGlobalUID, "with_global_uids").split("\n")
           assert(@create_table.grep(/hello.*int/i))
           assert(@create_table.grep(/primary key.*hello/i))
         end
 
-        teardown do
+        after do
           CreateWithNamedID.down
         end
       end
     end
 
-    context "with :use_global_uid => true" do
-      context "dropping a table" do
-        should "drop the global-uid tables" do
+    describe "with :use_global_uid => true" do
+      describe "dropping a table" do
+        it "drop the global-uid tables" do
           CreateWithExplicitUidTrue.up
           GlobalUid::Base.with_connections do |cx|
             assert cx.table_exists?('with_global_uids_ids')
@@ -215,36 +215,36 @@ class GlobalUIDTest < ActiveSupport::TestCase
       end
     end
 
-    context "with global-uid disabled in the migration" do
-      setup do
+    describe "with global-uid disabled in the migration" do
+      before do
         CreateWithoutGlobalUIDs.up
         @create_table = show_create_sql(WithoutGlobalUID, "without_global_uids").split("\n")
       end
 
-      should "not create the global_uids table" do
+      it "not create the global_uids table" do
         GlobalUid::Base.with_connections do |cx|
           assert !cx.table_exists?('without_global_uids_ids')
         end
       end
 
-      should "create standard auto-increment tables" do
+      it "create standard auto-increment tables" do
         id_line = @create_table.grep(/.id. int/i).first
         assert_match /auto_increment/i, id_line
       end
 
-      teardown do
+      after do
         CreateWithoutGlobalUIDs.down
       end
     end
 
     if ActiveRecord::VERSION::MAJOR == 4
-      context "schema dumping" do
-        setup do
+      describe "schema dumping" do
+        before do
           CreateWithoutGlobalUIDs.up
           CreateWithNoParams.up
         end
 
-        should "set global_uid flags as appropriate" do
+        it "set global_uid flags as appropriate" do
           stream = StringIO.new
           ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection, stream)
           stream.rewind
@@ -257,7 +257,7 @@ class GlobalUIDTest < ActiveSupport::TestCase
           assert without_line =~ /use_global_uid: false/
         end
 
-        teardown do
+        after do
           CreateWithoutGlobalUIDs.down
           CreateWithNoParams.down
         end
@@ -265,8 +265,8 @@ class GlobalUIDTest < ActiveSupport::TestCase
     end
   end
 
-  context "With InnoDB engine" do
-    setup do
+  describe "With InnoDB engine" do
+    before do
       reset_connections!
       drop_old_test_tables!
       restore_defaults!
@@ -275,11 +275,11 @@ class GlobalUIDTest < ActiveSupport::TestCase
       CreateWithoutGlobalUIDs.up
     end
 
-    should "interleave single and multiple uids" do
+    it "interleave single and multiple uids" do
       test_interleave
     end
 
-    teardown do
+    after do
       GlobalUid::Base.global_uid_options[:storage_engine] = nil
       reset_connections!
       CreateWithNoParams.down
@@ -287,8 +287,8 @@ class GlobalUIDTest < ActiveSupport::TestCase
     end
   end
 
-  context "With GlobalUID" do
-    setup do
+  describe "With GlobalUID" do
+    before do
       reset_connections!
       drop_old_test_tables!
       restore_defaults!
@@ -296,39 +296,39 @@ class GlobalUIDTest < ActiveSupport::TestCase
       CreateWithoutGlobalUIDs.up
     end
 
-    context "normally" do
-      should "create tables with the default MyISAM storage engine" do
+    describe "normally" do
+      it "create tables with the default MyISAM storage engine" do
         GlobalUid::Base.with_connections do |cx|
           foo = cx.select_all("show create table with_global_uids_ids")
           assert_match /ENGINE=MyISAM/, foo.first.values.join
         end
       end
 
-      should "get a unique id" do
+      it "get a unique id" do
         test_unique_ids
       end
 
-      should "get bulk ids" do
+      it "get bulk ids" do
         res = GlobalUid::Base.get_many_uids_for_class(WithGlobalUID, 10)
         assert res.size == 10
         res += GlobalUid::Base.get_many_uids_for_class(WithGlobalUID, 10)
         assert res.uniq.size == 20
-        # starting value of 1 with a step of 5, so we should get 6,11,16...
+        # starting value of 1 with a step of 5, so we it get 6,11,16...
         res.each_with_index do |val, i|
           assert_equal val, ((i + 1) * 5) + 1
         end
       end
 
-      should "interleave single and multiple uids" do
+      it "interleave single and multiple uids" do
         test_interleave
       end
     end
 
-    context "reserving ids" do
-      should "get 10 in bulk" do
+    describe "reserving ids" do
+      it "get 10 in bulk" do
         WithGlobalUID.with_reserved_global_uids(10) do
           WithGlobalUID.create!
-          # now we should be able to run without ever touching the cx again
+          # now we it be able to run without ever touching the cx again
           GlobalUid::Base.get_connections.each.expects(:insert).never
           GlobalUid::Base.get_connections.each.expects(:select_value).never
           9.times { WithGlobalUID.create! }
@@ -339,20 +339,20 @@ class GlobalUIDTest < ActiveSupport::TestCase
       end
     end
 
-    context "With a timing out server" do
-      setup do
+    describe "With a timing out server" do
+      before do
         reset_connections!
         @a_decent_cx = GlobalUid::Base.new_connection(GlobalUid::Base.global_uid_servers.first, 50, 1, 5)
         ActiveRecord::Base.stubs(:mysql2_connection).raises(GlobalUid::ConnectionTimeoutException).then.returns(@a_decent_cx)
         @connections = GlobalUid::Base.get_connections
       end
 
-      should "limp along with one functioning server" do
+      it "limp along with one functioning server" do
         assert @connections.include?(@a_decent_cx)
         assert_equal GlobalUid::Base.global_uid_servers.size - 1,  @connections.size, "get_connections size"
       end
 
-      should "eventually retry the connection and get it back in place" do
+      it "eventually retry the connection and get it back in place" do
         # clear the state machine expectation
         ActiveRecord::Base.mysql2_connection rescue nil
         ActiveRecord::Base.mysql2_connection rescue nil
@@ -364,13 +364,13 @@ class GlobalUIDTest < ActiveSupport::TestCase
 
       end
 
-      should "get some unique ids" do
+      it "get some unique ids" do
         test_unique_ids
       end
     end
 
-    context "With a server timing out on query" do
-      setup do
+    describe "With a server timing out on query" do
+      before do
         reset_connections!
         @old_size = GlobalUid::Base.get_connections.size # prime them
         GlobalUid::Base.get_connections.first.stubs(:insert).raises(GlobalUid::TimeoutException)
@@ -379,15 +379,15 @@ class GlobalUIDTest < ActiveSupport::TestCase
         32.times do WithGlobalUID.create! end
       end
 
-      should "pull the server out of the pool" do
+      it "pull the server out of the pool" do
         assert GlobalUid::Base.get_connections.size == @old_size - 1
       end
 
-      should "get ids from the remaining server" do
+      it "get ids from the remaining server" do
         test_unique_ids
       end
 
-      should "eventually retry the connection" do
+      it "eventually retry the connection" do
         awhile = Time.now + 10.hours
         Time.stubs(:now).returns(awhile)
 
@@ -395,8 +395,8 @@ class GlobalUIDTest < ActiveSupport::TestCase
       end
     end
 
-    context "With both servers throwing exceptions" do
-      setup do
+    describe "With both servers throwing exceptions" do
+      before do
         # would prefer to do the below, but need Mocha 0.9.10 to do so
         # ActiveRecord::ConnectionAdapters::MysqlAdapter.any_instance.stubs(:execute).raises(ActiveRecord::StatementInvalid)
         GlobalUid::Base.with_connections do |cx|
@@ -404,13 +404,13 @@ class GlobalUIDTest < ActiveSupport::TestCase
         end
       end
 
-      should "raise a NoServersAvailableException" do
+      it "raise a NoServersAvailableException" do
         assert_raises(GlobalUid::NoServersAvailableException) do
           WithGlobalUID.create!
         end
       end
 
-      should "retry the servers immediately after failure" do
+      it "retry the servers immediately after failure" do
         assert_raises(GlobalUid::NoServersAvailableException) do
           WithGlobalUID.create!
         end
@@ -419,12 +419,12 @@ class GlobalUIDTest < ActiveSupport::TestCase
       end
     end
 
-    context "with per-process_affinity" do
-      setup do
+    describe "with per-process_affinity" do
+      before do
         GlobalUid::Base.global_uid_options[:per_process_affinity] = true
       end
 
-      should "increment sequentially" do
+      it "increment sequentially" do
         last_id = 0
         10.times do
           this_id = WithGlobalUID.create!.id
@@ -432,59 +432,58 @@ class GlobalUIDTest < ActiveSupport::TestCase
         end
       end
 
-      teardown do
+      after do
         GlobalUid::Base.global_uid_options[:per_process_affinity] = false
       end
     end
 
-    teardown do
-      mocha_teardown # tear down mocha early to prevent some of this being tied to mocha expectations
+    after do
       reset_connections!
       CreateWithNoParams.down
       CreateWithoutGlobalUIDs.down
     end
   end
 
-  context "In dry-run mode" do
-    setup do
+  describe "In dry-run mode" do
+    before do
       reset_connections!
       drop_old_test_tables!
       GlobalUid::Base.global_uid_options[:dry_run] = true
       CreateWithNoParams.up
     end
 
-    should "increment normally1" do
+    it "increment normally1" do
       (1..10).each do |i|
         assert_equal i, WithGlobalUID.create!.id
       end
     end
 
-    should "insert into the UID servers nonetheless" do
+    it "insert into the UID servers nonetheless" do
       GlobalUid::Base.expects(:get_uid_for_class).at_least(10)
       10.times { WithGlobalUID.create! }
     end
 
-    should "log the results" do
+    it "log the results" do
       ActiveRecord::Base.logger.expects(:info).at_least(10)
       10.times { WithGlobalUID.create! }
     end
 
-    teardown do
+    after do
       reset_connections!
       CreateWithNoParams.down
       GlobalUid::Base.global_uid_options[:dry_run] = false
     end
   end
 
-  context "threads" do
-    setup do
+  describe "threads" do
+    before do
       reset_connections!
       drop_old_test_tables!
       restore_defaults!
       CreateWithNoParams.up
     end
 
-    should "work" do
+    it "work" do
       reset_connections!
       2.times.map do
         Thread.new do
@@ -493,12 +492,13 @@ class GlobalUIDTest < ActiveSupport::TestCase
       end.each(&:join)
     end
 
-    teardown do
+    after do
       CreateWithNoParams.down
     end
   end
 
   private
+
   def test_unique_ids
     seen = {}
     (0..10).each do
