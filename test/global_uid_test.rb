@@ -133,7 +133,6 @@ describe GlobalUid do
             foo = cx.select_all("show create table with_global_uids_ids")
             assert_match /ENGINE=InnoDB/, foo.first.values.join
           end
-
         end
 
         it "tear off the auto_increment part of the primary key from the created table" do
@@ -280,7 +279,6 @@ describe GlobalUid do
     end
 
     after do
-      GlobalUid::Base.global_uid_options[:storage_engine] = nil
       reset_connections!
       CreateWithNoParams.down
       CreateWithoutGlobalUIDs.down
@@ -543,6 +541,7 @@ describe GlobalUid do
   end
 
   def restore_defaults!
+    GlobalUid::Base.global_uid_options[:storage_engine] = nil
     GlobalUid::Base.global_uid_options[:disabled] = false
     GlobalUid::Base.global_uid_options[:dry_run] = false
   end
