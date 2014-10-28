@@ -195,26 +195,6 @@ module GlobalUid
       raise NoServersAvailableException, "All global UID servers are gone!"
     end
 
-    def self.get_many_uids_for_class(klass, n, options = {})
-      with_connections do |connection|
-        GlobalUidTimer.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
-          connection.transaction do
-            start_id = connection.select_value("SELECT id from #{klass.global_uid_table} where stub='a' FOR UPDATE").to_i
-            connection.execute("update #{klass.global_uid_table} set id = id + #{n} * @@auto_increment_increment where stub='a'")
-            if self.global_uid_options[:storage_engine] =~ /InnoDB/i
-              # This is needed to reset the auto_increment counter on an InnoDB table.
-              connection.execute("ALTER TABLE #{klass.global_uid_table} AUTO_INCREMENT = 1")
-            end
-            end_res = connection.select_one("SELECT id, @@auto_increment_increment as inc from #{klass.global_uid_table} where stub='a'")
-            increment_by = end_res['inc'].to_i
-            end_id = end_res['id'].to_i
-            return (start_id + increment_by).step(end_id, increment_by).to_a
-          end
-        end
-      end
-      raise NoServersAvailableException, "All global UID servers are gone!"
-    end
-
     def self.global_uid_options=(options)
       @global_uid_options = GLOBAL_UID_DEFAULTS.merge(options.symbolize_keys)
     end

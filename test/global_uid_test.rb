@@ -265,10 +265,6 @@ describe GlobalUid do
       CreateWithoutGlobalUIDs.up
     end
 
-    it "interleave single and multiple uids" do
-      test_interleave
-    end
-
     after do
       reset_connections!
       CreateWithNoParams.down
@@ -292,36 +288,6 @@ describe GlobalUid do
 
       it "get a unique id" do
         test_unique_ids
-      end
-
-      it "get bulk ids" do
-        res = GlobalUid::Base.get_many_uids_for_class(WithGlobalUID, 10)
-        res.size.must_equal 10
-        res += GlobalUid::Base.get_many_uids_for_class(WithGlobalUID, 10)
-        res.uniq.size.must_equal 20
-        # starting value of 1 with a step of 5, so we it get 6,11,16...
-        res.each_with_index do |val, i|
-          assert_equal val, ((i + 1) * 5) + 1
-        end
-      end
-
-      it "interleave single and multiple uids" do
-        test_interleave
-      end
-    end
-
-    describe "reserving ids" do
-      it "get 10 in bulk" do
-        WithGlobalUID.with_reserved_global_uids(10) do
-          WithGlobalUID.create!
-          # now we it be able to run without ever touching the cx again
-          GlobalUid::Base.get_connections.each.expects(:insert).never
-          GlobalUid::Base.get_connections.each.expects(:select_value).never
-          9.times { WithGlobalUID.create! }
-        end
-
-        GlobalUid::Base.get_connections.first.expects(:insert).once.returns(50)
-        WithGlobalUID.create!
       end
     end
 
@@ -487,27 +453,6 @@ describe GlobalUid do
       assert foo.description.nil?
       assert !seen.has_key?(foo.id)
       seen[foo.id] = 1
-    end
-  end
-
-  def test_interleave
-    old_per_process_affinity = GlobalUid::Base.global_uid_options[:per_process_affinity]
-    begin
-      # Set per process affinity to get deterministic results
-      GlobalUid::Base.global_uid_options[:per_process_affinity] = true
-      first_id = GlobalUid::Base.get_uid_for_class(WithGlobalUID)
-      res = [first_id]
-      res += GlobalUid::Base.get_many_uids_for_class(WithGlobalUID, 10)
-      assert_equal 11, res.uniq.size
-      res += [GlobalUid::Base.get_uid_for_class(WithGlobalUID)]
-      res += GlobalUid::Base.get_many_uids_for_class(WithGlobalUID, 10)
-      assert_equal 22, res.uniq.size
-      # starting value of first_id with a step of 5
-      res.each_with_index do |val, i|
-        assert_equal val, i * 5 + first_id
-      end
-    ensure
-      GlobalUid::Base.global_uid_options[:per_process_affinity] = old_per_process_affinity
     end
   end
 
