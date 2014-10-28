@@ -74,8 +74,10 @@ end
 class ParentSubclassSubclass < ParentSubclass
 end
 
+ActiveRecord::Migration.verbose = false
+
 describe GlobalUid do
-  ActiveRecord::Migration.verbose = false
+  before { cleanup }
 
   describe "#global_uid_disabled" do
     before do
@@ -100,16 +102,9 @@ describe GlobalUid do
   end
 
   describe "migrations" do
-    before do
-      restore_defaults!
-      reset_connections!
-      drop_old_test_tables!
-    end
-
     describe "without explicit parameters" do
       describe "with global-uid enabled" do
         before do
-          GlobalUid::Base.global_uid_options[:disabled] = false
           GlobalUid::Base.global_uid_options[:storage_engine] = "InnoDB"
           CreateWithNoParams.up
           @create_table = show_create_sql(WithGlobalUID, "with_global_uids").split("\n")
@@ -133,7 +128,6 @@ describe GlobalUid do
             foo = cx.select_all("show create table with_global_uids_ids")
             assert_match /ENGINE=InnoDB/, foo.first.values.join
           end
-
         end
 
         it "tear off the auto_increment part of the primary key from the created table" do
@@ -178,7 +172,6 @@ describe GlobalUid do
 
         after do
           CreateWithNoParams.down
-          GlobalUid::Base.global_uid_options[:disabled] = false
         end
       end
 
@@ -267,9 +260,6 @@ describe GlobalUid do
 
   describe "With InnoDB engine" do
     before do
-      reset_connections!
-      drop_old_test_tables!
-      restore_defaults!
       GlobalUid::Base.global_uid_options[:storage_engine] = "InnoDB"
       CreateWithNoParams.up
       CreateWithoutGlobalUIDs.up
@@ -280,7 +270,6 @@ describe GlobalUid do
     end
 
     after do
-      GlobalUid::Base.global_uid_options[:storage_engine] = nil
       reset_connections!
       CreateWithNoParams.down
       CreateWithoutGlobalUIDs.down
@@ -289,9 +278,6 @@ describe GlobalUid do
 
   describe "With GlobalUID" do
     before do
-      reset_connections!
-      drop_old_test_tables!
-      restore_defaults!
       CreateWithNoParams.up
       CreateWithoutGlobalUIDs.up
     end
@@ -310,9 +296,9 @@ describe GlobalUid do
 
       it "get bulk ids" do
         res = GlobalUid::Base.get_many_uids_for_class(WithGlobalUID, 10)
-        assert res.size == 10
+        res.size.must_equal 10
         res += GlobalUid::Base.get_many_uids_for_class(WithGlobalUID, 10)
-        assert res.uniq.size == 20
+        res.uniq.size.must_equal 20
         # starting value of 1 with a step of 5, so we it get 6,11,16...
         res.each_with_index do |val, i|
           assert_equal val, ((i + 1) * 5) + 1
@@ -360,8 +346,7 @@ describe GlobalUid do
         awhile = Time.now + 10.hours
         Time.stubs(:now).returns(awhile)
 
-        assert GlobalUid::Base.get_connections.size == GlobalUid::Base.global_uid_servers.size
-
+        GlobalUid::Base.get_connections.size.must_equal GlobalUid::Base.global_uid_servers.size
       end
 
       it "get some unique ids" do
@@ -380,7 +365,7 @@ describe GlobalUid do
       end
 
       it "pull the server out of the pool" do
-        assert GlobalUid::Base.get_connections.size == @old_size - 1
+        GlobalUid::Base.get_connections.size.must_equal @old_size - 1
       end
 
       it "get ids from the remaining server" do
@@ -391,7 +376,7 @@ describe GlobalUid do
         awhile = Time.now + 10.hours
         Time.stubs(:now).returns(awhile)
 
-        assert GlobalUid::Base.get_connections.size == GlobalUid::Base.global_uid_servers.size
+        GlobalUid::Base.get_connections.size.must_equal GlobalUid::Base.global_uid_servers.size
       end
     end
 
@@ -446,8 +431,6 @@ describe GlobalUid do
 
   describe "In dry-run mode" do
     before do
-      reset_connections!
-      drop_old_test_tables!
       GlobalUid::Base.global_uid_options[:dry_run] = true
       CreateWithNoParams.up
     end
@@ -471,15 +454,11 @@ describe GlobalUid do
     after do
       reset_connections!
       CreateWithNoParams.down
-      GlobalUid::Base.global_uid_options[:dry_run] = false
     end
   end
 
   describe "threads" do
     before do
-      reset_connections!
-      drop_old_test_tables!
-      restore_defaults!
       CreateWithNoParams.up
     end
 
@@ -532,6 +511,12 @@ describe GlobalUid do
     end
   end
 
+  def cleanup
+    reset_connections!
+    drop_old_test_tables!
+    restore_defaults!
+  end
+
   def drop_old_test_tables!
     GlobalUid::Base.with_connections do |cx|
       cx.execute("DROP TABLE IF exists with_global_uids_ids")
@@ -543,6 +528,7 @@ describe GlobalUid do
   end
 
   def restore_defaults!
+    GlobalUid::Base.global_uid_options[:storage_engine] = nil
     GlobalUid::Base.global_uid_options[:disabled] = false
     GlobalUid::Base.global_uid_options[:dry_run] = false
   end
