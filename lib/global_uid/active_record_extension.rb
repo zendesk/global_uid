@@ -10,11 +10,9 @@ module GlobalUid
       return if GlobalUid::Base.global_uid_options[:disabled]
       return if self.class.global_uid_disabled
 
-      global_uid = self.class.get_reserved_global_uid
-      if !global_uid
-        realtime = Benchmark::realtime do
-          global_uid = self.class.generate_uid
-        end
+      global_uid = nil
+      realtime = Benchmark::realtime do
+        global_uid = self.class.generate_uid
       end
 
       if GlobalUid::Base.global_uid_options[:dry_run]
@@ -63,28 +61,6 @@ module GlobalUid
         end
         @global_uid_table_exists = true
       end
-
-      def with_reserved_global_uids(n_to_reserve)
-        old_should_reserve = @should_reserve_global_uids
-        @should_reserve_global_uids = n_to_reserve
-        yield
-      ensure
-        @should_reserve_global_uids = old_should_reserve
-      end
-
-      def get_reserved_global_uid
-        @reserved_global_uids ||= []
-        id = @reserved_global_uids.shift
-        return id if id
-
-        if @should_reserve_global_uids
-          @reserved_global_uids += GlobalUid::Base.get_many_uids_for_class(self, @should_reserve_global_uids)
-          @reserved_global_uids.shift
-        else
-          nil
-        end
-      end
-
     end
   end
 end

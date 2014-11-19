@@ -12,7 +12,7 @@ module GlobalUid
 end
 
 ActiveRecord::Base.send(:include, GlobalUid::ActiveRecordExtension)
-ActiveRecord::ConnectionAdapters::AbstractAdapter.send(:include, GlobalUid::MigrationExtension)
+ActiveRecord::Migration.send(:prepend, GlobalUid::MigrationExtension)
 if ActiveRecord::VERSION::MAJOR == 4 && RUBY_VERSION >= '2'
   ActiveRecord::SchemaDumper.send(:prepend, GlobalUid::SchemaDumperExtension)
 end
