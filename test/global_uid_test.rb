@@ -74,6 +74,15 @@ end
 class ParentSubclassSubclass < ParentSubclass
 end
 
+class Account < ActiveRecord::Base
+  disable_global_uid
+  has_and_belongs_to_many :people
+end
+
+class Person < ActiveRecord::Base
+  has_and_belongs_to_many :account
+end
+
 ActiveRecord::Migration.verbose = false
 
 describe GlobalUid do
@@ -253,6 +262,15 @@ describe GlobalUid do
         after do
           CreateWithoutGlobalUIDs.down
           CreateWithNoParams.down
+        end
+      end
+    end
+
+    if ActiveRecord::VERSION::STRING >= '4.1.0'
+      describe "has_and_belongs_to_many associations" do
+        it "inherits global_uid_disabled from the left-hand-side of the association" do
+          assert Account::HABTM_People.global_uid_disabled
+          refute Person::HABTM_Account.global_uid_disabled
         end
       end
     end
