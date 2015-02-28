@@ -195,6 +195,18 @@ module GlobalUid
       raise NoServersAvailableException, "All global UID servers are gone!"
     end
 
+    def self.get_many_uids_for_class(klass, count, options = {})
+      return [] unless count > 0
+      with_connections do |connection|
+        GlobalUidTimer.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
+          increment_by = connection.select_value("SELECT @@auto_increment_increment")
+          start_id = connection.insert("REPLACE INTO #{klass.global_uid_table} (stub) VALUES " + (["('a')"] * count).join(','))
+          return start_id.step(start_id + (count-1) * increment_by, increment_by).to_a
+        end
+      end
+      raise NoServersAvailableException, "All global UID servers are gone!"
+    end
+
     def self.global_uid_options=(options)
       @global_uid_options = GLOBAL_UID_DEFAULTS.merge(options.symbolize_keys)
     end

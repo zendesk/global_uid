@@ -460,6 +460,28 @@ describe GlobalUid do
     end
   end
 
+  describe "generate_many_uids" do
+    before do
+      CreateWithNoParams.up
+    end
+
+    it "generates many unique ids" do
+      seen = {}
+      uids = WithGlobalUID.generate_many_uids(100)
+      last_uid = nil
+      uids.each do |uid|
+        assert !seen.has_key?(uid)
+        seen[uid] = 1
+        assert uid > last_uid if last_uid
+        last_uid = uid
+      end
+    end
+
+    after do
+      CreateWithNoParams.down
+    end
+  end
+
   private
 
   def test_unique_ids
