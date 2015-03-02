@@ -460,6 +460,22 @@ describe GlobalUid do
     end
   end
 
+  describe "generate_many_uids" do
+    before do
+      CreateWithNoParams.up
+    end
+
+    it "generates many unique ids" do
+      uids = WithGlobalUID.generate_many_uids(100)
+      uids.sort.must_equal uids
+      uids.uniq.must_equal uids
+    end
+
+    after do
+      CreateWithNoParams.down
+    end
+  end
+
   private
 
   def test_unique_ids

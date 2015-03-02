@@ -1,7 +1,7 @@
 PATH
   remote: ../
   specs:
-    global_uid (2.0.2)
+    global_uid (3.0.0)
       activerecord (>= 3.2.0, < 5.0)
       activesupport
 
@@ -35,7 +35,7 @@ GEM
       metaclass (~> 0.0.1)
     multi_json (1.10.1)
     mysql2 (0.3.16)
-    rake (10.3.2)
+    rake (10.4.2)
     thread_safe (0.3.4)
     tzinfo (0.3.39)
     wwtd (0.5.3)
