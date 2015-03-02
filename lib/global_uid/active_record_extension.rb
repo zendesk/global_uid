@@ -37,14 +37,12 @@ module GlobalUid
       end
 
       def generate_uid(options = {})
-        uid_table_name  = self.global_uid_table
-        self.ensure_global_uid_table
+        ensure_global_uid_table
         GlobalUid::Base.get_uid_for_class(self, options)
       end
 
       def generate_many_uids(count, options = {})
-        uid_table_name  = self.global_uid_table
-        self.ensure_global_uid_table
+        ensure_global_uid_table
         GlobalUid::Base.get_many_uids_for_class(self, count, options)
       end
 
