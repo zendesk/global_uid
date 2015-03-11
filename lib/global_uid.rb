@@ -15,6 +15,10 @@ end
 ActiveRecord::Base.send(:include, GlobalUid::ActiveRecordExtension)
 ActiveRecord::Migration.send(:prepend, GlobalUid::MigrationExtension)
 
+if defined?(ActiveRecord::SchemaMigration)
+  ActiveRecord::SchemaMigration.disable_global_uid
+end
+
 if ActiveRecord::VERSION::MAJOR >= 4 && ActiveRecord::VERSION::MINOR >= 1
   ActiveRecord::Associations::Builder::HasAndBelongsToMany.send(:include, GlobalUid::HasAndBelongsToManyBuilderExtension)
 end
