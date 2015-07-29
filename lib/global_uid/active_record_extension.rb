@@ -61,7 +61,7 @@ module GlobalUid
       def ensure_global_uid_table
         return @global_uid_table_exists if @global_uid_table_exists
         GlobalUid::Base.with_connections do |connection|
-          raise "Global UID table #{global_uid_table} not found!" unless connection.table_exists?(global_uid_table)
+          raise "Global UID table #{global_uid_table} not found!" unless connection.schema_cache.table_exists?(global_uid_table.to_s)
         end
         @global_uid_table_exists = true
       end
