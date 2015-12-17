@@ -1,0 +1,72 @@
+GIT
+  remote: git://github.com/rails/arel.git
+  revision: 899e8428c50c586e6c8d4884b542ac9fdf01e95f
+  specs:
+    arel (7.0.0.alpha)
+
+GIT
+  remote: git://github.com/rails/rails.git
+  revision: 7a53a9c13c997771797874b7549d389ced0be7b2
+  specs:
+    activemodel (5.0.0.alpha)
+      activesupport (= 5.0.0.alpha)
+      builder (~> 3.1)
+    activerecord (5.0.0.alpha)
+      activemodel (= 5.0.0.alpha)
+      activesupport (= 5.0.0.alpha)
+      arel (= 7.0.0.alpha)
+    activesupport (5.0.0.alpha)
+      concurrent-ruby (~> 1.0)
+      i18n (~> 0.7)
+      json (~> 1.7, >= 1.7.7)
+      method_source
+      minitest (~> 5.1)
+      tzinfo (~> 1.1)
+
+PATH
+  remote: ../
+  specs:
+    global_uid (3.2.0)
+      activerecord (>= 3.2.0, < 5.0)
+      activesupport
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    builder (3.2.2)
+    bump (0.5.3)
+    concurrent-ruby (1.0.0)
+    i18n (0.7.0)
+    json (1.8.3)
+    metaclass (0.0.4)
+    method_source (0.8.2)
+    minitest (5.8.3)
+    minitest-rg (5.2.0)
+      minitest (~> 5.0)
+    mocha (1.1.0)
+      metaclass (~> 0.0.1)
+    mysql2 (0.4.2)
+    rake (10.4.2)
+    thread_safe (0.3.5)
+    tzinfo (1.2.2)
+      thread_safe (~> 0.1)
+    wwtd (1.2.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  activerecord!
+  arel!
+  bump
+  bundler
+  global_uid!
+  minitest
+  minitest-rg
+  mocha
+  mysql2
+  rake
+  wwtd (>= 0.5.3)
+
+BUNDLED WITH
+   1.11.0
