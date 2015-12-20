@@ -19,10 +19,10 @@ if defined?(ActiveRecord::SchemaMigration)
   ActiveRecord::SchemaMigration.disable_global_uid
 end
 
-if ActiveRecord::VERSION::MAJOR >= 4 && ActiveRecord::VERSION::MINOR >= 1
+if ActiveRecord::VERSION::STRING >= '4.1.0'
   ActiveRecord::Associations::Builder::HasAndBelongsToMany.send(:prepend, GlobalUid::HasAndBelongsToManyBuilderExtension)
 end
 
-if ActiveRecord::VERSION::MAJOR == 4 && RUBY_VERSION >= '2'
+if ActiveRecord::VERSION::MAJOR >= 4
   ActiveRecord::SchemaDumper.send(:prepend, GlobalUid::SchemaDumperExtension)
 end

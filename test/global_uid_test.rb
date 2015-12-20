@@ -239,7 +239,7 @@ describe GlobalUid do
       end
     end
 
-    if ActiveRecord::VERSION::MAJOR == 4
+    if ActiveRecord::VERSION::MAJOR >= 4
       describe "schema dumping" do
         before do
           CreateWithoutGlobalUIDs.up
