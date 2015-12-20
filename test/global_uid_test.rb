@@ -277,8 +277,8 @@ describe GlobalUid do
     if ActiveRecord::VERSION::STRING >= '4.1.0'
       describe "has_and_belongs_to_many associations" do
         it "inherits global_uid_disabled from the left-hand-side of the association" do
-          assert Account::HABTM_People.global_uid_disabled
-          refute Person::HABTM_Account.global_uid_disabled
+          assert Account.const_get(:HABTM_People).global_uid_disabled
+          refute Person.const_get(:HABTM_Account).global_uid_disabled
         end
       end
     end
