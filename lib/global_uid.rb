@@ -20,7 +20,7 @@ if defined?(ActiveRecord::SchemaMigration)
 end
 
 if ActiveRecord::VERSION::MAJOR >= 4 && ActiveRecord::VERSION::MINOR >= 1
-  ActiveRecord::Associations::Builder::HasAndBelongsToMany.send(:include, GlobalUid::HasAndBelongsToManyBuilderExtension)
+  ActiveRecord::Associations::Builder::HasAndBelongsToMany.send(:prepend, GlobalUid::HasAndBelongsToManyBuilderExtension)
 end
 
 if ActiveRecord::VERSION::MAJOR == 4 && RUBY_VERSION >= '2'
