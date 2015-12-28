@@ -111,6 +111,14 @@ describe GlobalUid do
   end
 
   describe "migrations" do
+    def table_exists?(connection, table)
+      if ActiveRecord::VERSION::MAJOR >= 5
+        connection.data_source_exists?(table)
+      else
+        connection.table_exists?(table)
+      end
+    end
+
     describe "without explicit parameters" do
       describe "with global-uid enabled" do
         before do
@@ -121,7 +129,7 @@ describe GlobalUid do
 
         it "create the global_uids table" do
           GlobalUid::Base.with_connections do |cx|
-            assert cx.table_exists?('with_global_uids_ids'), 'Table should exist'
+            assert table_exists?(cx, 'with_global_uids_ids'), 'Table should exist'
           end
         end
 
@@ -157,12 +165,12 @@ describe GlobalUid do
         it "not drop the global-uid tables" do
           CreateWithNoParams.up
           GlobalUid::Base.with_connections do |cx|
-            assert cx.table_exists?('with_global_uids_ids'), 'Table should exist'
+            assert table_exists?(cx, 'with_global_uids_ids'), 'Table should exist'
           end
 
           CreateWithNoParams.down
           GlobalUid::Base.with_connections do |cx|
-            assert cx.table_exists?('with_global_uids_ids'), 'Table should be dropped'
+            assert table_exists?(cx, 'with_global_uids_ids'), 'Table should be dropped'
           end
         end
       end
@@ -175,7 +183,7 @@ describe GlobalUid do
 
         it "not create the global_uids table" do
           GlobalUid::Base.with_connections do |cx|
-            assert !cx.table_exists?('with_global_uids_ids'), 'Table should not have been created'
+            assert !table_exists?(cx, 'with_global_uids_ids'), 'Table should not have been created'
           end
         end
 
@@ -206,12 +214,12 @@ describe GlobalUid do
         it "drop the global-uid tables" do
           CreateWithExplicitUidTrue.up
           GlobalUid::Base.with_connections do |cx|
-            assert cx.table_exists?('with_global_uids_ids'), 'Table should exist'
+            assert table_exists?(cx, 'with_global_uids_ids'), 'Table should exist'
           end
 
           CreateWithExplicitUidTrue.down
           GlobalUid::Base.with_connections do |cx|
-            assert !cx.table_exists?('with_global_uids_ids'), 'Table should be dropped'
+            assert !table_exists?(cx, 'with_global_uids_ids'), 'Table should be dropped'
           end
         end
       end
@@ -225,7 +233,7 @@ describe GlobalUid do
 
       it "not create the global_uids table" do
         GlobalUid::Base.with_connections do |cx|
-          assert !cx.table_exists?('without_global_uids_ids'), 'Table should not not have been created'
+          assert !table_exists?(cx, 'without_global_uids_ids'), 'Table should not not have been created'
         end
       end
 
@@ -239,7 +247,7 @@ describe GlobalUid do
       end
     end
 
-    if ActiveRecord::VERSION::MAJOR == 4
+    if ActiveRecord::VERSION::MAJOR >= 4
       describe "schema dumping" do
         before do
           CreateWithoutGlobalUIDs.up
@@ -269,8 +277,8 @@ describe GlobalUid do
     if ActiveRecord::VERSION::STRING >= '4.1.0'
       describe "has_and_belongs_to_many associations" do
         it "inherits global_uid_disabled from the left-hand-side of the association" do
-          assert Account::HABTM_People.global_uid_disabled
-          refute Person::HABTM_Account.global_uid_disabled
+          assert Account.const_get(:HABTM_People).global_uid_disabled
+          refute Person.const_get(:HABTM_Account).global_uid_disabled
         end
       end
     end

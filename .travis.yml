@@ -1,6 +1,9 @@
+cache: bundler
+sudo: false
 rvm:
-  - 2.0
-  - 2.1.1
+  - 2.0.0
+  - 2.1.8
+  - 2.2.4
 before_script:
   - cp test/config/database.yml.example test/config/database.yml
   - mysql -e 'create database global_uid_test;'
@@ -11,5 +14,14 @@ gemfile:
   - gemfiles/rails4.0.gemfile
   - gemfiles/rails4.1.gemfile
   - gemfiles/rails4.2.gemfile
+  - gemfiles/rails5.0.gemfile
 bundler_args: --no-deployment
-script: "rake test"
+script: "bundle exec rake test"
+matrix:
+  exclude:
+    - rvm: 2.0.0
+      gemfile: gemfiles/rails5.0.gemfile
+    - rvm: 2.1.8
+      gemfile: gemfiles/rails5.0.gemfile
+branches:
+  only: master
