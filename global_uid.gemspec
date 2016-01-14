@@ -1,4 +1,4 @@
-Gem::Specification.new 'global_uid', '3.3.0' do |s|
+Gem::Specification.new 'global_uid', '3.3.1' do |s|
   s.summary     = "GUID"
   s.description = "GUIDs for sharded models"
   s.authors     = ["Ben Osheroff"]
