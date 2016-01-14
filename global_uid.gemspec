@@ -8,7 +8,7 @@ Gem::Specification.new 'global_uid', '3.3.0' do |s|
 
   s.required_ruby_version = "~> 2.0"
 
-  s.add_dependency('activerecord', '>= 3.2.0', '<5.0')
+  s.add_dependency('activerecord', '>= 3.2.0', '< 5.1')
   s.add_dependency('activesupport')
 
   s.add_development_dependency('mysql2')
