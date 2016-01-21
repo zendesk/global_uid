@@ -4,6 +4,7 @@ rvm:
   - 2.0.0
   - 2.1.8
   - 2.2.4
+  - 2.3.0
 before_script:
   - cp test/config/database.yml.example test/config/database.yml
   - mysql -e 'create database global_uid_test;'
