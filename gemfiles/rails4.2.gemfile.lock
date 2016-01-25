@@ -33,6 +33,9 @@ GEM
     mocha (1.1.0)
       metaclass (~> 0.0.1)
     mysql2 (0.4.2)
+    phenix (0.2.0)
+      activerecord (>= 3.2, < 5.1)
+      bundler
     rake (10.4.2)
     thread_safe (0.3.5)
     tzinfo (1.2.2)
@@ -51,6 +54,7 @@ DEPENDENCIES
   minitest-rg
   mocha
   mysql2
+  phenix
   rake
   wwtd (>= 0.5.3)
 

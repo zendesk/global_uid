@@ -30,7 +30,10 @@ GEM
     mocha (1.1.0)
       metaclass (~> 0.0.1)
     multi_json (1.10.1)
-    mysql2 (0.3.16)
+    mysql2 (0.3.20)
+    phenix (0.2.0)
+      activerecord (>= 3.2, < 5.1)
+      bundler
     rake (10.4.2)
     tzinfo (0.3.39)
     wwtd (0.5.3)
@@ -46,7 +49,8 @@ DEPENDENCIES
   minitest (~> 4.7.5)
   minitest-rg
   mocha
-  mysql2
+  mysql2 (~> 0.3.20)
+  phenix
   rake
   wwtd (>= 0.5.3)
 
