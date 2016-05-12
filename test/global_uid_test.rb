@@ -1,92 +1,18 @@
 require_relative 'test_helper'
-
-class CreateWithNoParams < ActiveRecord::Migration
-  group :change if self.respond_to?(:group)
-
-  def self.up
-    create_table :with_global_uids do |t|
-      t.string  :description
-    end
-  end
-
-  def self.down
-    drop_table :with_global_uids
-  end
-end
-
-class CreateWithExplicitUidTrue < ActiveRecord::Migration
-  group :change if self.respond_to?(:group)
-
-  def self.up
-    create_table :with_global_uids, :use_global_uid => true do |t|
-      t.string  :description
-    end
-  end
-
-  def self.down
-    drop_table :with_global_uids, :use_global_uid => true
-  end
-end
-
-class CreateWithNamedID < ActiveRecord::Migration
-  group :change if self.respond_to?(:group)
-
-  def self.up
-    create_table :with_global_uids, :id => 'hello' do |t|
-      t.string  :description
-    end
-  end
-
-  def self.down
-    drop_table :with_global_uids
-  end
-end
-
-class CreateWithoutGlobalUIDs < ActiveRecord::Migration
-  group :change if self.respond_to?(:group)
-
-  def self.up
-    create_table :without_global_uids, :use_global_uid => false do |t|
-      t.string  :description
-    end
-  end
-
-  def self.down
-    drop_table :without_global_uids, :use_global_uid => false
-  end
-end
-
-class WithGlobalUID < ActiveRecord::Base
-end
-
-class WithoutGlobalUID < ActiveRecord::Base
-end
-
-class Parent < ActiveRecord::Base
-  def self.reset
-    @global_uid_disabled = nil
-  end
-end
-
-class ParentSubclass < Parent
-end
-
-class ParentSubclassSubclass < ParentSubclass
-end
-
-class Account < ActiveRecord::Base
-  disable_global_uid
-  has_and_belongs_to_many :people
-end
-
-class Person < ActiveRecord::Base
-  has_and_belongs_to_many :account
-end
-
-ActiveRecord::Migration.verbose = false
+require_relative 'migrations'
+require_relative 'models'
 
 describe GlobalUid do
-  before { cleanup }
+  before do
+    Phenix.rise!(with_schema: false)
+    ActiveRecord::Base.establish_connection(:test)
+    reset_connections!
+    restore_defaults!
+  end
+
+  after do
+    Phenix.burn!
+  end
 
   describe "#global_uid_disabled" do
     before do
@@ -495,18 +421,6 @@ describe GlobalUid do
       assert foo.description.nil?
       assert !seen.has_key?(foo.id)
       seen[foo.id] = 1
-    end
-  end
-
-  def cleanup
-    reset_connections!
-    drop_old_test_tables!
-    restore_defaults!
-  end
-
-  def drop_old_test_tables!
-    GlobalUid::Base.with_connections do |cx|
-      cx.execute("DROP TABLE IF exists with_global_uids_ids")
     end
   end
 

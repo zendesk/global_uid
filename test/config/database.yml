@@ -1,0 +1,21 @@
+<% mysql = URI(ENV['MYSQL_URL'] || 'mysql://root@127.0.0.1:3306') %>
+
+mysql: &MYSQL
+  encoding: utf8
+  adapter: mysql2
+  username: <%= mysql.user %>
+  host: <%= mysql.host %>
+  port: <%= mysql.port %>
+  password: <%= mysql.password %>
+
+test:
+  <<: *MYSQL
+  database: global_uid_test
+
+test_id_server_1:
+  <<: *MYSQL
+  database: global_uid_test_id_server_1
+
+test_id_server_2:
+  <<: *MYSQL
+  database: global_uid_test_id_server_2
