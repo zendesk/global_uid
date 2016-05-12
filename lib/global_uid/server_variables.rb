@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # This module is good for testing and development, not so much for production.
 # Please note that this is unreliable -- if you lose your CX to the server
 # and auto-reconnect, you will be utterly hosed.  Much better to dedicate a server

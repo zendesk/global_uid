@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "global_uid/base"
 require "global_uid/active_record_extension"
 require "global_uid/has_and_belongs_to_many_builder_extension"
