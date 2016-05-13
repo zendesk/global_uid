@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class CreateWithNoParams < ActiveRecord::Migration
   group :change if self.respond_to?(:group)
 
