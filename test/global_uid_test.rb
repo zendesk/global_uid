@@ -376,6 +376,35 @@ describe GlobalUid do
     end
   end
 
+  describe "with forking" do
+    def parent_child_fork_values
+      IO.pipe do |read_pipe, write_pipe|
+        parent_value = yield.to_s
+        pid = fork do
+          write_pipe.write yield.to_s
+        end
+        Process.wait pid
+        write_pipe.close
+        child_value = read_pipe.read
+        [parent_value, child_value]
+      end
+    end
+
+    it "tests our helper method" do
+      p, c = parent_child_fork_values { 1 }
+      c.must_equal p
+      p, c = parent_child_fork_values { $$ }
+      c.wont_equal p
+    end
+
+    it "creates new MySQL connections" do
+      # Ensure the parent has a connection
+      GlobalUid::Base.get_connections.wont_be_empty
+      parent_value, child_value = parent_child_fork_values { GlobalUid::Base.get_connections.map(&:object_id) }
+      child_value.wont_equal parent_value
+    end
+  end
+
   describe "threads" do
     before do
       CreateWithNoParams.up

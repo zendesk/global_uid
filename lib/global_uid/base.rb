@@ -24,11 +24,12 @@ module GlobalUid
     }
 
     def self.servers
-      Thread.current[:servers]
+      # Thread local storage is inheritted on `fork`, include the pid
+      Thread.current["global_uid_servers_#{$$}"]
     end
 
     def self.servers=(s)
-      Thread.current[:servers] = s
+      Thread.current["global_uid_servers_#{$$}"] = s
     end
 
     def self.create_uid_tables(id_table_name, options={})
