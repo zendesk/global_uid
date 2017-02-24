@@ -152,8 +152,6 @@ module GlobalUid
 
       raise NoServersAvailableException if servers.empty?
 
-      exception_count = 0
-
       errors = []
       servers.each do |s|
         begin
