@@ -70,13 +70,13 @@ describe GlobalUid do
         it "create tables with the given storage_engine" do
           GlobalUid::Base.with_connections do |cx|
             foo = cx.select_all("show create table with_global_uids_ids")
-            assert_match /ENGINE=InnoDB/, foo.first.values.join
+            assert_match(/ENGINE=InnoDB/, foo.first.values.join)
           end
         end
 
         it "tear off the auto_increment part of the primary key from the created table" do
           id_line = @create_table.grep(/\`id\` int/i).first
-          refute_match /auto_increment/i, id_line
+          refute_match(/auto_increment/i, id_line)
         end
 
         it "create a primary key on id" do
@@ -165,8 +165,8 @@ describe GlobalUid do
       end
 
       it "create standard auto-increment tables" do
-        id_line = @create_table.grep(/.id. int/i).first
-        assert_match /auto_increment/i, id_line
+        id_line = @create_table.grep(/.id. (big)?int/i).first
+        assert_match(/auto_increment/i, id_line)
       end
 
       after do
@@ -235,7 +235,7 @@ describe GlobalUid do
       it "create tables with the default MyISAM storage engine" do
         GlobalUid::Base.with_connections do |cx|
           foo = cx.select_all("show create table with_global_uids_ids")
-          assert_match /ENGINE=MyISAM/, foo.first.values.join
+          assert_match(/ENGINE=MyISAM/, foo.first.values.join)
         end
       end
 

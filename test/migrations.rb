@@ -1,5 +1,12 @@
 # frozen_string_literal: true
-class CreateWithNoParams < ActiveRecord::Migration
+MigrationClass = if ActiveRecord::Migration.respond_to?(:[])
+  current_version = "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}".to_f
+  ActiveRecord::Migration[current_version]
+else
+  ActiveRecord::Migration
+end
+
+class CreateWithNoParams < MigrationClass
   group :change if self.respond_to?(:group)
 
   def self.up
@@ -13,7 +20,7 @@ class CreateWithNoParams < ActiveRecord::Migration
   end
 end
 
-class CreateWithExplicitUidTrue < ActiveRecord::Migration
+class CreateWithExplicitUidTrue < MigrationClass
   group :change if self.respond_to?(:group)
 
   def self.up
@@ -27,7 +34,7 @@ class CreateWithExplicitUidTrue < ActiveRecord::Migration
   end
 end
 
-class CreateWithNamedID < ActiveRecord::Migration
+class CreateWithNamedID < MigrationClass
   group :change if self.respond_to?(:group)
 
   def self.up
@@ -41,7 +48,7 @@ class CreateWithNamedID < ActiveRecord::Migration
   end
 end
 
-class CreateWithoutGlobalUIDs < ActiveRecord::Migration
+class CreateWithoutGlobalUIDs < MigrationClass
   group :change if self.respond_to?(:group)
 
   def self.up
