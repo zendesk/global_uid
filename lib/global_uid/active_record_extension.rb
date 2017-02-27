@@ -60,7 +60,7 @@ module GlobalUid
       end
 
       def ensure_global_uid_table
-        return @global_uid_table_exists if defined?(@global_uid_table_exists)
+        return @global_uid_table_exists if defined?(@global_uid_table_exists) && @global_uid_table_exists
         GlobalUid::Base.with_connections do |connection|
           if ActiveRecord::VERSION::MAJOR >= 5
             raise "Global UID table #{global_uid_table} not found!" unless connection.schema_cache.data_source_exists?(global_uid_table.to_s)
