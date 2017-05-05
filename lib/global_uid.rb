@@ -27,3 +27,8 @@ end
 if ActiveRecord::VERSION::MAJOR >= 4
   ActiveRecord::SchemaDumper.send(:prepend, GlobalUid::SchemaDumperExtension)
 end
+
+# Make sure that GlobalUID is disabled for ActiveRecord's Internal Metadata table
+if ActiveRecord::VERSION::MAJOR >= 5
+  ActiveRecord::InternalMetadata.global_uid_disabled
+end
