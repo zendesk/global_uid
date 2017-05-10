@@ -16,8 +16,14 @@ end
 ActiveRecord::Base.send(:include, GlobalUid::ActiveRecordExtension)
 ActiveRecord::Migration.send(:prepend, GlobalUid::MigrationExtension)
 
+# Make sure that GlobalUID is disabled for ActiveRecord's SchemaMigration table
 if defined?(ActiveRecord::SchemaMigration)
   ActiveRecord::SchemaMigration.disable_global_uid
+end
+
+# Make sure that GlobalUID is disabled for ActiveRecord's Internal Metadata table
+if ActiveRecord::VERSION::MAJOR >= 5
+  ActiveRecord::InternalMetadata.disable_global_uid
 end
 
 if ActiveRecord::VERSION::STRING >= '4.1.0'
@@ -26,9 +32,4 @@ end
 
 if ActiveRecord::VERSION::MAJOR >= 4
   ActiveRecord::SchemaDumper.send(:prepend, GlobalUid::SchemaDumperExtension)
-end
-
-# Make sure that GlobalUID is disabled for ActiveRecord's Internal Metadata table
-if ActiveRecord::VERSION::MAJOR >= 5
-  ActiveRecord::InternalMetadata.global_uid_disabled
 end
