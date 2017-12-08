@@ -1,8 +1,8 @@
 PATH
-  remote: ../
+  remote: ..
   specs:
-    global_uid (3.3.3)
-      activerecord (>= 3.2.0, < 5.1)
+    global_uid (3.4.3)
+      activerecord (>= 3.2.0, < 5.2)
       activesupport
 
 GEM
@@ -59,4 +59,4 @@ DEPENDENCIES
   wwtd (>= 0.5.3)
 
 BUNDLED WITH
-   1.12.3
+   1.16.0
