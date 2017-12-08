@@ -2,7 +2,7 @@
 module GlobalUid
   module SchemaDumperExtension
     def table(table, stream)
-      io = super(table, StringIO.new)
+      super(table, io = StringIO.new)
       schema = io.string
 
       pk = get_pk(table)
