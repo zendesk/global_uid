@@ -10,7 +10,7 @@ There are three parts to it: configuration, migration and object creation
 
 ### Interactions with other databases
 
-This plugin shouldn't fail with Databases other than MySQL but neither will it do anything either. There's theoretically nothing that should stop it from being *ported* to other DBs, we just don't need to.
+This gem only supports MySQL. Theoretically it should be easy to port it to other DBs, we just don't need to.
 
 ## Installation
 

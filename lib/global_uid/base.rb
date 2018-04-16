@@ -1,14 +1,8 @@
 # frozen_string_literal: true
 require "active_record"
 require "active_support/all"
-
+require "mysql2"
 require "timeout"
-
-begin
-  require 'mysql2'
-rescue LoadError
-end
-
 
 module GlobalUid
   class Base
@@ -38,7 +32,6 @@ module GlobalUid
 
       engine_stmt = "ENGINE=#{global_uid_options[:storage_engine] || "MyISAM"}"
 
-      # TODO it would be nice to be able to set the engine or something to not be MySQL specific
       with_connections do |connection|
         connection.execute("CREATE TABLE IF NOT EXISTS `#{id_table_name}` (
         `id` #{type} NOT NULL AUTO_INCREMENT,
@@ -79,7 +72,7 @@ module GlobalUid
       con = nil
       begin
         GlobalUidTimer.timeout(connection_timeout, ConnectionTimeoutException) do
-          con = ActiveRecord::Base.send("#{c[:adapter]}_connection", config)
+          con = ActiveRecord::Base.mysql2_connection(config)
         end
       rescue ConnectionTimeoutException => e
         notify e, "Timed out establishing a connection to #{name}"

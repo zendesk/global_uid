@@ -4,6 +4,7 @@ PATH
     global_uid (3.4.4)
       activerecord (>= 3.2.0, < 5.2)
       activesupport
+      mysql2
 
 GEM
   remote: https://rubygems.org/
