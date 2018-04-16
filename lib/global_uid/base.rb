@@ -51,17 +51,6 @@ module GlobalUid
       end
     end
 
-    begin
-      require 'system_timer'
-    rescue LoadError
-    end
-
-    if const_defined?("SystemTimer")
-      GlobalUidTimer = SystemTimer
-    else
-      GlobalUidTimer = Timeout
-    end
-
     def self.new_connection(name, connection_timeout, offset, increment_by)
       raise "No id server '#{name}' configured in database.yml" unless ActiveRecord::Base.configurations.has_key?(name)
       config = ActiveRecord::Base.configurations[name]
@@ -71,7 +60,7 @@ module GlobalUid
 
       con = nil
       begin
-        GlobalUidTimer.timeout(connection_timeout, ConnectionTimeoutException) do
+        Timeout.timeout(connection_timeout, ConnectionTimeoutException) do
           con = ActiveRecord::Base.mysql2_connection(config)
         end
       rescue ConnectionTimeoutException => e
@@ -180,7 +169,7 @@ module GlobalUid
 
     def self.get_uid_for_class(klass, options = {})
       with_connections do |connection|
-        GlobalUidTimer.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
+        Timeout.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
           id = connection.insert("REPLACE INTO #{klass.global_uid_table} (stub) VALUES ('a')")
           return id
         end
@@ -191,7 +180,7 @@ module GlobalUid
     def self.get_many_uids_for_class(klass, count, options = {})
       return [] unless count > 0
       with_connections do |connection|
-        GlobalUidTimer.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
+        Timeout.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
           increment_by = connection.select_value("SELECT @@auto_increment_increment")
           start_id = connection.insert("REPLACE INTO #{klass.global_uid_table} (stub) VALUES " + (["('a')"] * count).join(','))
           return start_id.step(start_id + (count-1) * increment_by, increment_by).to_a
