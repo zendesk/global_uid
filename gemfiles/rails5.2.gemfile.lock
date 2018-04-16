@@ -2,20 +2,20 @@ PATH
   remote: ..
   specs:
     global_uid (3.4.4)
-      activerecord (>= 3.2.0, < 5.2)
+      activerecord (>= 3.2.0, < 6.0)
       activesupport
       mysql2
 
 GEM
   remote: https://rubygems.org/
   specs:
-    activemodel (5.2.0.rc2)
-      activesupport (= 5.2.0.rc2)
-    activerecord (5.2.0.rc2)
-      activemodel (= 5.2.0.rc2)
-      activesupport (= 5.2.0.rc2)
+    activemodel (5.2.0)
+      activesupport (= 5.2.0)
+    activerecord (5.2.0)
+      activemodel (= 5.2.0)
+      activesupport (= 5.2.0)
       arel (>= 9.0)
-    activesupport (5.2.0.rc2)
+    activesupport (5.2.0)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 0.7, < 2)
       minitest (~> 5.1)
@@ -45,7 +45,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activerecord (~> 5.2.0.beta1)
+  activerecord (~> 5.2.0)
   bump
   bundler
   global_uid!
