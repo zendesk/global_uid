@@ -58,20 +58,17 @@ module GlobalUid
 
       raise "No global_uid support for adapter #{c[:adapter]}" if c[:adapter] != 'mysql2'
 
-      con = nil
       begin
         Timeout.timeout(connection_timeout, ConnectionTimeoutException) do
-          con = ActiveRecord::Base.mysql2_connection(config)
+          ActiveRecord::Base.mysql2_connection(config)
         end
       rescue ConnectionTimeoutException => e
         notify e, "Timed out establishing a connection to #{name}"
-        return nil
+        nil
       rescue Exception => e
         notify e, "establishing a connection to #{name}: #{e.message}"
-        return nil
+        nil
       end
-
-      con
     end
 
     def self.init_server_info(options)
