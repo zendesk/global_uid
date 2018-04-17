@@ -1,14 +1,8 @@
 # frozen_string_literal: true
 require "active_record"
 require "active_support/all"
-
+require "mysql2"
 require "timeout"
-
-begin
-  require 'mysql2'
-rescue LoadError
-end
-
 
 module GlobalUid
   class Base
@@ -38,7 +32,6 @@ module GlobalUid
 
       engine_stmt = "ENGINE=#{global_uid_options[:storage_engine] || "MyISAM"}"
 
-      # TODO it would be nice to be able to set the engine or something to not be MySQL specific
       with_connections do |connection|
         connection.execute("CREATE TABLE IF NOT EXISTS `#{id_table_name}` (
         `id` #{type} NOT NULL AUTO_INCREMENT,
@@ -58,17 +51,6 @@ module GlobalUid
       end
     end
 
-    begin
-      require 'system_timer'
-    rescue LoadError
-    end
-
-    if const_defined?("SystemTimer")
-      GlobalUidTimer = SystemTimer
-    else
-      GlobalUidTimer = Timeout
-    end
-
     def self.new_connection(name, connection_timeout, offset, increment_by)
       raise "No id server '#{name}' configured in database.yml" unless ActiveRecord::Base.configurations.has_key?(name)
       config = ActiveRecord::Base.configurations[name]
@@ -76,20 +58,17 @@ module GlobalUid
 
       raise "No global_uid support for adapter #{c[:adapter]}" if c[:adapter] != 'mysql2'
 
-      con = nil
       begin
-        GlobalUidTimer.timeout(connection_timeout, ConnectionTimeoutException) do
-          con = ActiveRecord::Base.send("#{c[:adapter]}_connection", config)
+        Timeout.timeout(connection_timeout, ConnectionTimeoutException) do
+          ActiveRecord::Base.mysql2_connection(config)
         end
       rescue ConnectionTimeoutException => e
         notify e, "Timed out establishing a connection to #{name}"
-        return nil
+        nil
       rescue Exception => e
         notify e, "establishing a connection to #{name}: #{e.message}"
-        return nil
+        nil
       end
-
-      con
     end
 
     def self.init_server_info(options)
@@ -187,7 +166,7 @@ module GlobalUid
 
     def self.get_uid_for_class(klass, options = {})
       with_connections do |connection|
-        GlobalUidTimer.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
+        Timeout.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
           id = connection.insert("REPLACE INTO #{klass.global_uid_table} (stub) VALUES ('a')")
           return id
         end
@@ -198,7 +177,7 @@ module GlobalUid
     def self.get_many_uids_for_class(klass, count, options = {})
       return [] unless count > 0
       with_connections do |connection|
-        GlobalUidTimer.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
+        Timeout.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
           increment_by = connection.select_value("SELECT @@auto_increment_increment")
           start_id = connection.insert("REPLACE INTO #{klass.global_uid_table} (stub) VALUES " + (["('a')"] * count).join(','))
           return start_id.step(start_id + (count-1) * increment_by, increment_by).to_a
