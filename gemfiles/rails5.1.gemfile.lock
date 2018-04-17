@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    global_uid (3.4.4)
+    global_uid (3.5.0)
       activerecord (>= 3.2.0, < 6.0)
       activesupport
       mysql2
