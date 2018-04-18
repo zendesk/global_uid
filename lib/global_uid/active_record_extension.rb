@@ -38,12 +38,10 @@ module GlobalUid
       end
 
       def generate_uid(options = {})
-        ensure_global_uid_table
         GlobalUid::Base.get_uid_for_class(self, options)
       end
 
       def generate_many_uids(count, options = {})
-        ensure_global_uid_table
         GlobalUid::Base.get_many_uids_for_class(self, count, options)
       end
 
@@ -57,18 +55,6 @@ module GlobalUid
 
       def global_uid_table
         GlobalUid::Base.id_table_from_name(self.table_name)
-      end
-
-      def ensure_global_uid_table
-        return @global_uid_table_exists if defined?(@global_uid_table_exists) && @global_uid_table_exists
-        GlobalUid::Base.with_connections do |connection|
-          if ActiveRecord::VERSION::MAJOR >= 5
-            raise "Global UID table #{global_uid_table} not found!" unless connection.schema_cache.data_source_exists?(global_uid_table.to_s)
-          else
-            raise "Global UID table #{global_uid_table} not found!" unless connection.schema_cache.table_exists?(global_uid_table.to_s)
-          end
-        end
-        @global_uid_table_exists = true
       end
     end
   end
