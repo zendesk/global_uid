@@ -6,9 +6,9 @@ require "global_uid/migration_extension"
 require "global_uid/schema_dumper_extension"
 
 module GlobalUid
-  class NoServersAvailableException < Exception ; end
-  class ConnectionTimeoutException < Exception ; end
-  class TimeoutException < Exception ; end
+  class NoServersAvailableException < StandardError ; end
+  class ConnectionTimeoutException < StandardError ; end
+  class TimeoutException < StandardError ; end
 
   autoload :ServerVariables, "global_uid/server_variables"
 end
