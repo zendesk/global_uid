@@ -1,8 +1,8 @@
 Gem::Specification.new 'global_uid', '3.6.1' do |s|
   s.summary     = "GUID"
   s.description = "GUIDs for sharded models"
-  s.authors     = ["Ben Osheroff"]
-  s.email       = 'ben@zendesk.com'
+  s.authors     = ["Benjamin Quorning", "Gabe Martin-Dempesy", "Pierre Schambacher", "Ben Osheroff"]
+  s.email       = ["bquorning@zendesk.com", "gabe@zendesk.com", "pschambacher@zendesk.com"]
   s.homepage    = 'https://github.com/zendesk/global_uid'
   s.license     = "MIT"
 
