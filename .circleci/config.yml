@@ -1,139 +1,17 @@
-version: 2
+version: 2.1
 
 jobs:
-
-  # Ruby 2.3
-  test-2.3-with-4.2:
+  rake-test:
+    parameters:
+      ruby-version:
+        type: string
+      gemfile:
+        type: string
     docker:
-      - image: circleci/ruby:2.3
+      - image: circleci/ruby:<< parameters.ruby-version >>
       - image: circleci/mysql:5.7
     environment:
-      BUNDLE_GEMFILE: gemfiles/rails4.2.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
-  test-2.3-with-5.0:
-    docker:
-      - image: circleci/ruby:2.3
-      - image: circleci/mysql:5.7
-    environment:
-      BUNDLE_GEMFILE: gemfiles/rails5.0.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
-  test-2.3-with-5.1:
-    docker:
-      - image: circleci/ruby:2.3
-      - image: circleci/mysql:5.7
-    environment:
-      BUNDLE_GEMFILE: gemfiles/rails5.1.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
-  test-2.3-with-5.2:
-    docker:
-      - image: circleci/ruby:2.3
-      - image: circleci/mysql:5.7
-    environment:
-      BUNDLE_GEMFILE: gemfiles/rails5.2.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
-
-  # Ruby 2.4
-  test-2.4-with-4.2:
-    docker:
-      - image: circleci/ruby:2.4
-      - image: circleci/mysql:5.7
-    environment:
-      BUNDLE_GEMFILE: gemfiles/rails4.2.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
-  test-2.4-with-5.0:
-    docker:
-      - image: circleci/ruby:2.4
-      - image: circleci/mysql:5.7
-    environment:
-      BUNDLE_GEMFILE: gemfiles/rails5.0.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
-  test-2.4-with-5.1:
-    docker:
-      - image: circleci/ruby:2.4
-      - image: circleci/mysql:5.7
-    environment:
-      BUNDLE_GEMFILE: gemfiles/rails5.1.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
-  test-2.4-with-5.2:
-    docker:
-      - image: circleci/ruby:2.4
-      - image: circleci/mysql:5.7
-    environment:
-      BUNDLE_GEMFILE: gemfiles/rails5.2.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
-
-  # Ruby 2.5
-  test-2.5-with-4.2:
-    docker:
-      - image: circleci/ruby:2.5
-      - image: circleci/mysql:5.7
-    environment:
-      BUNDLE_GEMFILE: gemfiles/rails4.2.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
-  test-2.5-with-5.0:
-    docker:
-      - image: circleci/ruby:2.5
-      - image: circleci/mysql:5.7
-    environment:
-      BUNDLE_GEMFILE: gemfiles/rails5.0.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
-  test-2.5-with-5.1:
-    docker:
-      - image: circleci/ruby:2.5
-      - image: circleci/mysql:5.7
-    environment:
-      BUNDLE_GEMFILE: gemfiles/rails5.1.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
-  test-2.5-with-5.2:
-    docker:
-      - image: circleci/ruby:2.5
-      - image: circleci/mysql:5.7
-    environment:
-      BUNDLE_GEMFILE: gemfiles/rails5.2.gemfile
+      BUNDLE_GEMFILE: << parameters.gemfile >>
     steps:
       - checkout
       - run: sudo apt install -y mysql-client
@@ -145,17 +23,51 @@ workflows:
   build:
     jobs:
 
-      - test-2.3-with-4.2
-      - test-2.3-with-5.0
-      - test-2.3-with-5.1
-      - test-2.3-with-5.2
-
-      - test-2.4-with-4.2
-      - test-2.4-with-5.0
-      - test-2.4-with-5.1
-      - test-2.4-with-5.2
-
-      - test-2.5-with-4.2
-      - test-2.5-with-5.0
-      - test-2.5-with-5.1
-      - test-2.5-with-5.2
+      - rake-test:
+          name: "ruby2.3 rails4.2"
+          ruby-version: "2.3"
+          gemfile: "gemfiles/rails4.2.gemfile"
+      - rake-test:
+          name: "ruby2.3 rails5.0"
+          ruby-version: "2.3"
+          gemfile: "gemfiles/rails5.0.gemfile"
+      - rake-test:
+          name: "ruby2.3 rails5.1"
+          ruby-version: "2.3"
+          gemfile: "gemfiles/rails5.1.gemfile"
+      - rake-test:
+          name: "ruby2.3 rails5.2"
+          ruby-version: "2.3"
+          gemfile: "gemfiles/rails5.2.gemfile"
+      - rake-test:
+          name: "ruby2.4 rails4.2"
+          ruby-version: "2.4"
+          gemfile: "gemfiles/rails4.2.gemfile"
+      - rake-test:
+          name: "ruby2.4 rails5.0"
+          ruby-version: "2.4"
+          gemfile: "gemfiles/rails5.0.gemfile"
+      - rake-test:
+          name: "ruby2.4 rails5.1"
+          ruby-version: "2.4"
+          gemfile: "gemfiles/rails5.1.gemfile"
+      - rake-test:
+          name: "ruby2.4 rails5.2"
+          ruby-version: "2.4"
+          gemfile: "gemfiles/rails5.2.gemfile"
+      - rake-test:
+          name: "ruby2.5 rails4.2"
+          ruby-version: "2.5"
+          gemfile: "gemfiles/rails4.2.gemfile"
+      - rake-test:
+          name: "ruby2.5 rails5.0"
+          ruby-version: "2.5"
+          gemfile: "gemfiles/rails5.0.gemfile"
+      - rake-test:
+          name: "ruby2.5 rails5.1"
+          ruby-version: "2.5"
+          gemfile: "gemfiles/rails5.1.gemfile"
+      - rake-test:
+          name: "ruby2.5 rails5.2"
+          ruby-version: "2.5"
+          gemfile: "gemfiles/rails5.2.gemfile"
