@@ -1,5 +1,7 @@
 # Global UID Plugin
 
+[![Build status](https://circleci.com/gh/global_uid/kasket.svg?style=svg)](https://circleci.com/gh/global_uid/kasket)
+
 ## Summary
 
 This plugin does a lot of the heavy lifting needed to have an external MySQL based global id generator as described in this article from Flickr
