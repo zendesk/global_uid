@@ -8,15 +8,12 @@ module GlobalUid
       # rules for stripping out auto_increment -- enabled, not dry-run, and not a "PK-less" table
       remove_auto_increment = uid_enabled && !GlobalUid::Base.global_uid_options[:dry_run] && !(options[:id] == false)
 
-      if remove_auto_increment
-        old_id_option = options[:id]
-        options.merge!(:id => false)
-      end
+      options.merge!(:id => false) if remove_auto_increment
 
       super(name, options) { |t|
         if remove_auto_increment
           # need to honor specifically named tables
-          id_column_name = (old_id_option || :id)
+          id_column_name = options.fetch(:id_column_name, :id)
           t.column id_column_name, "int(10) NOT NULL PRIMARY KEY"
         end
         blk.call(t) if blk

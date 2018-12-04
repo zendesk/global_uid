@@ -119,7 +119,7 @@ describe GlobalUid do
         end
       end
 
-      describe "with a named ID key" do
+      describe "with option :id_column_name" do
         before do
           CreateWithNamedID.up
         end

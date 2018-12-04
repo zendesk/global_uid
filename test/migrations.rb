@@ -38,7 +38,7 @@ class CreateWithNamedID < MigrationClass
   group :change if self.respond_to?(:group)
 
   def self.up
-    create_table :with_global_uids, :id => 'hello' do |t|
+    create_table :with_global_uids, :id_column_name => 'hello' do |t|
       t.string  :description
     end
   end
