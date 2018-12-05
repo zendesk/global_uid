@@ -118,22 +118,6 @@ describe GlobalUid do
           CreateWithNoParams.down
         end
       end
-
-      describe "with a named ID key" do
-        before do
-          CreateWithNamedID.up
-        end
-
-        it "preserve the name of the ID key" do
-          @create_table = show_create_sql(WithGlobalUID, "with_global_uids").split("\n")
-          assert(@create_table.grep(/hello.*int/i))
-          assert(@create_table.grep(/primary key.*hello/i))
-        end
-
-        after do
-          CreateWithNamedID.down
-        end
-      end
     end
 
     describe "with :use_global_uid => true" do
