@@ -1,10 +1,9 @@
 require 'bundler/setup'
 require 'bundler/gem_tasks'
-require 'wwtd/tasks'
 require 'bump/tasks'
 require 'rake/testtask'
 
-task :default => 'wwtd:local'
+task :default => 'test'
 
 Rake::TestTask.new(:test) do |test|
   test.pattern = 'test/**/*_test.rb'
