@@ -18,7 +18,6 @@ Gem::Specification.new 'global_uid', '3.7.0' do |s|
   s.add_development_dependency('minitest-rg')
   s.add_development_dependency('mocha')
   s.add_development_dependency('bump')
-  s.add_development_dependency('wwtd', '>= 0.5.3')
   s.add_development_dependency('phenix')
 
   s.files = Dir.glob('lib/**/*')
