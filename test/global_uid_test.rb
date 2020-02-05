@@ -249,7 +249,7 @@ describe GlobalUid do
         awhile = Time.now + 10.hours
         Time.stubs(:now).returns(awhile)
 
-        GlobalUid::Base.get_connections.size.must_equal GlobalUid::Base.global_uid_servers.size
+        assert_equal GlobalUid::Base.get_connections.size, GlobalUid::Base.global_uid_servers.size
       end
 
       it "get some unique ids" do
@@ -268,7 +268,7 @@ describe GlobalUid do
       end
 
       it "pull the server out of the pool" do
-        GlobalUid::Base.get_connections.size.must_equal @old_size - 1
+        assert_equal GlobalUid::Base.get_connections.size, @old_size - 1
       end
 
       it "get ids from the remaining server" do
@@ -279,7 +279,7 @@ describe GlobalUid do
         awhile = Time.now + 10.hours
         Time.stubs(:now).returns(awhile)
 
-        GlobalUid::Base.get_connections.size.must_equal GlobalUid::Base.global_uid_servers.size
+        assert_equal GlobalUid::Base.get_connections.size, GlobalUid::Base.global_uid_servers.size
       end
     end
 
@@ -376,16 +376,16 @@ describe GlobalUid do
 
     it "tests our helper method" do
       p, c = parent_child_fork_values { 1 }
-      c.must_equal p
+      assert_equal c, p
       p, c = parent_child_fork_values { $$ }
-      c.wont_equal p
+      refute_equal c, p
     end
 
     it "creates new MySQL connections" do
       # Ensure the parent has a connection
-      GlobalUid::Base.get_connections.wont_be_empty
+      refute_empty GlobalUid::Base.get_connections
       parent_value, child_value = parent_child_fork_values { GlobalUid::Base.get_connections.map(&:object_id) }
-      child_value.wont_equal parent_value
+      refute_equal child_value, parent_value
     end
   end
 
@@ -415,8 +415,8 @@ describe GlobalUid do
 
     it "generates many unique ids" do
       uids = WithGlobalUID.generate_many_uids(100)
-      uids.sort.must_equal uids
-      uids.uniq.must_equal uids
+      assert_equal uids.sort, uids
+      assert_equal uids.uniq, uids
     end
 
     after do
