@@ -17,13 +17,6 @@ jobs:
     environment:
       BUNDLE_GEMFILE: gemfiles/rails4.2.gemfile
     <<: *run_tests
-  test-2.4-with-5.0:
-    docker:
-      - image: circleci/ruby:2.4
-      - image: circleci/mysql:5.7
-    environment:
-      BUNDLE_GEMFILE: gemfiles/rails5.0.gemfile
-    <<: *run_tests
   test-2.4-with-5.1:
     docker:
       - image: circleci/ruby:2.4
@@ -47,13 +40,6 @@ jobs:
     environment:
       BUNDLE_GEMFILE: gemfiles/rails4.2.gemfile
     <<: *run_tests
-  test-2.5-with-5.0:
-    docker:
-      - image: circleci/ruby:2.5
-      - image: circleci/mysql:5.7
-    environment:
-      BUNDLE_GEMFILE: gemfiles/rails5.0.gemfile
-    <<: *run_tests
   test-2.5-with-5.1:
     docker:
       - image: circleci/ruby:2.5
@@ -75,11 +61,9 @@ workflows:
     jobs:
 
       - test-2.4-with-4.2
-      - test-2.4-with-5.0
       - test-2.4-with-5.1
       - test-2.4-with-5.2
 
       - test-2.5-with-4.2
-      - test-2.5-with-5.0
       - test-2.5-with-5.1
       - test-2.5-with-5.2
