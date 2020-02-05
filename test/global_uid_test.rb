@@ -63,7 +63,7 @@ describe GlobalUid do
         it "create global_uids tables with matching ids" do
           GlobalUid::Base.with_connections do |cx|
             foo = cx.select_all("select id from with_global_uids_ids")
-            assert(foo.first['id'].to_i == 1)
+            assert_equal(foo.first['id'].to_i, 1)
           end
         end
 
@@ -80,7 +80,7 @@ describe GlobalUid do
         end
 
         it "create a primary key on id" do
-          assert @create_table.grep(/primary key/i).size > 0
+          refute_empty @create_table.grep(/primary key/i)
         end
 
         after do
@@ -172,10 +172,10 @@ describe GlobalUid do
           schema = stream.read
 
           with_line = schema.split("\n").grep(/with_global_uids/).first
-          assert with_line =~ /use_global_uid: true/
+          assert_match(/use_global_uid: true/, with_line)
 
           without_line = schema.split("\n").grep(/without_global_uids/).first
-          assert without_line =~ /use_global_uid: false/
+          assert_match(/use_global_uid: false/, without_line)
         end
 
         after do
@@ -237,7 +237,7 @@ describe GlobalUid do
       end
 
       it "limp along with one functioning server" do
-        assert @connections.include?(@a_decent_cx)
+        assert_includes @connections, @a_decent_cx
         assert_equal GlobalUid::Base.global_uid_servers.size - 1,  @connections.size, "get_connections size"
       end
 
@@ -316,7 +316,7 @@ describe GlobalUid do
         last_id = 0
         10.times do
           this_id = WithGlobalUID.create!.id
-          assert this_id > last_id
+          assert_operator this_id, :>, last_id
         end
       end
 
@@ -431,9 +431,9 @@ describe GlobalUid do
     (0..10).each do
       foo = WithGlobalUID.new
       foo.save
-      assert !foo.id.nil?
-      assert foo.description.nil?
-      assert !seen.has_key?(foo.id)
+      refute_nil foo.id
+      assert_nil foo.description
+      refute seen.has_key?(foo.id)
       seen[foo.id] = 1
     end
   end
