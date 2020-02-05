@@ -1,4 +1,4 @@
-Gemfile.lock
+*gemfile.lock
 *.gem
 .bundle
 .rvmrc
