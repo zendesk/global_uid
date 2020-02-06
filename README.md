@@ -1,6 +1,6 @@
 # Global UID Plugin
 
-[![Build status](https://circleci.com/gh/global_uid/kasket.svg?style=svg)](https://circleci.com/gh/global_uid/kasket)
+[![Build status](https://circleci.com/gh/zendesk/global_uid.svg?style=svg)](https://circleci.com/gh/zendesk/global_uid)
 
 ## Summary
 
