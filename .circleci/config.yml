@@ -1,5 +1,12 @@
 version: 2
 
+run_tests: &run_tests
+  steps:
+    - checkout
+    - run: sudo apt install -y default-mysql-client
+    - run: bundle install
+    - run: bundle exec rake test
+
 jobs:
 
   # Ruby 2.3
@@ -9,44 +16,28 @@ jobs:
       - image: circleci/mysql:5.7
     environment:
       BUNDLE_GEMFILE: gemfiles/rails4.2.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
+    <<: *run_tests
   test-2.3-with-5.0:
     docker:
       - image: circleci/ruby:2.3
       - image: circleci/mysql:5.7
     environment:
       BUNDLE_GEMFILE: gemfiles/rails5.0.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
+    <<: *run_tests
   test-2.3-with-5.1:
     docker:
       - image: circleci/ruby:2.3
       - image: circleci/mysql:5.7
     environment:
       BUNDLE_GEMFILE: gemfiles/rails5.1.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
+    <<: *run_tests
   test-2.3-with-5.2:
     docker:
       - image: circleci/ruby:2.3
       - image: circleci/mysql:5.7
     environment:
       BUNDLE_GEMFILE: gemfiles/rails5.2.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
+    <<: *run_tests
 
   # Ruby 2.4
   test-2.4-with-4.2:
@@ -55,44 +46,28 @@ jobs:
       - image: circleci/mysql:5.7
     environment:
       BUNDLE_GEMFILE: gemfiles/rails4.2.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
+    <<: *run_tests
   test-2.4-with-5.0:
     docker:
       - image: circleci/ruby:2.4
       - image: circleci/mysql:5.7
     environment:
       BUNDLE_GEMFILE: gemfiles/rails5.0.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
+    <<: *run_tests
   test-2.4-with-5.1:
     docker:
       - image: circleci/ruby:2.4
       - image: circleci/mysql:5.7
     environment:
       BUNDLE_GEMFILE: gemfiles/rails5.1.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
+    <<: *run_tests
   test-2.4-with-5.2:
     docker:
       - image: circleci/ruby:2.4
       - image: circleci/mysql:5.7
     environment:
       BUNDLE_GEMFILE: gemfiles/rails5.2.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
+    <<: *run_tests
 
   # Ruby 2.5
   test-2.5-with-4.2:
@@ -101,44 +76,28 @@ jobs:
       - image: circleci/mysql:5.7
     environment:
       BUNDLE_GEMFILE: gemfiles/rails4.2.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
+    <<: *run_tests
   test-2.5-with-5.0:
     docker:
       - image: circleci/ruby:2.5
       - image: circleci/mysql:5.7
     environment:
       BUNDLE_GEMFILE: gemfiles/rails5.0.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
+    <<: *run_tests
   test-2.5-with-5.1:
     docker:
       - image: circleci/ruby:2.5
       - image: circleci/mysql:5.7
     environment:
       BUNDLE_GEMFILE: gemfiles/rails5.1.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
+    <<: *run_tests
   test-2.5-with-5.2:
     docker:
       - image: circleci/ruby:2.5
       - image: circleci/mysql:5.7
     environment:
       BUNDLE_GEMFILE: gemfiles/rails5.2.gemfile
-    steps:
-      - checkout
-      - run: sudo apt install -y mysql-client
-      - run: bundle install
-      - run: bundle exec rake test
+    <<: *run_tests
 
 workflows:
   version: 2
