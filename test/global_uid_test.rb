@@ -63,7 +63,7 @@ describe GlobalUid do
         it "create global_uids tables with matching ids" do
           GlobalUid::Base.with_connections do |cx|
             foo = cx.select_all("select id from with_global_uids_ids")
-            assert(foo.first['id'].to_i == 1)
+            assert_equal(foo.first['id'].to_i, 1)
           end
         end
 
@@ -80,7 +80,7 @@ describe GlobalUid do
         end
 
         it "create a primary key on id" do
-          assert @create_table.grep(/primary key/i).size > 0
+          refute_empty @create_table.grep(/primary key/i)
         end
 
         after do
@@ -172,10 +172,10 @@ describe GlobalUid do
           schema = stream.read
 
           with_line = schema.split("\n").grep(/with_global_uids/).first
-          assert with_line =~ /use_global_uid: true/
+          assert_match(/use_global_uid: true/, with_line)
 
           without_line = schema.split("\n").grep(/without_global_uids/).first
-          assert without_line =~ /use_global_uid: false/
+          assert_match(/use_global_uid: false/, without_line)
         end
 
         after do
@@ -237,7 +237,7 @@ describe GlobalUid do
       end
 
       it "limp along with one functioning server" do
-        assert @connections.include?(@a_decent_cx)
+        assert_includes @connections, @a_decent_cx
         assert_equal GlobalUid::Base.global_uid_servers.size - 1,  @connections.size, "get_connections size"
       end
 
@@ -249,7 +249,7 @@ describe GlobalUid do
         awhile = Time.now + 10.hours
         Time.stubs(:now).returns(awhile)
 
-        GlobalUid::Base.get_connections.size.must_equal GlobalUid::Base.global_uid_servers.size
+        assert_equal GlobalUid::Base.get_connections.size, GlobalUid::Base.global_uid_servers.size
       end
 
       it "get some unique ids" do
@@ -268,7 +268,7 @@ describe GlobalUid do
       end
 
       it "pull the server out of the pool" do
-        GlobalUid::Base.get_connections.size.must_equal @old_size - 1
+        assert_equal GlobalUid::Base.get_connections.size, @old_size - 1
       end
 
       it "get ids from the remaining server" do
@@ -279,7 +279,7 @@ describe GlobalUid do
         awhile = Time.now + 10.hours
         Time.stubs(:now).returns(awhile)
 
-        GlobalUid::Base.get_connections.size.must_equal GlobalUid::Base.global_uid_servers.size
+        assert_equal GlobalUid::Base.get_connections.size, GlobalUid::Base.global_uid_servers.size
       end
     end
 
@@ -316,7 +316,7 @@ describe GlobalUid do
         last_id = 0
         10.times do
           this_id = WithGlobalUID.create!.id
-          assert this_id > last_id
+          assert_operator this_id, :>, last_id
         end
       end
 
@@ -376,16 +376,16 @@ describe GlobalUid do
 
     it "tests our helper method" do
       p, c = parent_child_fork_values { 1 }
-      c.must_equal p
+      assert_equal c, p
       p, c = parent_child_fork_values { $$ }
-      c.wont_equal p
+      refute_equal c, p
     end
 
     it "creates new MySQL connections" do
       # Ensure the parent has a connection
-      GlobalUid::Base.get_connections.wont_be_empty
+      refute_empty GlobalUid::Base.get_connections
       parent_value, child_value = parent_child_fork_values { GlobalUid::Base.get_connections.map(&:object_id) }
-      child_value.wont_equal parent_value
+      refute_equal child_value, parent_value
     end
   end
 
@@ -415,8 +415,8 @@ describe GlobalUid do
 
     it "generates many unique ids" do
       uids = WithGlobalUID.generate_many_uids(100)
-      uids.sort.must_equal uids
-      uids.uniq.must_equal uids
+      assert_equal uids.sort, uids
+      assert_equal uids.uniq, uids
     end
 
     after do
@@ -431,9 +431,9 @@ describe GlobalUid do
     (0..10).each do
       foo = WithGlobalUID.new
       foo.save
-      assert !foo.id.nil?
-      assert foo.description.nil?
-      assert !seen.has_key?(foo.id)
+      refute_nil foo.id
+      assert_nil foo.description
+      refute seen.has_key?(foo.id)
       seen[foo.id] = 1
     end
   end
