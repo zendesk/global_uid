@@ -52,8 +52,8 @@ module GlobalUid
     end
 
     def self.new_connection(name, connection_timeout, offset, increment_by)
-      raise "No id server '#{name}' configured in database.yml" unless ActiveRecord::Base.configurations.has_key?(name)
-      config = ActiveRecord::Base.configurations[name]
+      raise "No id server '#{name}' configured in database.yml" unless ActiveRecord::Base.configurations.to_h.has_key?(name)
+      config = ActiveRecord::Base.configurations.to_h[name]
       c = config.symbolize_keys
 
       raise "No global_uid support for adapter #{c[:adapter]}" if c[:adapter] != 'mysql2'
