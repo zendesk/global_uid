@@ -158,39 +158,35 @@ describe GlobalUid do
       end
     end
 
-    if ActiveRecord::VERSION::MAJOR >= 4
-      describe "schema dumping" do
-        before do
-          CreateWithoutGlobalUIDs.up
-          CreateWithNoParams.up
-        end
+    describe "schema dumping" do
+      before do
+        CreateWithoutGlobalUIDs.up
+        CreateWithNoParams.up
+      end
 
-        it "set global_uid flags as appropriate" do
-          stream = StringIO.new
-          ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection, stream)
-          stream.rewind
-          schema = stream.read
+      it "set global_uid flags as appropriate" do
+        stream = StringIO.new
+        ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection, stream)
+        stream.rewind
+        schema = stream.read
 
-          with_line = schema.split("\n").grep(/with_global_uids/).first
-          assert_match(/use_global_uid: true/, with_line)
+        with_line = schema.split("\n").grep(/with_global_uids/).first
+        assert_match(/use_global_uid: true/, with_line)
 
-          without_line = schema.split("\n").grep(/without_global_uids/).first
-          assert_match(/use_global_uid: false/, without_line)
-        end
+        without_line = schema.split("\n").grep(/without_global_uids/).first
+        assert_match(/use_global_uid: false/, without_line)
+      end
 
-        after do
-          CreateWithoutGlobalUIDs.down
-          CreateWithNoParams.down
-        end
+      after do
+        CreateWithoutGlobalUIDs.down
+        CreateWithNoParams.down
       end
     end
 
-    if ActiveRecord::VERSION::STRING >= '4.1.0'
-      describe "has_and_belongs_to_many associations" do
-        it "inherits global_uid_disabled from the left-hand-side of the association" do
-          assert Account.const_get(:HABTM_People).global_uid_disabled
-          refute Person.const_get(:HABTM_Account).global_uid_disabled
-        end
+    describe "has_and_belongs_to_many associations" do
+      it "inherits global_uid_disabled from the left-hand-side of the association" do
+        assert Account.const_get(:HABTM_People).global_uid_disabled
+        refute Person.const_get(:HABTM_Account).global_uid_disabled
       end
     end
   end

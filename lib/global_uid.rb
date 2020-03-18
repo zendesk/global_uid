@@ -26,10 +26,5 @@ if ActiveRecord::VERSION::MAJOR >= 5
   ActiveRecord::InternalMetadata.disable_global_uid
 end
 
-if ActiveRecord::VERSION::STRING >= '4.1.0'
-  ActiveRecord::Associations::Builder::HasAndBelongsToMany.send(:include, GlobalUid::HasAndBelongsToManyBuilderExtension)
-end
-
-if ActiveRecord::VERSION::MAJOR >= 4
-  ActiveRecord::SchemaDumper.send(:prepend, GlobalUid::SchemaDumperExtension)
-end
+ActiveRecord::Associations::Builder::HasAndBelongsToMany.send(:include, GlobalUid::HasAndBelongsToManyBuilderExtension)
+ActiveRecord::SchemaDumper.send(:prepend, GlobalUid::SchemaDumperExtension)
