@@ -49,14 +49,15 @@ The `increment_by` value configured here does not dictate the value on your allo
 
 Here's a complete list of the options you can use:
 
-| Name                  | Default                                    | Description                                                                                                |
-| --------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| `:disabled`           | `false`                                    | Disable GlobalUid entirely                                                                                 |
-| `:connection_timeout` | 3 seconds                                  | Timeout for connecting to a global UID server                                                              |
-| `:query_timeout`      | 10 seconds                                 | Timeout for retrieving a global UID from a server before we move on to the next server                     |
-| `:connection_retry`   | 10 minutes                                 | After failing to connect or query a UID server, how long before we retry                                   |
-| `:notifier`           | A proc calling `ActiveRecord::Base.logger` | This proc is called with two parameters upon UID server failure -- an exception and a message              |
-| `:increment_by`       | 5                                          | Used to validate number of ID servers, preventing connections if there are more servers than the given increment |
+| Name                             | Default                                    | Description                                                                                                  |
+| -------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `:disabled`                      | `false`                                    | Disable GlobalUid entirely                                                                                   |
+| `:connection_timeout`            | 3 seconds                                  | Timeout for connecting to a global UID server                                                                |
+| `:query_timeout`                 | 10 seconds                                 | Timeout for retrieving a global UID from a server before we move on to the next server                       |
+| `:connection_retry`              | 10 minutes                                 | After failing to connect or query a UID server, how long before we retry                                     |
+| `:notifier`                      | A proc calling `ActiveRecord::Base.logger` | This proc is called with two parameters upon UID server failure -- an exception and a message                |
+| `:increment_by`                  | 5                                          | Used for validation, compared with the value on the alloc servers to prevent allocation of duplicate IDs     |
+| `:suppress_increment_exceptions` | `false`                                    | Suppress configuration validation, allowing updates to `auto_increment_increment` while alloc servers in use |
 
 ### Migration
 

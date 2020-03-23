@@ -11,9 +11,10 @@ module GlobalUid
       :connection_retry     => 10.minutes,
       :notifier             => Proc.new { |exception, message| ActiveRecord::Base.logger.error("GlobalUID error: #{exception.class} #{message}") },
       :query_timeout        => 10,
-      :increment_by         => 5,  # This will define the maximum number of servers that you can have
+      :increment_by         => 5, # This will define the maximum number of servers that you can have
       :disabled             => false,
-      :per_process_affinity => true
+      :per_process_affinity => true,
+      :suppress_increment_exceptions => false
     }
 
     def self.servers
@@ -94,6 +95,7 @@ module GlobalUid
 
     def self.setup_connections!
       connection_timeout = self.global_uid_options[:connection_timeout]
+      increment_by = self.global_uid_options[:increment_by]
 
       if self.servers.nil?
         self.servers = init_server_info
@@ -107,9 +109,18 @@ module GlobalUid
         if info[:new?] || ( info[:retry_at] && Time.now > info[:retry_at] )
           info[:new?] = false
 
-          connection = new_connection(info[:name], connection_timeout)
-          info[:cx]  = connection
-          info[:retry_at] = Time.now + self.global_uid_options[:connection_retry] if connection.nil?
+          begin
+            connection = new_connection(info[:name], connection_timeout)
+            info[:cx] = connection
+            if connection.nil?
+              info[:retry_at] = Time.now + self.global_uid_options[:connection_retry]
+            else
+              info[:allocator] = Allocator.new(incrementing_by: increment_by, connection: connection)
+            end
+          rescue InvalidIncrementException => e
+            notify e, "#{e.message}"
+            info[:cx] = nil
+          end
         end
       end
 
@@ -160,9 +171,9 @@ module GlobalUid
 
     def self.get_uid_for_class(klass)
       with_connections do |connection|
+        server = self.servers.find { |s| connection.current_database.include?(s[:name]) }
         Timeout.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
-          id = connection.insert("REPLACE INTO #{klass.global_uid_table} (stub) VALUES ('a')")
-          return id
+          return server[:allocator].allocate_one(klass.global_uid_table)
         end
       end
       raise NoServersAvailableException, "All global UID servers are gone!"
@@ -171,10 +182,9 @@ module GlobalUid
     def self.get_many_uids_for_class(klass, count)
       return [] unless count > 0
       with_connections do |connection|
+        server = self.servers.find { |s| connection.current_database.include?(s[:name]) }
         Timeout.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
-          increment_by = connection.select_value("SELECT @@auto_increment_increment")
-          start_id = connection.insert("REPLACE INTO #{klass.global_uid_table} (stub) VALUES " + (["('a')"] * count).join(','))
-          return start_id.step(start_id + (count-1) * increment_by, increment_by).to_a
+          return server[:allocator].allocate_many(klass.global_uid_table, count: count)
         end
       end
       raise NoServersAvailableException, "All global UID servers are gone!"
