@@ -52,7 +52,6 @@ Here's a complete list of the options you can use:
 | Name                  | Default                                    | Description                                                                                                |
 | --------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
 | `:disabled`           | `false`                                    | Disable GlobalUid entirely                                                                                 |
-| `:dry_run`            | `false`                                    | Setting this parameter causes the REPLACE INTO statements to run, but the id picked up will not be used.   |
 | `:connection_timeout` | 3 seconds                                  | Timeout for connecting to a global UID server                                                              |
 | `:query_timeout`      | 10 seconds                                 | Timeout for retrieving a global UID from a server before we move on to the next server                     |
 | `:connection_retry`   | 10 minutes                                 | After failing to connect or query a UID server, how long before we retry                                   |

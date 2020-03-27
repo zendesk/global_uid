@@ -328,34 +328,6 @@ describe GlobalUid do
     end
   end
 
-  describe "In dry-run mode" do
-    before do
-      GlobalUid::Base.global_uid_options[:dry_run] = true
-      CreateWithNoParams.up
-    end
-
-    it "increment normally1" do
-      (1..10).each do |i|
-        assert_equal i, WithGlobalUID.create!.id
-      end
-    end
-
-    it "insert into the UID servers nonetheless" do
-      GlobalUid::Base.expects(:get_uid_for_class).at_least(10)
-      10.times { WithGlobalUID.create! }
-    end
-
-    it "log the results" do
-      ActiveRecord::Base.logger.expects(:info).at_least(10)
-      10.times { WithGlobalUID.create! }
-    end
-
-    after do
-      reset_connections!
-      CreateWithNoParams.down
-    end
-  end
-
   describe "with forking" do
     def parent_child_fork_values
       IO.pipe do |read_pipe, write_pipe|
@@ -441,7 +413,6 @@ describe GlobalUid do
   def restore_defaults!
     GlobalUid::Base.global_uid_options[:storage_engine] = nil
     GlobalUid::Base.global_uid_options[:disabled] = false
-    GlobalUid::Base.global_uid_options[:dry_run] = false
   end
 
   def show_create_sql(klass, table)

@@ -5,8 +5,8 @@ module GlobalUid
     def create_table(name, options = {}, &blk)
       uid_enabled = !(GlobalUid::Base.global_uid_options[:disabled] || options[:use_global_uid] == false)
 
-      # rules for stripping out auto_increment -- enabled, not dry-run, and not a "PK-less" table
-      remove_auto_increment = uid_enabled && !GlobalUid::Base.global_uid_options[:dry_run] && !(options[:id] == false)
+      # rules for stripping out auto_increment -- enabled and not a "PK-less" table
+      remove_auto_increment = uid_enabled && !(options[:id] == false)
 
       options.merge!(:id => false) if remove_auto_increment
 

@@ -11,17 +11,7 @@ module GlobalUid
       return if GlobalUid::Base.global_uid_options[:disabled]
       return if self.class.global_uid_disabled
 
-      global_uid = nil
-      realtime = Benchmark::realtime do
-        global_uid = self.class.generate_uid
-      end
-
-      if GlobalUid::Base.global_uid_options[:dry_run]
-        ActiveRecord::Base.logger.info("GlobalUid dry-run: #{self.class.name}\t#{global_uid}\t#{"%.4f" % realtime}")
-        return
-      end
-
-      self.id = global_uid
+      self.id = self.class.generate_uid
     end
 
     module ClassMethods
