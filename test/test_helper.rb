@@ -4,7 +4,7 @@ require "active_record"
 require 'minitest/autorun'
 require 'minitest/rg'
 require 'minitest/line/describe_track'
-require 'mocha/setup'
+require 'mocha/minitest'
 require 'global_uid'
 require 'phenix'
 require 'pry'
