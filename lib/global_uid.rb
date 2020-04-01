@@ -9,8 +9,6 @@ module GlobalUid
   class NoServersAvailableException < StandardError ; end
   class ConnectionTimeoutException < StandardError ; end
   class TimeoutException < StandardError ; end
-
-  autoload :ServerVariables, "global_uid/server_variables"
 end
 
 ActiveRecord::Base.send(:include, GlobalUid::ActiveRecordExtension)

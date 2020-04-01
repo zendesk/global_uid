@@ -15,7 +15,13 @@ test:
 test_id_server_1:
   <<: *MYSQL
   database: global_uid_test_id_server_1
+  variables:
+    auto_increment_increment: 5
+    auto_increment_offset: 1
 
 test_id_server_2:
   <<: *MYSQL
   database: global_uid_test_id_server_2
+  variables:
+    auto_increment_increment: 5
+    auto_increment_offset: 2

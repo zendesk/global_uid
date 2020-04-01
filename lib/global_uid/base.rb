@@ -50,7 +50,7 @@ module GlobalUid
       end
     end
 
-    def self.new_connection(name, connection_timeout, offset, increment_by)
+    def self.new_connection(name, connection_timeout)
       raise "No id server '#{name}' configured in database.yml" unless ActiveRecord::Base.configurations.to_h.has_key?(name)
       config = ActiveRecord::Base.configurations.to_h[name]
       c = config.symbolize_keys
@@ -76,17 +76,13 @@ module GlobalUid
       raise "You haven't configured any id servers" if id_servers.nil? or id_servers.empty?
       raise "More servers configured than increment_by: #{id_servers.size} > #{options[:increment_by]} -- this will create duplicate IDs." if id_servers.size > options[:increment_by]
 
-      offset = 1
-
       id_servers.map do |name, i|
         info = {}
         info[:cx]       = nil
         info[:name]     = name
         info[:retry_at] = nil
-        info[:offset]   = offset
         info[:rand]     = rand
         info[:new?]     = true
-        offset +=1
         info
       end
     end
@@ -111,7 +107,7 @@ module GlobalUid
         if info[:new?] || ( info[:retry_at] && Time.now > info[:retry_at] )
           info[:new?] = false
 
-          connection = new_connection(info[:name], connection_timeout, info[:offset], increment_by)
+          connection = new_connection(info[:name], connection_timeout)
           info[:cx]  = connection
           info[:retry_at] = Time.now + options[:connection_retry] if connection.nil?
         end

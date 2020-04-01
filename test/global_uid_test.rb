@@ -227,7 +227,7 @@ describe GlobalUid do
     describe "With a timing out server" do
       before do
         reset_connections!
-        @a_decent_cx = GlobalUid::Base.new_connection(GlobalUid::Base.global_uid_servers.first, 50, 1, 5)
+        @a_decent_cx = GlobalUid::Base.new_connection(GlobalUid::Base.global_uid_servers.first, 50)
         ActiveRecord::Base.stubs(:mysql2_connection).raises(GlobalUid::ConnectionTimeoutException).then.returns(@a_decent_cx)
         @connections = GlobalUid::Base.get_connections
       end

@@ -14,7 +14,6 @@ GlobalUid::Base.global_uid_options = {
     "test_id_server_2"
   ]
 }
-GlobalUid::Base.extend(GlobalUid::ServerVariables)
 
 Phenix.configure do |config|
   config.database_config_path = File.join(File.dirname(__FILE__), "config/database.yml")
