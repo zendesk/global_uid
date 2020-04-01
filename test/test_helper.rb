@@ -3,6 +3,7 @@ require 'bundler/setup'
 require "active_record"
 require 'minitest/autorun'
 require 'minitest/rg'
+require 'minitest/line/describe_track'
 require 'mocha/setup'
 require 'global_uid'
 require 'phenix'
