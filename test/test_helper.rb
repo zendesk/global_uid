@@ -6,6 +6,7 @@ require 'minitest/rg'
 require 'mocha/setup'
 require 'global_uid'
 require 'phenix'
+require 'pry'
 
 GlobalUid::Base.global_uid_options = {
   :disabled   => false,
