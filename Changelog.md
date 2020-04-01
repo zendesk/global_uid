@@ -6,6 +6,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Removed
+- Removed the `dry_run` option (https://github.com/zendesk/global_uid/pull/64)
+
 ## [3.7.1] - 2020-02-06
 ### Added
 - Support for Rails 6.0. (https://github.com/zendesk/global_uid/pull/60)
