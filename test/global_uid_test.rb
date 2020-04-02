@@ -394,27 +394,6 @@ describe GlobalUid do
 
   private
 
-  def test_unique_ids
-    seen = {}
-    (0..10).each do
-      foo = WithGlobalUID.new
-      foo.save
-      refute_nil foo.id
-      assert_nil foo.description
-      refute seen.has_key?(foo.id)
-      seen[foo.id] = 1
-    end
-  end
-
-  def reset_connections!
-    GlobalUid::Base.servers = nil
-  end
-
-  def restore_defaults!
-    GlobalUid::Base.global_uid_options[:storage_engine] = nil
-    GlobalUid::Base.global_uid_options[:disabled] = false
-  end
-
   def show_create_sql(klass, table)
     klass.connection.select_rows("show create table #{table}")[0][1]
   end
