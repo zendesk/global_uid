@@ -3,9 +3,11 @@ require 'bundler/setup'
 require "active_record"
 require 'minitest/autorun'
 require 'minitest/rg'
-require 'mocha/setup'
+require 'minitest/line/describe_track'
+require 'mocha/minitest'
 require 'global_uid'
 require 'phenix'
+require 'pry'
 
 GlobalUid::Base.global_uid_options = {
   :disabled   => false,
