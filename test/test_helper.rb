@@ -19,15 +19,13 @@ ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/test.log")
 ActiveSupport.test_order = :sorted if ActiveSupport.respond_to?(:test_order=)
 ActiveRecord::Migration.verbose = false
 
-def test_unique_ids
-  seen = {}
-  (0..10).each do
-    foo = WithGlobalUID.new
-    foo.save
-    refute_nil foo.id
-    assert_nil foo.description
-    refute seen.has_key?(foo.id)
-    seen[foo.id] = 1
+def test_unique_ids(amount = 10)
+  amount.times.each_with_object({}) do |_, seen|
+    record = WithGlobalUID.create!
+    refute_nil record.id
+    assert_nil record.description
+    refute seen.has_key?(record.id)
+    seen[record.id] = true
   end
 end
 
