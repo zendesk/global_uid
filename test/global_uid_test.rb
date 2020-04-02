@@ -40,7 +40,7 @@ describe GlobalUid do
       CreateWithoutGlobalUIDs.up
       GlobalUid::Base.expects(:get_uid_for_class).never
 
-      (1..10).each do |index, _|
+      (1..10).each do |index|
         assert_equal index, WithoutGlobalUID.create!.id
       end
 

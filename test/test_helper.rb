@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 require 'bundler/setup'
 require "active_record"
+require 'benchmark/ips'
 require 'minitest/autorun'
 require 'minitest/rg'
 require 'minitest/line/describe_track'
