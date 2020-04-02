@@ -35,6 +35,17 @@ describe GlobalUid do
       assert !ParentSubclass.global_uid_disabled
       assert !ParentSubclassSubclass.global_uid_disabled
     end
+
+    it "uses the default AUTO_INCREMENT, skipping the alloc servers" do
+      CreateWithoutGlobalUIDs.up
+      GlobalUid::Base.expects(:get_uid_for_class).never
+
+      (1..10).each do |index, _|
+        assert_equal index, WithoutGlobalUID.create!.id
+      end
+
+      CreateWithoutGlobalUIDs.down
+    end
   end
 
   describe "migrations" do
