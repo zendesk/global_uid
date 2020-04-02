@@ -72,9 +72,10 @@ module GlobalUid
 
     def self.init_server_info(options)
       id_servers = self.global_uid_servers
+      increment_by = self.global_uid_options[:increment_by]
 
       raise "You haven't configured any id servers" if id_servers.nil? or id_servers.empty?
-      raise "More servers configured than increment_by: #{id_servers.size} > #{options[:increment_by]} -- this will create duplicate IDs." if id_servers.size > options[:increment_by]
+      raise "More servers configured than increment_by: #{id_servers.size} > #{increment_by} -- this will create duplicate IDs." if id_servers.size > increment_by
 
       id_servers.map do |name, i|
         info = {}
@@ -92,7 +93,7 @@ module GlobalUid
     end
 
     def self.setup_connections!(options)
-      connection_timeout = options[:connection_timeout]
+      connection_timeout = self.global_uid_options[:connection_timeout]
       increment_by       = options[:increment_by]
 
       if self.servers.nil?
@@ -109,7 +110,7 @@ module GlobalUid
 
           connection = new_connection(info[:name], connection_timeout)
           info[:cx]  = connection
-          info[:retry_at] = Time.now + options[:connection_retry] if connection.nil?
+          info[:retry_at] = Time.now + self.global_uid_options[:connection_retry] if connection.nil?
         end
       end
 
@@ -120,7 +121,7 @@ module GlobalUid
       options = self.global_uid_options.merge(options)
       servers = setup_connections!(options)
 
-      if !options[:per_process_affinity]
+      if !self.global_uid_options[:per_process_affinity]
         servers = servers.sort_by { rand } #yes, I know it's not true random.
       end
 
