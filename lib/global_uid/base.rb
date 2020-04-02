@@ -44,7 +44,7 @@ module GlobalUid
       end
     end
 
-    def self.drop_uid_tables(id_table_name, options={})
+    def self.drop_uid_tables(id_table_name)
       with_connections do |connection|
         connection.execute("DROP TABLE IF EXISTS `#{id_table_name}`")
       end
@@ -70,11 +70,12 @@ module GlobalUid
       end
     end
 
-    def self.init_server_info(options)
+    def self.init_server_info
       id_servers = self.global_uid_servers
+      increment_by = self.global_uid_options[:increment_by]
 
       raise "You haven't configured any id servers" if id_servers.nil? or id_servers.empty?
-      raise "More servers configured than increment_by: #{id_servers.size} > #{options[:increment_by]} -- this will create duplicate IDs." if id_servers.size > options[:increment_by]
+      raise "More servers configured than increment_by: #{id_servers.size} > #{increment_by} -- this will create duplicate IDs." if id_servers.size > increment_by
 
       id_servers.map do |name, i|
         info = {}
@@ -91,12 +92,11 @@ module GlobalUid
       self.servers = nil
     end
 
-    def self.setup_connections!(options)
-      connection_timeout = options[:connection_timeout]
-      increment_by       = options[:increment_by]
+    def self.setup_connections!
+      connection_timeout = self.global_uid_options[:connection_timeout]
 
       if self.servers.nil?
-        self.servers = init_server_info(options)
+        self.servers = init_server_info
         # sorting here sets up each process to have affinity to a particular server.
         self.servers = self.servers.sort_by { |s| s[:rand] }
       end
@@ -109,18 +109,17 @@ module GlobalUid
 
           connection = new_connection(info[:name], connection_timeout)
           info[:cx]  = connection
-          info[:retry_at] = Time.now + options[:connection_retry] if connection.nil?
+          info[:retry_at] = Time.now + self.global_uid_options[:connection_retry] if connection.nil?
         end
       end
 
       self.servers
     end
 
-    def self.with_connections(options = {})
-      options = self.global_uid_options.merge(options)
-      servers = setup_connections!(options)
+    def self.with_connections
+      servers = setup_connections!
 
-      if !options[:per_process_affinity]
+      if !self.global_uid_options[:per_process_affinity]
         servers = servers.sort_by { rand } #yes, I know it's not true random.
       end
 
@@ -155,11 +154,11 @@ module GlobalUid
       end
     end
 
-    def self.get_connections(options = {})
+    def self.get_connections
       with_connections {}
     end
 
-    def self.get_uid_for_class(klass, options = {})
+    def self.get_uid_for_class(klass)
       with_connections do |connection|
         Timeout.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
           id = connection.insert("REPLACE INTO #{klass.global_uid_table} (stub) VALUES ('a')")
@@ -169,7 +168,7 @@ module GlobalUid
       raise NoServersAvailableException, "All global UID servers are gone!"
     end
 
-    def self.get_many_uids_for_class(klass, count, options = {})
+    def self.get_many_uids_for_class(klass, count)
       return [] unless count > 0
       with_connections do |connection|
         Timeout.timeout(self.global_uid_options[:query_timeout], TimeoutException) do

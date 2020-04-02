@@ -27,12 +27,12 @@ module GlobalUid
         @global_uid_disabled
       end
 
-      def generate_uid(options = {})
-        GlobalUid::Base.get_uid_for_class(self, options)
+      def generate_uid
+        GlobalUid::Base.get_uid_for_class(self)
       end
 
-      def generate_many_uids(count, options = {})
-        GlobalUid::Base.get_many_uids_for_class(self, count, options)
+      def generate_many_uids(count)
+        GlobalUid::Base.get_many_uids_for_class(self, count)
       end
 
       def disable_global_uid
