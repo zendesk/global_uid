@@ -25,7 +25,7 @@ module GlobalUid
     def drop_table(name, options = {})
       if !GlobalUid::Base.global_uid_options[:disabled] && options[:use_global_uid] == true
         id_table_name = options[:global_uid_table] || GlobalUid::Base.id_table_from_name(name)
-        GlobalUid::Base.drop_uid_tables(id_table_name,options)
+        GlobalUid::Base.drop_uid_tables(id_table_name)
       end
       super(name, options)
     end
