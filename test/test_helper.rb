@@ -10,13 +10,16 @@ require 'global_uid'
 require 'phenix'
 require 'pry'
 
+require_relative 'support/migrations'
+require_relative 'support/models'
+
 Phenix.configure do |config|
   config.database_config_path = File.join(File.dirname(__FILE__), "config/database.yml")
 end
 
 Phenix.rise!(with_schema: false)
 ActiveRecord::Base.establish_connection(:test)
-ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/test.log")
+ActiveRecord::Base.logger = Logger.new(File.join(File.dirname(__FILE__), "test.log"))
 ActiveSupport.test_order = :sorted if ActiveSupport.respond_to?(:test_order=)
 ActiveRecord::Migration.verbose = false
 

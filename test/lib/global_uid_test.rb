@@ -1,7 +1,5 @@
 # frozen_string_literal: true
-require_relative 'test_helper'
-require_relative 'migrations'
-require_relative 'models'
+require_relative '../test_helper'
 
 describe GlobalUid do
   before do
