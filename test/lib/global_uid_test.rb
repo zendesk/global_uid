@@ -1,7 +1,5 @@
 # frozen_string_literal: true
-require_relative 'test_helper'
-require_relative 'migrations'
-require_relative 'models'
+require_relative '../test_helper'
 
 describe GlobalUid do
   before do
@@ -34,6 +32,17 @@ describe GlobalUid do
       ParentSubclassSubclass.reset
       assert !ParentSubclass.global_uid_disabled
       assert !ParentSubclassSubclass.global_uid_disabled
+    end
+
+    it "uses the default AUTO_INCREMENT, skipping the alloc servers" do
+      CreateWithoutGlobalUIDs.up
+      GlobalUid::Base.expects(:get_uid_for_class).never
+
+      (1..10).each do |index|
+        assert_equal index, WithoutGlobalUID.create!.id
+      end
+
+      CreateWithoutGlobalUIDs.down
     end
   end
 
@@ -393,27 +402,6 @@ describe GlobalUid do
   end
 
   private
-
-  def test_unique_ids
-    seen = {}
-    (0..10).each do
-      foo = WithGlobalUID.new
-      foo.save
-      refute_nil foo.id
-      assert_nil foo.description
-      refute seen.has_key?(foo.id)
-      seen[foo.id] = 1
-    end
-  end
-
-  def reset_connections!
-    GlobalUid::Base.servers = nil
-  end
-
-  def restore_defaults!
-    GlobalUid::Base.global_uid_options[:storage_engine] = nil
-    GlobalUid::Base.global_uid_options[:disabled] = false
-  end
 
   def show_create_sql(klass, table)
     klass.connection.select_rows("show create table #{table}")[0][1]

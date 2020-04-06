@@ -3,6 +3,7 @@ class WithGlobalUID < ActiveRecord::Base
 end
 
 class WithoutGlobalUID < ActiveRecord::Base
+  disable_global_uid
 end
 
 class Parent < ActiveRecord::Base

@@ -6,6 +6,7 @@ run_tests: &run_tests
     - run: sudo apt install -y default-mysql-client
     - run: bundle install
     - run: bundle exec rake test
+    - run: bundle exec rake performance_test
 
 jobs:
 

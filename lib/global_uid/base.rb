@@ -9,7 +9,7 @@ module GlobalUid
     GLOBAL_UID_DEFAULTS = {
       :connection_timeout   => 3,
       :connection_retry     => 10.minutes,
-      :notifier             => Proc.new { |exception, message| ActiveRecord::Base.logger.error("GlobalUID error:  #{exception} #{message}") },
+      :notifier             => Proc.new { |exception, message| ActiveRecord::Base.logger.error("GlobalUID error: #{exception.class} #{message}") },
       :query_timeout        => 10,
       :increment_by         => 5,  # This will define the maximum number of servers that you can have
       :disabled             => false,

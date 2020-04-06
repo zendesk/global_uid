@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 require 'bundler/setup'
 require "active_record"
+require 'benchmark/ips'
 require 'minitest/autorun'
 require 'minitest/rg'
 require 'minitest/line/describe_track'
@@ -9,13 +10,8 @@ require 'global_uid'
 require 'phenix'
 require 'pry'
 
-GlobalUid::Base.global_uid_options = {
-  :disabled   => false,
-  :id_servers => [
-    "test_id_server_1",
-    "test_id_server_2"
-  ]
-}
+require_relative 'support/migrations'
+require_relative 'support/models'
 
 Phenix.configure do |config|
   config.database_config_path = File.join(File.dirname(__FILE__), "config/database.yml")
@@ -23,6 +19,33 @@ end
 
 Phenix.rise!(with_schema: false)
 ActiveRecord::Base.establish_connection(:test)
-ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/test.log")
+ActiveRecord::Base.logger = Logger.new(File.join(File.dirname(__FILE__), "test.log"))
 ActiveSupport.test_order = :sorted if ActiveSupport.respond_to?(:test_order=)
 ActiveRecord::Migration.verbose = false
+
+def test_unique_ids(amount = 10)
+  amount.times.each_with_object({}) do |_, seen|
+    record = WithGlobalUID.create!
+    refute_nil record.id
+    assert_nil record.description
+    refute seen.has_key?(record.id)
+    seen[record.id] = true
+  end
+end
+
+def reset_connections!
+  GlobalUid::Base.servers = nil
+end
+
+def restore_defaults!
+  GlobalUid::Base.global_uid_options = {
+    :id_servers => [
+      "test_id_server_1",
+      "test_id_server_2"
+    ]
+  }
+
+  # Randomize connections for test processes to ensure they're not
+  # sticky during tests
+  GlobalUid::Base.global_uid_options[:per_process_affinity] = false
+end
