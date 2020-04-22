@@ -64,21 +64,21 @@ describe GlobalUid do
         end
 
         it "create the global_uids table" do
-          GlobalUid::Base.with_connections do |cx|
-            assert table_exists?(cx, 'with_global_uids_ids'), 'Table should exist'
+          GlobalUid::Base.with_servers do |server|
+            assert table_exists?(server.connection, 'with_global_uids_ids'), 'Table should exist'
           end
         end
 
         it "create global_uids tables with matching ids" do
-          GlobalUid::Base.with_connections do |cx|
-            foo = cx.select_all("select id from with_global_uids_ids")
+          GlobalUid::Base.with_servers do |server|
+            foo = server.connection.select_all("select id from with_global_uids_ids")
             assert_equal(foo.first['id'].to_i, 1)
           end
         end
 
         it "create tables with the given storage_engine" do
-          GlobalUid::Base.with_connections do |cx|
-            foo = cx.select_all("show create table with_global_uids_ids")
+          GlobalUid::Base.with_servers do |server|
+            foo = server.connection.select_all("show create table with_global_uids_ids")
             assert_match(/ENGINE=InnoDB/, foo.first.values.join)
           end
         end
@@ -100,13 +100,13 @@ describe GlobalUid do
       describe "dropping a table" do
         it "not drop the global-uid tables" do
           CreateWithNoParams.up
-          GlobalUid::Base.with_connections do |cx|
-            assert table_exists?(cx, 'with_global_uids_ids'), 'Table should exist'
+          GlobalUid::Base.with_servers do |server|
+            assert table_exists?(server.connection, 'with_global_uids_ids'), 'Table should exist'
           end
 
           CreateWithNoParams.down
-          GlobalUid::Base.with_connections do |cx|
-            assert table_exists?(cx, 'with_global_uids_ids'), 'Table should be dropped'
+          GlobalUid::Base.with_servers do |server|
+            assert table_exists?(server.connection, 'with_global_uids_ids'), 'Table should be dropped'
           end
         end
       end
@@ -118,8 +118,8 @@ describe GlobalUid do
         end
 
         it "not create the global_uids table" do
-          GlobalUid::Base.with_connections do |cx|
-            assert !table_exists?(cx, 'with_global_uids_ids'), 'Table should not have been created'
+          GlobalUid::Base.with_servers do |server|
+            assert !table_exists?(server.connection, 'with_global_uids_ids'), 'Table should not have been created'
           end
         end
 
@@ -133,13 +133,13 @@ describe GlobalUid do
       describe "dropping a table" do
         it "drop the global-uid tables" do
           CreateWithExplicitUidTrue.up
-          GlobalUid::Base.with_connections do |cx|
-            assert table_exists?(cx, 'with_global_uids_ids'), 'Table should exist'
+          GlobalUid::Base.with_servers do |server|
+            assert table_exists?(server.connection, 'with_global_uids_ids'), 'Table should exist'
           end
 
           CreateWithExplicitUidTrue.down
-          GlobalUid::Base.with_connections do |cx|
-            assert !table_exists?(cx, 'with_global_uids_ids'), 'Table should be dropped'
+          GlobalUid::Base.with_servers do |server|
+            assert !table_exists?(server.connection, 'with_global_uids_ids'), 'Table should be dropped'
           end
         end
       end
@@ -152,8 +152,8 @@ describe GlobalUid do
       end
 
       it "not create the global_uids table" do
-        GlobalUid::Base.with_connections do |cx|
-          assert !table_exists?(cx, 'without_global_uids_ids'), 'Table should not not have been created'
+        GlobalUid::Base.with_servers do |server|
+          assert !table_exists?(server.connection, 'without_global_uids_ids'), 'Table should not not have been created'
         end
       end
 
@@ -285,9 +285,9 @@ describe GlobalUid do
 
     describe "normally" do
       it "create tables with the default MyISAM storage engine" do
-        GlobalUid::Base.with_connections do |cx|
-          foo = cx.select_all("show create table with_global_uids_ids")
-          assert_match(/ENGINE=MyISAM/, foo.first.values.join)
+        GlobalUid::Base.with_servers do |server|
+          table = server.connection.select_all("show create table with_global_uids_ids")
+          assert_match(/ENGINE=MyISAM/, table.first.values.join)
         end
       end
 
@@ -313,8 +313,8 @@ describe GlobalUid do
           end
 
           it "raises an exception, preventing duplicate ID generation" do
-            GlobalUid::Base.with_connections do |con|
-              con.execute("SET SESSION auto_increment_increment = 42")
+            GlobalUid::Base.with_servers do |server|
+              server.connection.execute("SET SESSION auto_increment_increment = 42")
             end
 
             assert_raises(GlobalUid::NoServersAvailableException) { test_unique_ids(10) }
@@ -322,8 +322,8 @@ describe GlobalUid do
           end
 
           it "raises an exception before attempting to generate many UIDs" do
-            GlobalUid::Base.with_connections do |con|
-              con.execute("SET SESSION auto_increment_increment = 42")
+            GlobalUid::Base.with_servers do |server|
+              server.connection.execute("SET SESSION auto_increment_increment = 42")
             end
 
             assert_raises GlobalUid::NoServersAvailableException do
@@ -333,8 +333,8 @@ describe GlobalUid do
           end
 
           it "doesn't cater for increment_by being increased by a factor of x" do
-            GlobalUid::Base.with_connections do |connection|
-              connection.execute("SET SESSION auto_increment_increment = #{GlobalUid::Base::GLOBAL_UID_DEFAULTS[:increment_by] * 2}")
+            GlobalUid::Base.with_servers do |server|
+              server.connection.execute("SET SESSION auto_increment_increment = #{GlobalUid::Base::GLOBAL_UID_DEFAULTS[:increment_by] * 2}")
             end
             # Due to multiple processes and threads sharing the same alloc server, identifiers may be provisioned
             # before the current thread receives its next one. We rely on the gap being divisible by the configured increment
@@ -354,7 +354,10 @@ describe GlobalUid do
           end
 
           it "notifies the client and continues with the other connection" do
-            con = GlobalUid::Base.get_connections.first
+            # Initialize the servers and their connections
+            GlobalUid::Base.setup_connections!
+            # Misconfigure one of the servers, after the connection has been made
+            con = GlobalUid::Base.servers.first.connection
             con.execute("SET SESSION auto_increment_increment = 42")
 
             # Trigger the exception, one call may not hit the server, there's still a 1/(2^32) chance of failure.
@@ -363,7 +366,10 @@ describe GlobalUid do
           end
 
           it "notifies the client and continues when attempting to generate many UIDs" do
-            con = GlobalUid::Base.get_connections.first
+            # Initialize the servers and their connections
+            GlobalUid::Base.setup_connections!
+            # Misconfigure one of the servers, after the connection has been made
+            con = GlobalUid::Base.servers.first.connection
             con.execute("SET SESSION auto_increment_increment = 42")
 
             # Trigger the exception, one call may not hit the server, there's still a 1/(2^32) chance of failure.
@@ -380,7 +386,6 @@ describe GlobalUid do
           if config["database"].include?(server)
             raise GlobalUid::ConnectionTimeoutException if end_time > Time.now
           end
-
           ActiveRecord::Base.__minitest_stub__mysql2_connection(config)
         end
         ActiveRecord::Base.stub :mysql2_connection, modified_connection do
@@ -414,16 +419,15 @@ describe GlobalUid do
 
     describe "With a server timing out on query" do
       before do
-        reset_connections!
-        @old_size = GlobalUid::Base.get_connections.size # prime them
+        GlobalUid::Base.setup_connections!
         GlobalUid::Base.get_connections.first.stubs(:insert).raises(GlobalUid::TimeoutException)
         # trigger the failure -- have to do it it a bunch of times, as one call might not hit the server
         # Even so there's a 1/(2^32) possibility of this test failing.
-        32.times do WithGlobalUID.create! end
+        32.times { WithGlobalUID.create! }
       end
 
       it "pull the server out of the pool" do
-        assert_equal GlobalUid::Base.get_connections.size, @old_size - 1
+        assert_equal 1, GlobalUid::Base.get_connections.size
       end
 
       it "get ids from the remaining server" do
@@ -431,19 +435,20 @@ describe GlobalUid do
       end
 
       it "eventually retry the connection" do
+        assert_equal 1, GlobalUid::Base.get_connections.size
+
         awhile = Time.now + 10.hours
         Time.stubs(:now).returns(awhile)
+        32.times { WithGlobalUID.create! }
 
-        assert_equal GlobalUid::Base.get_connections.size, GlobalUid::Base.global_uid_servers.size
+        assert_equal 2, GlobalUid::Base.get_connections.size
       end
     end
 
     describe "With both servers throwing exceptions" do
       before do
-        # would prefer to do the below, but need Mocha 0.9.10 to do so
-        # ActiveRecord::ConnectionAdapters::MysqlAdapter.any_instance.stubs(:execute).raises(ActiveRecord::StatementInvalid)
-        GlobalUid::Base.with_connections do |cx|
-          cx.stubs(:insert).raises(ActiveRecord::StatementInvalid)
+        GlobalUid::Base.with_servers do |server|
+          server.connection.stubs(:insert).raises(ActiveRecord::StatementInvalid)
         end
       end
 
@@ -510,7 +515,7 @@ describe GlobalUid do
 
     it "creates new MySQL connections" do
       # Ensure the parent has a connection
-      refute_empty GlobalUid::Base.get_connections
+      refute_empty GlobalUid::Base.setup_connections!
       parent_value, child_value = parent_child_fork_values { GlobalUid::Base.get_connections.map(&:object_id) }
       refute_equal child_value, parent_value
     end
@@ -558,13 +563,14 @@ describe GlobalUid do
   end
 
   def with_modified_connections(increment:, servers:)
-    modified_connection = lambda do |name, _connection_timeout|
-      config = ActiveRecord::Base.configurations.to_h[name]
-      ActiveRecord::Base.mysql2_connection(config).tap do |connection|
-        connection.execute("SET SESSION auto_increment_increment = #{increment}") if servers.include?(name)
+    modified_connection = lambda do |config|
+      ActiveRecord::Base.__minitest_stub__mysql2_connection(config).tap do |connection|
+        if servers.any? { |name| config["database"].include?(name) }
+          connection.execute("SET SESSION auto_increment_increment = #{increment}")
+        end
       end
     end
-    GlobalUid::Base.stub :new_connection, modified_connection do
+    ActiveRecord::Base.stub :mysql2_connection, modified_connection do
       reset_connections!
       yield
     end
