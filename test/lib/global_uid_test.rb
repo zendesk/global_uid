@@ -214,6 +214,69 @@ describe GlobalUid do
     end
   end
 
+  describe "Updating the auto_increment_increment on active alloc servers" do
+    before do
+      CreateWithNoParams.up
+      CreateWithoutGlobalUIDs.up
+
+      @notifications = []
+      GlobalUid::Base.global_uid_options[:notifier] = Proc.new do |exception, message|
+        GlobalUid::Base::GLOBAL_UID_DEFAULTS[:notifier].call(exception, message)
+        @notifications << exception.class
+      end
+    end
+
+    describe 'with increment exceptions raised' do
+      it 'takes the servers out of the pool, preventing usage during update' do
+        assert_raises(GlobalUid::NoServersAvailableException) do
+          # Double the increment_by value and set it on the database connection (auto_increment_increment)
+          # Record creation will fail as all connections will be rejected since they're configured incorrectly.
+          # The client is expecting `auto_increment_increment` to equal the configured `increment_by`
+          with_modified_connections(increment: 10, servers: ["test_id_server_1", "test_id_server_2"]) do
+            25.times { WithGlobalUID.create! }
+          end
+        end
+      end
+    end
+
+    describe "with increment exceptions suppressed " do
+      before do
+        GlobalUid::Base.global_uid_options[:suppress_increment_exceptions] = true
+      end
+
+      it "allows the increment to be updated" do
+        # Prefill alloc servers with a few records, initializing a connection to both alloc servers
+        test_unique_ids(25)
+        assert_empty(@notifications)
+
+        # Update the active `test_id_server_1` connection, setting a `auto_increment_increment`
+        # value that differs to what's configured and expected
+        # The change should be noted and record creation should continue on both servers
+        with_modified_connections(increment: 10, servers: ["test_id_server_1"]) do
+          test_unique_ids(25)
+          assert_includes(@notifications, GlobalUid::InvalidIncrementException)
+          assert_equal(2, GlobalUid::Base.get_connections.length)
+        end
+
+        # Update both active `test_id_server_1` and `test_id_server_2` connections, setting a `auto_increment_increment`
+        # value that differs to what's configured and expected
+        # The change should be noted and record creation should continue on both servers
+        @notifications = []
+        with_modified_connections(increment: 10, servers: ["test_id_server_1", "test_id_server_2"]) do
+          test_unique_ids(25)
+          assert_includes(@notifications, GlobalUid::InvalidIncrementException)
+          assert_equal(2, GlobalUid::Base.get_connections.length)
+        end
+      end
+    end
+
+    after do
+      reset_connections!
+      CreateWithNoParams.down
+      CreateWithoutGlobalUIDs.down
+    end
+  end
+
   describe "With GlobalUID" do
     before do
       CreateWithNoParams.up
@@ -231,34 +294,121 @@ describe GlobalUid do
       it "get a unique id" do
         test_unique_ids
       end
+
+      describe 'when the auto_increment_increment changes' do
+        before do
+          @notifications = []
+          GlobalUid::Base.global_uid_options[:notifier] = Proc.new do |exception, message|
+            GlobalUid::Base::GLOBAL_UID_DEFAULTS[:notifier].call(exception, message)
+            @notifications << exception.class
+          end
+        end
+
+        describe "and all servers report a value other than what's configured" do
+          it "raises an exception when configuration incorrect during initialization" do
+            GlobalUid::Base.global_uid_options[:increment_by] = 42
+            reset_connections!
+            assert_raises(GlobalUid::NoServersAvailableException) { test_unique_ids(10) }
+            assert_includes(@notifications, GlobalUid::InvalidIncrementException)
+          end
+
+          it "raises an exception, preventing duplicate ID generation" do
+            GlobalUid::Base.with_connections do |con|
+              con.execute("SET SESSION auto_increment_increment = 42")
+            end
+
+            assert_raises(GlobalUid::NoServersAvailableException) { test_unique_ids(10) }
+            assert_includes(@notifications, GlobalUid::InvalidIncrementException)
+          end
+
+          it "raises an exception before attempting to generate many UIDs" do
+            GlobalUid::Base.with_connections do |con|
+              con.execute("SET SESSION auto_increment_increment = 42")
+            end
+
+            assert_raises GlobalUid::NoServersAvailableException do
+              WithGlobalUID.generate_many_uids(10)
+            end
+            assert_includes(@notifications, GlobalUid::InvalidIncrementException)
+          end
+
+          it "doesn't cater for increment_by being increased by a factor of x" do
+            GlobalUid::Base.with_connections do |connection|
+              connection.execute("SET SESSION auto_increment_increment = #{GlobalUid::Base::GLOBAL_UID_DEFAULTS[:increment_by] * 2}")
+            end
+            # Due to multiple processes and threads sharing the same alloc server, identifiers may be provisioned
+            # before the current thread receives its next one. We rely on the gap being divisible by the configured increment
+            test_unique_ids(10)
+            assert_empty(@notifications)
+          end
+        end
+
+        describe "and only one server reports a value other than what's configured" do
+          it "notifies the client when configuration incorrect during initialization" do
+            with_modified_connections(increment: 42, servers: ["test_id_server_1"]) do
+
+              # Trigger the exception, one call may not hit the server, there's still a 1/(2^32) chance of failure.
+              test_unique_ids(32)
+              assert_includes(@notifications, GlobalUid::InvalidIncrementException)
+            end
+          end
+
+          it "notifies the client and continues with the other connection" do
+            con = GlobalUid::Base.get_connections.first
+            con.execute("SET SESSION auto_increment_increment = 42")
+
+            # Trigger the exception, one call may not hit the server, there's still a 1/(2^32) chance of failure.
+            test_unique_ids(32)
+            assert_includes(@notifications, GlobalUid::InvalidIncrementException)
+          end
+
+          it "notifies the client and continues when attempting to generate many UIDs" do
+            con = GlobalUid::Base.get_connections.first
+            con.execute("SET SESSION auto_increment_increment = 42")
+
+            # Trigger the exception, one call may not hit the server, there's still a 1/(2^32) chance of failure.
+            32.times { WithGlobalUID.generate_many_uids(10) }
+            assert_includes(@notifications, GlobalUid::InvalidIncrementException)
+          end
+        end
+      end
     end
 
     describe "With a timing out server" do
-      before do
-        reset_connections!
-        @a_decent_cx = GlobalUid::Base.new_connection(GlobalUid::Base.global_uid_servers.first, 50)
-        ActiveRecord::Base.stubs(:mysql2_connection).raises(GlobalUid::ConnectionTimeoutException).then.returns(@a_decent_cx)
-        @connections = GlobalUid::Base.get_connections
+      def with_timed_out_connection(server:, end_time:)
+        modified_connection = lambda do |config|
+          if config["database"].include?(server)
+            raise GlobalUid::ConnectionTimeoutException if end_time > Time.now
+          end
+
+          ActiveRecord::Base.__minitest_stub__mysql2_connection(config)
+        end
+        ActiveRecord::Base.stub :mysql2_connection, modified_connection do
+          reset_connections!
+          yield
+        end
       end
 
       it "limp along with one functioning server" do
-        assert_includes @connections, @a_decent_cx
-        assert_equal GlobalUid::Base.global_uid_servers.size - 1,  @connections.size, "get_connections size"
+        with_timed_out_connection(server: "test_id_server_1", end_time: Time.now + 10.minutes) do
+          test_unique_ids(10)
+          assert_equal 1, GlobalUid::Base.get_connections.size
+          assert_equal 'global_uid_test_id_server_2', GlobalUid::Base.get_connections[0].current_database
+        end
       end
 
       it "eventually retry the connection and get it back in place" do
-        # clear the state machine expectation
-        ActiveRecord::Base.mysql2_connection rescue nil
-        ActiveRecord::Base.mysql2_connection rescue nil
+        with_timed_out_connection(server: "test_id_server_1", end_time: Time.now + 10.minutes) do
+          test_unique_ids(10)
+          assert_equal 1, GlobalUid::Base.get_connections.size
+          assert_equal 'global_uid_test_id_server_2', GlobalUid::Base.get_connections[0].current_database
 
-        awhile = Time.now + 10.hours
-        Time.stubs(:now).returns(awhile)
+          after_timeout_end_time = Time.now + 11.minutes
+          Time.stubs(:now).returns(after_timeout_end_time)
 
-        assert_equal GlobalUid::Base.get_connections.size, GlobalUid::Base.global_uid_servers.size
-      end
-
-      it "get some unique ids" do
-        test_unique_ids
+          test_unique_ids(10)
+          assert_equal 2, GlobalUid::Base.get_connections.size
+        end
       end
     end
 
@@ -405,5 +555,18 @@ describe GlobalUid do
 
   def show_create_sql(klass, table)
     klass.connection.select_rows("show create table #{table}")[0][1]
+  end
+
+  def with_modified_connections(increment:, servers:)
+    modified_connection = lambda do |name, _connection_timeout|
+      config = ActiveRecord::Base.configurations.to_h[name]
+      ActiveRecord::Base.mysql2_connection(config).tap do |connection|
+        connection.execute("SET SESSION auto_increment_increment = #{increment}") if servers.include?(name)
+      end
+    end
+    GlobalUid::Base.stub :new_connection, modified_connection do
+      reset_connections!
+      yield
+    end
   end
 end
