@@ -58,7 +58,7 @@ describe GlobalUid do
     describe "without explicit parameters" do
       describe "with global-uid enabled" do
         before do
-          GlobalUid::Base.global_uid_options[:storage_engine] = "InnoDB"
+          GlobalUid.configuration.storage_engine = "InnoDB"
           CreateWithNoParams.up
           @create_table = show_create_sql(WithGlobalUID, "with_global_uids").split("\n")
         end
@@ -113,7 +113,7 @@ describe GlobalUid do
 
       describe "with global-uid disabled, globally" do
         before do
-          GlobalUid::Base.global_uid_options[:disabled] = true
+          GlobalUid.configuration.disabled = true
           CreateWithNoParams.up
         end
 
@@ -202,7 +202,7 @@ describe GlobalUid do
 
   describe "With InnoDB engine" do
     before do
-      GlobalUid::Base.global_uid_options[:storage_engine] = "InnoDB"
+      GlobalUid.configuration.storage_engine = "InnoDB"
       CreateWithNoParams.up
       CreateWithoutGlobalUIDs.up
     end
@@ -220,8 +220,9 @@ describe GlobalUid do
       CreateWithoutGlobalUIDs.up
 
       @notifications = []
-      GlobalUid::Base.global_uid_options[:notifier] = Proc.new do |exception, message|
-        GlobalUid::Base::GLOBAL_UID_DEFAULTS[:notifier].call(exception, message)
+      original = GlobalUid.configuration.notifier
+      GlobalUid.configuration.notifier = Proc.new do |exception, message|
+        original.call(exception, message)
         @notifications << exception.class
       end
     end
@@ -241,7 +242,7 @@ describe GlobalUid do
 
     describe "with increment exceptions suppressed " do
       before do
-        GlobalUid::Base.global_uid_options[:suppress_increment_exceptions] = true
+        GlobalUid.configuration.suppress_increment_exceptions = true
       end
 
       it "allows the increment to be updated" do
@@ -298,15 +299,16 @@ describe GlobalUid do
       describe 'when the auto_increment_increment changes' do
         before do
           @notifications = []
-          GlobalUid::Base.global_uid_options[:notifier] = Proc.new do |exception, message|
-            GlobalUid::Base::GLOBAL_UID_DEFAULTS[:notifier].call(exception, message)
+          original = GlobalUid.configuration.notifier
+          GlobalUid.configuration.notifier = Proc.new do |exception, message|
+            original.call(exception, message)
             @notifications << exception.class
           end
         end
 
         describe "and all servers report a value other than what's configured" do
           it "raises an exception when configuration incorrect during initialization" do
-            GlobalUid::Base.global_uid_options[:increment_by] = 42
+            GlobalUid.configuration.increment_by = 42
             reset_connections!
             assert_raises(GlobalUid::NoServersAvailableException) { test_unique_ids(10) }
             assert_includes(@notifications, GlobalUid::InvalidIncrementException)
@@ -334,7 +336,7 @@ describe GlobalUid do
 
           it "doesn't cater for increment_by being increased by a factor of x" do
             GlobalUid::Base.with_servers do |server|
-              server.connection.execute("SET SESSION auto_increment_increment = #{GlobalUid::Base::GLOBAL_UID_DEFAULTS[:increment_by] * 2}")
+              server.connection.execute("SET SESSION auto_increment_increment = #{GlobalUid.configuration.increment_by * 2}")
             end
             # Due to multiple processes and threads sharing the same alloc server, identifiers may be provisioned
             # before the current thread receives its next one. We rely on the gap being divisible by the configured increment
@@ -469,19 +471,39 @@ describe GlobalUid do
 
     describe "with per-process_affinity" do
       before do
-        GlobalUid::Base.global_uid_options[:per_process_affinity] = true
+        GlobalUid.configuration.per_process_affinity = true
       end
 
-      it "increment sequentially" do
+      it "increment sequentially, selecting a server at random" do
         last_id = 0
         10.times do
           this_id = WithGlobalUID.create!.id
           assert_operator this_id, :>, last_id
         end
+
+        refute_empty(GlobalUid::Base.servers[0].allocator.recent_allocations)
+        assert_empty(GlobalUid::Base.servers[1].allocator.recent_allocations)
       end
 
       after do
-        GlobalUid::Base.global_uid_options[:per_process_affinity] = false
+        GlobalUid.configuration.per_process_affinity = false
+      end
+    end
+
+    describe "without per-process_affinity" do
+      before do
+        GlobalUid.configuration.per_process_affinity = false
+      end
+
+      it "increment sequentially, using the first configured id_server" do
+        last_id = 0
+        10.times do
+          this_id = WithGlobalUID.create!.id
+          assert_operator this_id, :>, last_id
+        end
+
+        refute_empty(GlobalUid::Base.servers[0].allocator.recent_allocations)
+        refute_empty(GlobalUid::Base.servers[1].allocator.recent_allocations)
       end
     end
 

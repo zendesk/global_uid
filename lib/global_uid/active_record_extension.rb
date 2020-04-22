@@ -8,7 +8,7 @@ module GlobalUid
     end
 
     def global_uid_before_create
-      return if GlobalUid::Base.global_uid_options[:disabled]
+      return if GlobalUid.configuration.disabled?
       return if self.class.global_uid_disabled
 
       self.id = self.class.generate_uid

@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 - [Breaking change] ID Validation, ensure the ID coming back has been incremented using the configured `auto_increment_increment`. (https://github.com/zendesk/global_uid/pull/63)
+- [Breaking change] Move configuration to a class (https://github.com/zendesk/global_uid/pull/70)
 
 ### Removed
 - Removed the `dry_run` option (https://github.com/zendesk/global_uid/pull/64)

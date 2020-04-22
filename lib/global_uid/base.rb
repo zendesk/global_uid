@@ -6,16 +6,6 @@ require "timeout"
 
 module GlobalUid
   class Base
-    GLOBAL_UID_DEFAULTS = {
-      :connection_timeout   => 3,
-      :connection_retry     => 10.minutes,
-      :notifier             => Proc.new { |exception, message| ActiveRecord::Base.logger.error("GlobalUID error: #{exception.class} #{message}") },
-      :query_timeout        => 10,
-      :increment_by         => 5, # This will define the maximum number of servers that you can have
-      :disabled             => false,
-      :per_process_affinity => true,
-      :suppress_increment_exceptions => false
-    }
 
     def self.servers
       # Thread local storage is inheritted on `fork`, include the pid
@@ -30,7 +20,7 @@ module GlobalUid
       type     = options[:uid_type] || "bigint(21) UNSIGNED"
       start_id = options[:start_id] || 1
 
-      engine_stmt = "ENGINE=#{global_uid_options[:storage_engine] || "MyISAM"}"
+      engine_stmt = "ENGINE=#{GlobalUid.configuration.storage_engine}"
 
       with_servers do |server|
         server.connection.execute("CREATE TABLE IF NOT EXISTS `#{id_table_name}` (
@@ -52,12 +42,11 @@ module GlobalUid
     end
 
     def self.init_server_info
-      id_servers = self.global_uid_servers
-      increment_by = self.global_uid_options[:increment_by]
-      connection_timeout = self.global_uid_options[:connection_timeout]
+      id_servers = GlobalUid.configuration.id_servers
+      increment_by = GlobalUid.configuration.increment_by
+      connection_timeout = GlobalUid.configuration.connection_timeout
 
       raise "You haven't configured any id servers" if id_servers.nil? or id_servers.empty?
-      raise "More servers configured than increment_by: #{id_servers.size} > #{increment_by} -- this will create duplicate IDs." if id_servers.size > increment_by
 
       id_servers.map do |name|
         GlobalUid::Server.new(name,
@@ -79,7 +68,7 @@ module GlobalUid
 
     def self.with_servers
       servers = setup_connections!
-      servers = servers.shuffle if !self.global_uid_options[:per_process_affinity]
+      servers = servers.shuffle if !GlobalUid.configuration.per_process_affinity?
 
       raise NoServersAvailableException if servers.empty?
 
@@ -105,9 +94,7 @@ module GlobalUid
     end
 
     def self.notify(exception, message)
-      if self.global_uid_options[:notifier]
-        self.global_uid_options[:notifier].call(exception, message)
-      end
+      GlobalUid.configuration.notifier.call(exception, message)
     end
 
     def self.get_connections
@@ -117,7 +104,7 @@ module GlobalUid
 
     def self.get_uid_for_class(klass)
       with_servers do |server|
-        Timeout.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
+        Timeout.timeout(GlobalUid.configuration.query_timeout, TimeoutException) do
           return server.allocator.allocate_one(klass.global_uid_table)
         end
       end
@@ -127,23 +114,11 @@ module GlobalUid
     def self.get_many_uids_for_class(klass, count)
       return [] unless count > 0
       with_servers do |server|
-        Timeout.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
+        Timeout.timeout(GlobalUid.configuration.query_timeout, TimeoutException) do
           return server.allocator.allocate_many(klass.global_uid_table, count: count)
         end
       end
       raise NoServersAvailableException, "All global UID servers are gone!"
-    end
-
-    def self.global_uid_options=(options)
-      @global_uid_options = GLOBAL_UID_DEFAULTS.merge(options.symbolize_keys)
-    end
-
-    def self.global_uid_options
-      @global_uid_options
-    end
-
-    def self.global_uid_servers
-      self.global_uid_options[:id_servers]
     end
 
     def self.id_table_from_name(name)

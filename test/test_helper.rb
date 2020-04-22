@@ -38,14 +38,12 @@ def reset_connections!
 end
 
 def restore_defaults!
-  GlobalUid::Base.global_uid_options = {
-    :id_servers => [
-      "test_id_server_1",
-      "test_id_server_2"
-    ]
-  }
+  GlobalUid.reset_configuration
+  GlobalUid.configure do |config|
+    config.id_servers = ["test_id_server_1", "test_id_server_2"]
 
-  # Randomize connections for test processes to ensure they're not
-  # sticky during tests
-  GlobalUid::Base.global_uid_options[:per_process_affinity] = false
+    # Randomize connections for test processes to ensure they're not
+    # sticky during tests
+    config.per_process_affinity = false
+  end
 end

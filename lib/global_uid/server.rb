@@ -18,7 +18,7 @@ module GlobalUid
     def retry_connection?
       return Time.now > retry_at if retry_at
 
-      update_retry_at(GlobalUid::Base.global_uid_options[:connection_retry])
+      update_retry_at(GlobalUid.configuration.connection_retry)
       true
     end
 
