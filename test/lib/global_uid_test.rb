@@ -591,7 +591,7 @@ describe GlobalUid do
 
     attr_accessor :notifications
 
-    def notify(exception)
+    def call(exception)
       ActiveRecord::Base.logger.error("GlobalUID error: #{exception.class} #{exception.message}")
       @notifications << exception.class
     end

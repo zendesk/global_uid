@@ -30,7 +30,7 @@ module GlobalUid
       begin
         @allocator = Allocator.new(incrementing_by: increment_by, connection: @connection) unless @connection.nil?
       rescue InvalidIncrementException => e
-        GlobalUid.configuration.notifier.notify(e)
+        GlobalUid.configuration.notifier.call(e)
         # Don't return the connection if the allocator has found it invalid
         disconnect!
       end
@@ -62,10 +62,10 @@ module GlobalUid
         ActiveRecord::Base.mysql2_connection(config)
       end
     rescue ConnectionTimeoutException => e
-      GlobalUid.configuration.notifier.notify(ConnectionTimeoutException.new("Timed out establishing a connection to #{name}"))
+      GlobalUid.configuration.notifier.call(ConnectionTimeoutException.new("Timed out establishing a connection to #{name}"))
       nil
     rescue Exception => e
-      GlobalUid.configuration.notifier.notify(StandardError.new("establishing a connection to #{name}: #{e.message}"))
+      GlobalUid.configuration.notifier.call(StandardError.new("establishing a connection to #{name}: #{e.message}"))
       nil
     end
   end

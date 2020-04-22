@@ -23,7 +23,8 @@ module GlobalUid
       # Duration (in seconds) to wait before attempting another connection to UID server
       @connection_retry = 600 # 10 minutes
 
-      # This class is called with the exception on a UID server failure
+      # An object that will be notified in case of a UID server failure.
+      # The object is expected to respond to `#call`, which will be passed one argument of type `Exception`.
       @notifier = GlobalUid::ErrorTracker.new
 
       # Timeout (in seconds) for retrieving a global UID from a server before moving to the next server
