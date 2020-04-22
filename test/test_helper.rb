@@ -42,8 +42,8 @@ def restore_defaults!
   GlobalUid.configure do |config|
     config.id_servers = ["test_id_server_1", "test_id_server_2"]
 
-    # Randomize connections for test processes to ensure they're not
-    # sticky during tests
-    config.per_process_affinity = false
+    # Shuffle connections to ensure they're not
+    # always hitting test_id_server_1 first.
+    config.connection_shuffling = true
   end
 end

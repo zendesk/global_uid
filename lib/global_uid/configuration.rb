@@ -7,12 +7,12 @@ module GlobalUid
     attr_accessor :query_timeout
     attr_accessor :increment_by
     attr_accessor :disabled
-    attr_accessor :per_process_affinity
+    attr_accessor :connection_shuffling
     attr_accessor :suppress_increment_exceptions
     attr_accessor :storage_engine
 
     alias_method :disabled?, :disabled
-    alias_method :per_process_affinity?, :per_process_affinity
+    alias_method :connection_shuffling?, :connection_shuffling
     alias_method :suppress_increment_exceptions?, :suppress_increment_exceptions
 
     # Set defaults
@@ -38,8 +38,8 @@ module GlobalUid
       # Disable GlobalUid entirely
       @disabled = false
 
-      # Select alloc server from list of configured `id_servers` at random
-      @per_process_affinity = true
+      # @id_servers will be iterated through in order given, set to false to randomize
+      @connection_shuffling = false
 
       # Suppress configuration validation, allowing updates to auto_increment_increment while alloc servers in use.
       # The InvalidIncrementException will be swallowed and logged when suppressed

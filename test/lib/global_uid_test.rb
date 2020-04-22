@@ -455,9 +455,9 @@ describe GlobalUid do
       end
     end
 
-    describe "with per-process_affinity" do
+    describe "without shuffling connections" do
       before do
-        GlobalUid.configuration.per_process_affinity = true
+        GlobalUid.configuration.connection_shuffling = false
       end
 
       it "increment sequentially, selecting a server at random" do
@@ -472,13 +472,13 @@ describe GlobalUid do
       end
 
       after do
-        GlobalUid.configuration.per_process_affinity = false
+        GlobalUid.configuration.connection_shuffling = true
       end
     end
 
-    describe "without per-process_affinity" do
+    describe "with connection shuffling" do
       before do
-        GlobalUid.configuration.per_process_affinity = false
+        GlobalUid.configuration.connection_shuffling = true
       end
 
       it "increment sequentially, using the first configured id_server" do

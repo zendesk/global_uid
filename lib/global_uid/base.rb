@@ -66,7 +66,7 @@ module GlobalUid
 
     def self.with_servers
       servers = setup_connections!
-      servers = servers.shuffle if !GlobalUid.configuration.per_process_affinity?
+      servers = servers.shuffle if GlobalUid.configuration.connection_shuffling?
 
       errors = []
       servers.each do |server|
