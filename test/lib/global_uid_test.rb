@@ -584,7 +584,7 @@ describe GlobalUid do
     end
   end
 
-  class TestErrorTracker
+  class TestErrorTracker < GlobalUid::ErrorTracker
     def initialize
       @notifications = []
     end
@@ -592,7 +592,7 @@ describe GlobalUid do
     attr_accessor :notifications
 
     def call(exception)
-      ActiveRecord::Base.logger.error("GlobalUID error: #{exception.class} #{exception.message}")
+      super
       @notifications << exception.class
     end
   end
