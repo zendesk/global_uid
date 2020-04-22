@@ -215,16 +215,13 @@ describe GlobalUid do
   end
 
   describe "Updating the auto_increment_increment on active alloc servers" do
+    let(:tracker) { TestErrorTracker.new }
+
     before do
       CreateWithNoParams.up
       CreateWithoutGlobalUIDs.up
 
-      @notifications = []
-      original = GlobalUid.configuration.notifier
-      GlobalUid.configuration.notifier = Proc.new do |exception, message|
-        original.call(exception, message)
-        @notifications << exception.class
-      end
+      GlobalUid.configuration.notifier = tracker
     end
 
     describe 'with increment exceptions raised' do
@@ -248,24 +245,24 @@ describe GlobalUid do
       it "allows the increment to be updated" do
         # Prefill alloc servers with a few records, initializing a connection to both alloc servers
         test_unique_ids(25)
-        assert_empty(@notifications)
+        assert_empty(tracker.notifications)
 
         # Update the active `test_id_server_1` connection, setting a `auto_increment_increment`
         # value that differs to what's configured and expected
         # The change should be noted and record creation should continue on both servers
         with_modified_connections(increment: 10, servers: ["test_id_server_1"]) do
           test_unique_ids(25)
-          assert_includes(@notifications, GlobalUid::InvalidIncrementException)
+          assert_includes(tracker.notifications, GlobalUid::InvalidIncrementException)
           assert_equal(2, GlobalUid::Base.get_connections.length)
         end
 
         # Update both active `test_id_server_1` and `test_id_server_2` connections, setting a `auto_increment_increment`
         # value that differs to what's configured and expected
         # The change should be noted and record creation should continue on both servers
-        @notifications = []
+        tracker.notifications = []
         with_modified_connections(increment: 10, servers: ["test_id_server_1", "test_id_server_2"]) do
           test_unique_ids(25)
-          assert_includes(@notifications, GlobalUid::InvalidIncrementException)
+          assert_includes(tracker.notifications, GlobalUid::InvalidIncrementException)
           assert_equal(2, GlobalUid::Base.get_connections.length)
         end
       end
@@ -297,13 +294,10 @@ describe GlobalUid do
       end
 
       describe 'when the auto_increment_increment changes' do
+        let(:tracker) { TestErrorTracker.new }
+
         before do
-          @notifications = []
-          original = GlobalUid.configuration.notifier
-          GlobalUid.configuration.notifier = Proc.new do |exception, message|
-            original.call(exception, message)
-            @notifications << exception.class
-          end
+          GlobalUid.configuration.notifier = tracker
         end
 
         describe "and all servers report a value other than what's configured" do
@@ -311,7 +305,7 @@ describe GlobalUid do
             GlobalUid.configuration.increment_by = 42
             reset_connections!
             assert_raises(GlobalUid::NoServersAvailableException) { test_unique_ids(10) }
-            assert_includes(@notifications, GlobalUid::InvalidIncrementException)
+            assert_includes(tracker.notifications, GlobalUid::InvalidIncrementException)
           end
 
           it "raises an exception, preventing duplicate ID generation" do
@@ -320,7 +314,7 @@ describe GlobalUid do
             end
 
             assert_raises(GlobalUid::NoServersAvailableException) { test_unique_ids(10) }
-            assert_includes(@notifications, GlobalUid::InvalidIncrementException)
+            assert_includes(tracker.notifications, GlobalUid::InvalidIncrementException)
           end
 
           it "raises an exception before attempting to generate many UIDs" do
@@ -331,7 +325,7 @@ describe GlobalUid do
             assert_raises GlobalUid::NoServersAvailableException do
               WithGlobalUID.generate_many_uids(10)
             end
-            assert_includes(@notifications, GlobalUid::InvalidIncrementException)
+            assert_includes(tracker.notifications, GlobalUid::InvalidIncrementException)
           end
 
           it "doesn't cater for increment_by being increased by a factor of x" do
@@ -341,7 +335,7 @@ describe GlobalUid do
             # Due to multiple processes and threads sharing the same alloc server, identifiers may be provisioned
             # before the current thread receives its next one. We rely on the gap being divisible by the configured increment
             test_unique_ids(10)
-            assert_empty(@notifications)
+            assert_empty(tracker.notifications)
           end
         end
 
@@ -351,7 +345,7 @@ describe GlobalUid do
 
               # Trigger the exception, one call may not hit the server, there's still a 1/(2^32) chance of failure.
               test_unique_ids(32)
-              assert_includes(@notifications, GlobalUid::InvalidIncrementException)
+              assert_includes(tracker.notifications, GlobalUid::InvalidIncrementException)
             end
           end
 
@@ -364,7 +358,7 @@ describe GlobalUid do
 
             # Trigger the exception, one call may not hit the server, there's still a 1/(2^32) chance of failure.
             test_unique_ids(32)
-            assert_includes(@notifications, GlobalUid::InvalidIncrementException)
+            assert_includes(tracker.notifications, GlobalUid::InvalidIncrementException)
           end
 
           it "notifies the client and continues when attempting to generate many UIDs" do
@@ -376,7 +370,7 @@ describe GlobalUid do
 
             # Trigger the exception, one call may not hit the server, there's still a 1/(2^32) chance of failure.
             32.times { WithGlobalUID.generate_many_uids(10) }
-            assert_includes(@notifications, GlobalUid::InvalidIncrementException)
+            assert_includes(tracker.notifications, GlobalUid::InvalidIncrementException)
           end
         end
       end
@@ -595,6 +589,19 @@ describe GlobalUid do
     ActiveRecord::Base.stub :mysql2_connection, modified_connection do
       reset_connections!
       yield
+    end
+  end
+
+  class TestErrorTracker
+    def initialize
+      @notifications = []
+    end
+
+    attr_accessor :notifications
+
+    def notify(exception)
+      ActiveRecord::Base.logger.error("GlobalUID error: #{exception.class} #{exception.message}")
+      @notifications << exception.class
     end
   end
 end

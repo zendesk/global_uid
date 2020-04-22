@@ -58,7 +58,7 @@ module GlobalUid
 
     def alert(exception)
       if GlobalUid.configuration.suppress_increment_exceptions?
-        GlobalUid::Base.notify(exception, exception.message)
+        GlobalUid.configuration.notifier.notify(exception)
       else
         raise exception
       end

@@ -77,7 +77,7 @@ module GlobalUid
         begin
           yield server if server.active?
         rescue TimeoutException, Exception => e
-          notify e, "#{e.message}"
+          GlobalUid.configuration.notifier.notify(e)
           errors << e
           server.disconnect!
           server.update_retry_at(60)
@@ -91,10 +91,6 @@ module GlobalUid
       end
 
       servers
-    end
-
-    def self.notify(exception, message)
-      GlobalUid.configuration.notifier.call(exception, message)
     end
 
     def self.get_connections

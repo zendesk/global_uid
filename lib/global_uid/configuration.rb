@@ -23,8 +23,8 @@ module GlobalUid
       # Duration (in seconds) to wait before attempting another connection to UID server
       @connection_retry = 600 # 10 minutes
 
-      # This proc is called with two parameters upon UID server failure -- an exception and a message
-      @notifier = Proc.new { |exception, message| ActiveRecord::Base.logger.error("GlobalUID error: #{exception.class} #{message}") }
+      # This class is called with the exception on a UID server failure
+      @notifier = GlobalUid::ErrorTracker.new
 
       # Timeout (in seconds) for retrieving a global UID from a server before moving to the next server
       @query_timeout = 10
