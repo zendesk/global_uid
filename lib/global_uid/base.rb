@@ -46,8 +46,6 @@ module GlobalUid
       increment_by = GlobalUid.configuration.increment_by
       connection_timeout = GlobalUid.configuration.connection_timeout
 
-      raise "You haven't configured any id servers" if id_servers.nil? or id_servers.empty?
-
       id_servers.map do |name|
         GlobalUid::Server.new(name,
           increment_by: increment_by,
@@ -70,8 +68,6 @@ module GlobalUid
       servers = setup_connections!
       servers = servers.shuffle if !GlobalUid.configuration.per_process_affinity?
 
-      raise NoServersAvailableException if servers.empty?
-
       errors = []
       servers.each do |server|
         begin
@@ -84,10 +80,10 @@ module GlobalUid
         end
       end
 
-      # in the case where all servers are gone, put everyone back in.
-      if get_connections.empty?
-        servers.each { |server| server.update_retry_at(0) }
-        raise NoServersAvailableException, "Errors hit: #{errors.map(&:to_s).join(',')}"
+      if get_connections.empty? # all servers have returned errors
+        exception = NoServersAvailableException.new(errors.empty? ? "" : "Errors hit: #{errors.map(&:to_s).join(', ')}")
+        GlobalUid.configuration.notifier.notify(exception)
+        raise exception
       end
 
       servers
@@ -104,7 +100,6 @@ module GlobalUid
           return server.allocator.allocate_one(klass.global_uid_table)
         end
       end
-      raise NoServersAvailableException, "All global UID servers are gone!"
     end
 
     def self.get_many_uids_for_class(klass, count)
@@ -114,7 +109,6 @@ module GlobalUid
           return server.allocator.allocate_many(klass.global_uid_table, count: count)
         end
       end
-      raise NoServersAvailableException, "All global UID servers are gone!"
     end
 
     def self.id_table_from_name(name)

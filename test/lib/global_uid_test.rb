@@ -453,14 +453,6 @@ describe GlobalUid do
           WithGlobalUID.create!
         end
       end
-
-      it "retry the servers immediately after failure" do
-        assert_raises(GlobalUid::NoServersAvailableException) do
-          WithGlobalUID.create!
-        end
-
-        assert WithGlobalUID.create!
-      end
     end
 
     describe "with per-process_affinity" do
