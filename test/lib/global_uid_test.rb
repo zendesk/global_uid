@@ -558,13 +558,14 @@ describe GlobalUid do
   end
 
   def with_modified_connections(increment:, servers:)
-    modified_connection = lambda do |name, _connection_timeout|
-      config = ActiveRecord::Base.configurations.to_h[name]
-      ActiveRecord::Base.mysql2_connection(config).tap do |connection|
-        connection.execute("SET SESSION auto_increment_increment = #{increment}") if servers.include?(name)
+    modified_connection = lambda do |config|
+      ActiveRecord::Base.__minitest_stub__mysql2_connection(config).tap do |connection|
+        if servers.any? { |name| config["database"].include?(name) }
+          connection.execute("SET SESSION auto_increment_increment = #{increment}")
+        end
       end
     end
-    GlobalUid::Base.stub :new_connection, modified_connection do
+    ActiveRecord::Base.stub :mysql2_connection, modified_connection do
       reset_connections!
       yield
     end

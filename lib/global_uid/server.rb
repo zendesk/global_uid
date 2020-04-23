@@ -21,7 +21,7 @@ module GlobalUid
         @new = false
 
         begin
-          @connection = GlobalUid::Base.new_connection(name, connection_timeout)
+          @connection = mysql2_connection(name)
 
           if @connection.nil?
             @retry_at = Time.now + connection_retry
@@ -41,6 +41,26 @@ module GlobalUid
 
     def new?
       @new
+    end
+
+    def mysql2_connection(name)
+      raise "No id server '#{name}' configured in database.yml" unless ActiveRecord::Base.configurations.to_h.has_key?(name)
+      config = ActiveRecord::Base.configurations.to_h[name]
+      c = config.symbolize_keys
+
+      raise "No global_uid support for adapter #{c[:adapter]}" if c[:adapter] != 'mysql2'
+
+      begin
+        Timeout.timeout(connection_timeout, ConnectionTimeoutException) do
+          ActiveRecord::Base.mysql2_connection(config)
+        end
+      rescue ConnectionTimeoutException => e
+        GlobalUid::Base.notify e, "Timed out establishing a connection to #{name}"
+        nil
+      rescue Exception => e
+        GlobalUid::Base.notify e, "establishing a connection to #{name}: #{e.message}"
+        nil
+      end
     end
 
   end
