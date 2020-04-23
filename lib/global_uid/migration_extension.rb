@@ -17,7 +17,14 @@ module GlobalUid
 
       if uid_enabled
         id_table_name = options[:global_uid_table] || GlobalUid::Base.id_table_from_name(name)
-        GlobalUid::Base.create_uid_tables(id_table_name, options)
+        GlobalUid::Base.with_servers do |server|
+          server.create_uid_table!(
+            name: id_table_name,
+            uid_type: options[:uid_type] || "bigint(21) UNSIGNED",
+            start_id: options[:start_id] || 1,
+            storage_engine: GlobalUid::Base.global_uid_options[:storage_engine] || "MyISAM"
+          )
+        end
       end
 
     end
@@ -25,7 +32,9 @@ module GlobalUid
     def drop_table(name, options = {})
       if !GlobalUid::Base.global_uid_options[:disabled] && options[:use_global_uid] == true
         id_table_name = options[:global_uid_table] || GlobalUid::Base.id_table_from_name(name)
-        GlobalUid::Base.drop_uid_tables(id_table_name)
+        GlobalUid::Base.with_servers do |server|
+          server.drop_uid_table!(name: id_table_name)
+        end
       end
       super(name, options)
     end

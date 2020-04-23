@@ -44,6 +44,22 @@ module GlobalUid
       @allocator = nil
     end
 
+    def create_uid_table!(name:, uid_type:, start_id:, storage_engine:)
+      connection.execute("CREATE TABLE IF NOT EXISTS `#{name}` (
+      `id` #{uid_type} NOT NULL AUTO_INCREMENT,
+      `stub` char(1) NOT NULL DEFAULT '',
+      PRIMARY KEY (`id`),
+      UNIQUE KEY `stub` (`stub`)
+      ) ENGINE=#{storage_engine}")
+
+      # prime the pump on each server
+      connection.execute("INSERT IGNORE INTO `#{name}` VALUES(#{start_id}, 'a')")
+    end
+
+    def drop_uid_table!(name:)
+      connection.execute("DROP TABLE IF EXISTS `#{name}`")
+    end
+
     private
 
     attr_accessor :connection_retry, :connection_timeout, :retry_at, :increment_by

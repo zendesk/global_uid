@@ -26,31 +26,6 @@ module GlobalUid
       Thread.current["global_uid_servers_#{$$}"] = s
     end
 
-    def self.create_uid_tables(id_table_name, options={})
-      type     = options[:uid_type] || "bigint(21) UNSIGNED"
-      start_id = options[:start_id] || 1
-
-      engine_stmt = "ENGINE=#{global_uid_options[:storage_engine] || "MyISAM"}"
-
-      with_servers do |server|
-        server.connection.execute("CREATE TABLE IF NOT EXISTS `#{id_table_name}` (
-        `id` #{type} NOT NULL AUTO_INCREMENT,
-        `stub` char(1) NOT NULL DEFAULT '',
-        PRIMARY KEY (`id`),
-        UNIQUE KEY `stub` (`stub`)
-        ) #{engine_stmt}")
-
-        # prime the pump on each server
-        server.connection.execute("INSERT IGNORE INTO `#{id_table_name}` VALUES(#{start_id}, 'a')")
-      end
-    end
-
-    def self.drop_uid_tables(id_table_name)
-      with_servers do |server|
-        server.connection.execute("DROP TABLE IF EXISTS `#{id_table_name}`")
-      end
-    end
-
     def self.init_server_info
       id_servers = self.global_uid_servers
       increment_by = self.global_uid_options[:increment_by]
