@@ -74,12 +74,18 @@ module GlobalUid
     def self.init_server_info
       id_servers = self.global_uid_servers
       increment_by = self.global_uid_options[:increment_by]
+      connection_retry = self.global_uid_options[:connection_retry]
+      connection_timeout = self.global_uid_options[:connection_timeout]
 
       raise "You haven't configured any id servers" if id_servers.nil? or id_servers.empty?
       raise "More servers configured than increment_by: #{id_servers.size} > #{increment_by} -- this will create duplicate IDs." if id_servers.size > increment_by
 
       id_servers.map do |name|
-        GlobalUid::Server.new(name)
+        GlobalUid::Server.new(name,
+          increment_by: increment_by,
+          connection_retry: connection_retry,
+          connection_timeout: connection_timeout
+        )
       end
     end
 
@@ -88,35 +94,8 @@ module GlobalUid
     end
 
     def self.setup_connections!
-      connection_timeout = self.global_uid_options[:connection_timeout]
-      increment_by = self.global_uid_options[:increment_by]
-
-      if self.servers.nil?
-        self.servers = init_server_info.shuffle
-      end
-
-      self.servers.each do |server|
-        next if server.connection
-
-        if server.new? || ( server.retry_at && Time.now > server.retry_at )
-          server.new = false
-
-          begin
-            connection = new_connection(server.name, connection_timeout)
-            server.connection = connection
-            if connection.nil?
-              server.retry_at = Time.now + self.global_uid_options[:connection_retry]
-            else
-              server.allocator = Allocator.new(incrementing_by: increment_by, connection: connection)
-            end
-          rescue InvalidIncrementException => e
-            notify e, "#{e.message}"
-            server.connection = nil
-          end
-        end
-      end
-
-      self.servers
+      self.servers ||= init_server_info.shuffle
+      self.servers.each(&:connect)
     end
 
     def self.with_connections
