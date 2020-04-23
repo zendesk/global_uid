@@ -32,8 +32,8 @@ module GlobalUid
 
       engine_stmt = "ENGINE=#{global_uid_options[:storage_engine] || "MyISAM"}"
 
-      with_connections do |connection|
-        connection.execute("CREATE TABLE IF NOT EXISTS `#{id_table_name}` (
+      with_servers do |server|
+        server.connection.execute("CREATE TABLE IF NOT EXISTS `#{id_table_name}` (
         `id` #{type} NOT NULL AUTO_INCREMENT,
         `stub` char(1) NOT NULL DEFAULT '',
         PRIMARY KEY (`id`),
@@ -41,13 +41,13 @@ module GlobalUid
         ) #{engine_stmt}")
 
         # prime the pump on each server
-        connection.execute("INSERT IGNORE INTO `#{id_table_name}` VALUES(#{start_id}, 'a')")
+        server.connection.execute("INSERT IGNORE INTO `#{id_table_name}` VALUES(#{start_id}, 'a')")
       end
     end
 
     def self.drop_uid_tables(id_table_name)
-      with_connections do |connection|
-        connection.execute("DROP TABLE IF EXISTS `#{id_table_name}`")
+      with_servers do |server|
+        server.connection.execute("DROP TABLE IF EXISTS `#{id_table_name}`")
       end
     end
 
@@ -79,7 +79,7 @@ module GlobalUid
       self.servers.each(&:connect)
     end
 
-    def self.with_connections
+    def self.with_servers
       servers = setup_connections!
       servers = servers.shuffle if !self.global_uid_options[:per_process_affinity]
 
@@ -88,7 +88,7 @@ module GlobalUid
       errors = []
       servers.each do |server|
         begin
-          yield server.connection if server.active?
+          yield server if server.active?
         rescue TimeoutException, Exception => e
           notify e, "#{e.message}"
           errors << e
@@ -105,7 +105,7 @@ module GlobalUid
         raise NoServersAvailableException, "Errors hit: #{errors.map(&:to_s).join(',')}"
       end
 
-      connections
+      servers
     end
 
     def self.notify(exception, message)
@@ -120,8 +120,7 @@ module GlobalUid
     end
 
     def self.get_uid_for_class(klass)
-      with_connections do |connection|
-        server = self.servers.find { |server| connection.current_database.include?(server.name) }
+      with_servers do |server|
         Timeout.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
           return server.allocator.allocate_one(klass.global_uid_table)
         end
@@ -131,8 +130,7 @@ module GlobalUid
 
     def self.get_many_uids_for_class(klass, count)
       return [] unless count > 0
-      with_connections do |connection|
-        server = self.servers.find { |server| connection.current_database.include?(server.name) }
+      with_servers do |server|
         Timeout.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
           return server.allocator.allocate_many(klass.global_uid_table, count: count)
         end

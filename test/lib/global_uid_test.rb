@@ -64,21 +64,21 @@ describe GlobalUid do
         end
 
         it "create the global_uids table" do
-          GlobalUid::Base.with_connections do |connection|
-            assert table_exists?(connection, 'with_global_uids_ids'), 'Table should exist'
+          GlobalUid::Base.with_servers do |server|
+            assert table_exists?(server.connection, 'with_global_uids_ids'), 'Table should exist'
           end
         end
 
         it "create global_uids tables with matching ids" do
-          GlobalUid::Base.with_connections do |connection|
-            foo = connection.select_all("select id from with_global_uids_ids")
+          GlobalUid::Base.with_servers do |server|
+            foo = server.connection.select_all("select id from with_global_uids_ids")
             assert_equal(foo.first['id'].to_i, 1)
           end
         end
 
         it "create tables with the given storage_engine" do
-          GlobalUid::Base.with_connections do |connection|
-            foo = connection.select_all("show create table with_global_uids_ids")
+          GlobalUid::Base.with_servers do |server|
+            foo = server.connection.select_all("show create table with_global_uids_ids")
             assert_match(/ENGINE=InnoDB/, foo.first.values.join)
           end
         end
@@ -100,13 +100,13 @@ describe GlobalUid do
       describe "dropping a table" do
         it "not drop the global-uid tables" do
           CreateWithNoParams.up
-          GlobalUid::Base.with_connections do |connection|
-            assert table_exists?(connection, 'with_global_uids_ids'), 'Table should exist'
+          GlobalUid::Base.with_servers do |server|
+            assert table_exists?(server.connection, 'with_global_uids_ids'), 'Table should exist'
           end
 
           CreateWithNoParams.down
-          GlobalUid::Base.with_connections do |connection|
-            assert table_exists?(connection, 'with_global_uids_ids'), 'Table should be dropped'
+          GlobalUid::Base.with_servers do |server|
+            assert table_exists?(server.connection, 'with_global_uids_ids'), 'Table should be dropped'
           end
         end
       end
@@ -118,8 +118,8 @@ describe GlobalUid do
         end
 
         it "not create the global_uids table" do
-          GlobalUid::Base.with_connections do |connection|
-            assert !table_exists?(connection, 'with_global_uids_ids'), 'Table should not have been created'
+          GlobalUid::Base.with_servers do |server|
+            assert !table_exists?(server.connection, 'with_global_uids_ids'), 'Table should not have been created'
           end
         end
 
@@ -133,13 +133,13 @@ describe GlobalUid do
       describe "dropping a table" do
         it "drop the global-uid tables" do
           CreateWithExplicitUidTrue.up
-          GlobalUid::Base.with_connections do |connection|
-            assert table_exists?(connection, 'with_global_uids_ids'), 'Table should exist'
+          GlobalUid::Base.with_servers do |server|
+            assert table_exists?(server.connection, 'with_global_uids_ids'), 'Table should exist'
           end
 
           CreateWithExplicitUidTrue.down
-          GlobalUid::Base.with_connections do |connection|
-            assert !table_exists?(connection, 'with_global_uids_ids'), 'Table should be dropped'
+          GlobalUid::Base.with_servers do |server|
+            assert !table_exists?(server.connection, 'with_global_uids_ids'), 'Table should be dropped'
           end
         end
       end
@@ -152,8 +152,8 @@ describe GlobalUid do
       end
 
       it "not create the global_uids table" do
-        GlobalUid::Base.with_connections do |connection|
-          assert !table_exists?(connection, 'without_global_uids_ids'), 'Table should not not have been created'
+        GlobalUid::Base.with_servers do |server|
+          assert !table_exists?(server.connection, 'without_global_uids_ids'), 'Table should not not have been created'
         end
       end
 
@@ -285,8 +285,8 @@ describe GlobalUid do
 
     describe "normally" do
       it "create tables with the default MyISAM storage engine" do
-        GlobalUid::Base.with_connections do |connection|
-          foo = connection.select_all("show create table with_global_uids_ids")
+        GlobalUid::Base.with_servers do |server|
+          foo = server.connection.select_all("show create table with_global_uids_ids")
           assert_match(/ENGINE=MyISAM/, foo.first.values.join)
         end
       end
@@ -313,8 +313,8 @@ describe GlobalUid do
           end
 
           it "raises an exception, preventing duplicate ID generation" do
-            GlobalUid::Base.with_connections do |con|
-              con.execute("SET SESSION auto_increment_increment = 42")
+            GlobalUid::Base.with_servers do |server|
+              server.connection.execute("SET SESSION auto_increment_increment = 42")
             end
 
             assert_raises(GlobalUid::NoServersAvailableException) { test_unique_ids(10) }
@@ -322,8 +322,8 @@ describe GlobalUid do
           end
 
           it "raises an exception before attempting to generate many UIDs" do
-            GlobalUid::Base.with_connections do |con|
-              con.execute("SET SESSION auto_increment_increment = 42")
+            GlobalUid::Base.with_servers do |server|
+              server.connection.execute("SET SESSION auto_increment_increment = 42")
             end
 
             assert_raises GlobalUid::NoServersAvailableException do
@@ -333,8 +333,8 @@ describe GlobalUid do
           end
 
           it "doesn't cater for increment_by being increased by a factor of x" do
-            GlobalUid::Base.with_connections do |connection|
-              connection.execute("SET SESSION auto_increment_increment = #{GlobalUid::Base::GLOBAL_UID_DEFAULTS[:increment_by] * 2}")
+            GlobalUid::Base.with_servers do |server|
+              server.connection.execute("SET SESSION auto_increment_increment = #{GlobalUid::Base::GLOBAL_UID_DEFAULTS[:increment_by] * 2}")
             end
             # Due to multiple processes and threads sharing the same alloc server, identifiers may be provisioned
             # before the current thread receives its next one. We rely on the gap being divisible by the configured increment
@@ -443,8 +443,8 @@ describe GlobalUid do
       before do
         # would prefer to do the below, but need Mocha 0.9.10 to do so
         # ActiveRecord::ConnectionAdapters::MysqlAdapter.any_instance.stubs(:execute).raises(ActiveRecord::StatementInvalid)
-        GlobalUid::Base.with_connections do |connection|
-          connection.stubs(:insert).raises(ActiveRecord::StatementInvalid)
+        GlobalUid::Base.with_servers do |server|
+          server.connection.stubs(:insert).raises(ActiveRecord::StatementInvalid)
         end
       end
 
