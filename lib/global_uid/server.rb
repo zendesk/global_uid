@@ -1,9 +1,9 @@
 module GlobalUid
   class Server
 
-    attr_accessor :connection, :name, :allocator
+    attr_accessor :connection, :name
 
-    def initialize(name, increment_by:, connection_retry:, connection_timeout:)
+    def initialize(name, increment_by:, connection_retry:, connection_timeout:, query_timeout:)
       @connection = nil
       @name = name
       @retry_at = nil
@@ -11,6 +11,7 @@ module GlobalUid
       @increment_by = increment_by
       @connection_retry = connection_retry
       @connection_timeout = connection_timeout
+      @query_timeout = query_timeout
     end
 
     def connect
@@ -60,9 +61,21 @@ module GlobalUid
       connection.execute("DROP TABLE IF EXISTS `#{name}`")
     end
 
+    def allocate(klass, count: 1)
+      # TODO: Replace Timeout.timeout with DB level timeout
+      #   Timeout.timeout is unpredictable
+      Timeout.timeout(query_timeout, TimeoutException) do
+        if count == 1
+          allocator.allocate_one(klass.global_uid_table)
+        else
+          allocator.allocate_many(klass.global_uid_table, count: count)
+        end
+      end
+    end
+
     private
 
-    attr_accessor :connection_retry, :connection_timeout, :retry_at, :increment_by
+    attr_accessor :connection_retry, :connection_timeout, :retry_at, :increment_by, :query_timeout, :allocator
 
     def retry_connection?
       return Time.now > retry_at if retry_at

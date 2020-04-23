@@ -31,6 +31,7 @@ module GlobalUid
       increment_by = self.global_uid_options[:increment_by]
       connection_retry = self.global_uid_options[:connection_retry]
       connection_timeout = self.global_uid_options[:connection_timeout]
+      query_timeout = self.global_uid_options[:query_timeout]
 
       raise "You haven't configured any id servers" if id_servers.nil? or id_servers.empty?
       raise "More servers configured than increment_by: #{id_servers.size} > #{increment_by} -- this will create duplicate IDs." if id_servers.size > increment_by
@@ -39,7 +40,8 @@ module GlobalUid
         GlobalUid::Server.new(name,
           increment_by: increment_by,
           connection_retry: connection_retry,
-          connection_timeout: connection_timeout
+          connection_timeout: connection_timeout,
+          query_timeout: query_timeout
         )
       end
 
@@ -96,17 +98,13 @@ module GlobalUid
 
     def self.get_uid_for_class(klass)
       with_servers do |server|
-        Timeout.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
-          return server.allocator.allocate_one(klass.global_uid_table)
-        end
+        return server.allocate(klass)
       end
     end
 
     def self.get_many_uids_for_class(klass, count)
       with_servers do |server|
-        Timeout.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
-          return server.allocator.allocate_many(klass.global_uid_table, count: count)
-        end
+        return server.allocate(klass, count: count)
       end
     end
 
