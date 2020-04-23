@@ -113,8 +113,9 @@ module GlobalUid
       end
     end
 
-    def self.get_connections
-      with_connections {}
+    def self.connections
+      return [] if servers.nil?
+      servers.map(&:connection).compact
     end
 
     def self.get_uid_for_class(klass)
