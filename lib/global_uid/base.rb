@@ -102,7 +102,6 @@ module GlobalUid
     end
 
     def self.get_many_uids_for_class(klass, count)
-      return [] unless count > 0
       with_servers do |server|
         Timeout.timeout(self.global_uid_options[:query_timeout], TimeoutException) do
           return server.allocator.allocate_many(klass.global_uid_table, count: count)

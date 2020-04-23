@@ -16,6 +16,8 @@ module GlobalUid
     end
 
     def allocate_many(table, count:)
+      return [] unless count > 0
+
       increment_by = validate_connection_increment
 
       start_id = connection.insert("REPLACE INTO #{table} (stub) VALUES " + (["('a')"] * count).join(','))
