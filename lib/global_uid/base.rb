@@ -96,18 +96,6 @@ module GlobalUid
       servers.select(&:active?).map(&:connection)
     end
 
-    def self.get_uid_for_class(klass)
-      with_servers do |server|
-        return server.allocate(klass)
-      end
-    end
-
-    def self.get_many_uids_for_class(klass, count)
-      with_servers do |server|
-        return server.allocate(klass, count: count)
-      end
-    end
-
     def self.global_uid_options=(options)
       @global_uid_options = GLOBAL_UID_DEFAULTS.merge(options.symbolize_keys)
     end
