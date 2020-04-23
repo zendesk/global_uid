@@ -92,9 +92,7 @@ module GlobalUid
       increment_by = self.global_uid_options[:increment_by]
 
       if self.servers.nil?
-        self.servers = init_server_info
-        # sorting here sets up each process to have affinity to a particular server.
-        self.servers = self.servers.sort_by { |server| server.rand }
+        self.servers = init_server_info.shuffle
       end
 
       self.servers.each do |server|
@@ -123,10 +121,7 @@ module GlobalUid
 
     def self.with_connections
       servers = setup_connections!
-
-      if !self.global_uid_options[:per_process_affinity]
-        servers = servers.sort_by { rand } #yes, I know it's not true random.
-      end
+      servers = servers.shuffle if !self.global_uid_options[:per_process_affinity]
 
       raise NoServersAvailableException if servers.empty?
 
