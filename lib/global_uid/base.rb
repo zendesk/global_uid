@@ -35,13 +35,15 @@ module GlobalUid
       raise "You haven't configured any id servers" if id_servers.nil? or id_servers.empty?
       raise "More servers configured than increment_by: #{id_servers.size} > #{increment_by} -- this will create duplicate IDs." if id_servers.size > increment_by
 
-      id_servers.map do |name|
+      servers = id_servers.map do |name|
         GlobalUid::Server.new(name,
           increment_by: increment_by,
           connection_retry: connection_retry,
           connection_timeout: connection_timeout
         )
       end
+
+      servers.shuffle # each process uses a random server
     end
 
     def self.disconnect!
@@ -50,9 +52,12 @@ module GlobalUid
     end
 
     def self.with_servers
-      self.servers ||= init_server_info.shuffle
+      self.servers ||= init_server_info
       servers = self.servers.each(&:connect)
-      servers.shuffle! if !self.global_uid_options[:per_process_affinity]
+
+      if !self.global_uid_options[:per_process_affinity]
+        servers.shuffle! # subsequent requests are made against different servers
+      end
 
       errors = []
       servers.each do |server|
