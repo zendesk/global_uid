@@ -91,11 +91,6 @@ module GlobalUid
       end
     end
 
-    def self.connections
-      return [] if servers.nil?
-      servers.select(&:active?).map(&:connection)
-    end
-
     def self.global_uid_options=(options)
       @global_uid_options = GLOBAL_UID_DEFAULTS.merge(options.symbolize_keys)
     end

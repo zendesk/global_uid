@@ -254,7 +254,7 @@ describe GlobalUid do
         with_modified_connections(increment: 10, servers: ["test_id_server_1"]) do
           test_unique_ids(25)
           assert_includes(@notifications, GlobalUid::InvalidIncrementException)
-          assert_equal(2, GlobalUid::Base.connections.length)
+          assert_equal(2, active_connections.length)
         end
 
         # Update both active `test_id_server_1` and `test_id_server_2` connections, setting a `auto_increment_increment`
@@ -264,7 +264,7 @@ describe GlobalUid do
         with_modified_connections(increment: 10, servers: ["test_id_server_1", "test_id_server_2"]) do
           test_unique_ids(25)
           assert_includes(@notifications, GlobalUid::InvalidIncrementException)
-          assert_equal(2, GlobalUid::Base.connections.length)
+          assert_equal(2, active_connections.length)
         end
       end
     end
@@ -352,7 +352,7 @@ describe GlobalUid do
           end
 
           it "notifies the client and continues with the other connection" do
-            con = GlobalUid::Base.connections.first
+            con = active_connections.first
             con.execute("SET SESSION auto_increment_increment = 42")
 
             # Trigger the exception, one call may not hit the server, there's still a 1/(2^32) chance of failure.
@@ -361,7 +361,7 @@ describe GlobalUid do
           end
 
           it "notifies the client and continues when attempting to generate many UIDs" do
-            con = GlobalUid::Base.connections.first
+            con = active_connections.first
             con.execute("SET SESSION auto_increment_increment = 42")
 
             # Trigger the exception, one call may not hit the server, there's still a 1/(2^32) chance of failure.
@@ -390,36 +390,36 @@ describe GlobalUid do
       it "limp along with one functioning server" do
         with_timed_out_connection(server: "test_id_server_1", end_time: Time.now + 10.minutes) do
           test_unique_ids(10)
-          assert_equal 1, GlobalUid::Base.connections.size
-          assert_equal 'global_uid_test_id_server_2', GlobalUid::Base.connections[0].current_database
+          assert_equal 1, active_connections.length
+          assert_equal 'global_uid_test_id_server_2', active_connections[0].current_database
         end
       end
 
       it "eventually retry the connection and get it back in place" do
         with_timed_out_connection(server: "test_id_server_1", end_time: Time.now + 10.minutes) do
           test_unique_ids(10)
-          assert_equal 1, GlobalUid::Base.connections.size
-          assert_equal 'global_uid_test_id_server_2', GlobalUid::Base.connections[0].current_database
+          assert_equal 1, active_connections.length
+          assert_equal 'global_uid_test_id_server_2', active_connections[0].current_database
 
           after_timeout_end_time = Time.now + 11.minutes
           Time.stubs(:now).returns(after_timeout_end_time)
 
           test_unique_ids(10)
-          assert_equal 2, GlobalUid::Base.connections.size
+          assert_equal 2, active_connections.length
         end
       end
     end
 
     describe "With a server timing out on query" do
       before do
-        GlobalUid::Base.connections.first.stubs(:insert).raises(GlobalUid::TimeoutException)
+        active_connections.first.stubs(:insert).raises(GlobalUid::TimeoutException)
         # trigger the failure -- have to do it it a bunch of times, as one call might not hit the server
         # Even so there's a 1/(2^32) possibility of this test failing.
         32.times { WithGlobalUID.create! }
       end
 
       it "pull the server out of the pool" do
-        assert_equal 1, GlobalUid::Base.connections.size
+        assert_equal 1, active_connections.length
       end
 
       it "get ids from the remaining server" do
@@ -427,13 +427,13 @@ describe GlobalUid do
       end
 
       it "eventually retry the connection" do
-        assert_equal 1, GlobalUid::Base.connections.size
+        assert_equal 1, active_connections.length
 
         awhile = Time.now + 10.minutes
         Time.stubs(:now).returns(awhile)
 
         test_unique_ids
-        assert_equal 2, GlobalUid::Base.connections.size
+        assert_equal 2, active_connections.length
       end
     end
 
@@ -512,7 +512,7 @@ describe GlobalUid do
         # Ensure the parent has a connection
       end
 
-      parent_value, child_value = parent_child_fork_values { GlobalUid::Base.connections.map(&:object_id) }
+      parent_value, child_value = parent_child_fork_values { active_connections.map(&:object_id) }
       refute_equal child_value, parent_value
     end
   end
@@ -553,6 +553,11 @@ describe GlobalUid do
   end
 
   private
+
+  def active_connections
+    return [] if GlobalUid::Base.servers.nil?
+    GlobalUid::Base.servers.select(&:active?).map(&:connection)
+  end
 
   def show_create_sql(klass, table)
     klass.connection.select_rows("show create table #{table}")[0][1]
