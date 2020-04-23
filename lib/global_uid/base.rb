@@ -58,14 +58,12 @@ module GlobalUid
       servers = setup_connections!
       servers = servers.shuffle if !self.global_uid_options[:per_process_affinity]
 
-      raise NoServersAvailableException if servers.empty?
-
       errors = []
       servers.each do |server|
         begin
           yield server if server.active?
         rescue TimeoutException, Exception => e
-          notify e, "#{e.message}"
+          notify(e, e.message)
           errors << e
           server.disconnect!
           server.update_retry_at(1.minute)
@@ -77,7 +75,8 @@ module GlobalUid
         servers.each do |server|
           server.update_retry_at(0)
         end
-        raise NoServersAvailableException, "Errors hit: #{errors.map(&:to_s).join(',')}"
+        message = errors.empty? ? "" : "Errors hit: #{errors.map(&:to_s).join(', ')}"
+        raise NoServersAvailableException.new(message)
       end
 
       servers
