@@ -99,7 +99,6 @@ module GlobalUid
           return server.allocator.allocate_one(klass.global_uid_table)
         end
       end
-      raise NoServersAvailableException, "All global UID servers are gone!"
     end
 
     def self.get_many_uids_for_class(klass, count)
@@ -109,7 +108,6 @@ module GlobalUid
           return server.allocator.allocate_many(klass.global_uid_table, count: count)
         end
       end
-      raise NoServersAvailableException, "All global UID servers are gone!"
     end
 
     def self.global_uid_options=(options)
