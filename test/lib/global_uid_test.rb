@@ -414,16 +414,14 @@ describe GlobalUid do
 
     describe "With a server timing out on query" do
       before do
-        reset_connections!
-        @old_size = GlobalUid::Base.get_connections.size # prime them
         GlobalUid::Base.get_connections.first.stubs(:insert).raises(GlobalUid::TimeoutException)
         # trigger the failure -- have to do it it a bunch of times, as one call might not hit the server
         # Even so there's a 1/(2^32) possibility of this test failing.
-        32.times do WithGlobalUID.create! end
+        32.times { WithGlobalUID.create! }
       end
 
       it "pull the server out of the pool" do
-        assert_equal GlobalUid::Base.get_connections.size, @old_size - 1
+        assert_equal 1, GlobalUid::Base.get_connections.size
       end
 
       it "get ids from the remaining server" do
@@ -431,10 +429,12 @@ describe GlobalUid do
       end
 
       it "eventually retry the connection" do
-        awhile = Time.now + 10.hours
+        assert_equal 1, GlobalUid::Base.get_connections.size
+
+        awhile = Time.now + 10.minutes
         Time.stubs(:now).returns(awhile)
 
-        assert_equal GlobalUid::Base.get_connections.size, GlobalUid::Base.global_uid_servers.size
+        assert_equal 2, GlobalUid::Base.get_connections.size
       end
     end
 
