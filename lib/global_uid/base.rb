@@ -70,6 +70,7 @@ module GlobalUid
     end
 
     def self.disconnect!
+      servers.each(&:disconnect!) unless servers.nil?
       self.servers = nil
     end
 
@@ -87,24 +88,24 @@ module GlobalUid
       errors = []
       servers.each do |server|
         begin
-          yield server.connection if server.connection
+          yield server.connection if server.active?
         rescue TimeoutException, Exception => e
           notify e, "#{e.message}"
           errors << e
-          server.connection = nil
-          server.retry_at = Time.now + 1.minute
+          server.disconnect!
+          server.update_retry_at(1.minute)
         end
       end
 
       # in the case where all servers are gone, put everyone back in.
-      if servers.all? { |server| server.connection.nil? }
+      if servers.all?(&:disconnected?)
         servers.each do |server|
-          server.retry_at = Time.now - 5.minutes
+          server.update_retry_at(0)
         end
         raise NoServersAvailableException, "Errors hit: #{errors.map(&:to_s).join(',')}"
       end
 
-      servers.map { |server| server.connection }.compact
+      connections
     end
 
     def self.notify(exception, message)
@@ -115,7 +116,7 @@ module GlobalUid
 
     def self.connections
       return [] if servers.nil?
-      servers.map(&:connection).compact
+      servers.select(&:active?).map(&:connection)
     end
 
     def self.get_uid_for_class(klass)

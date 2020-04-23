@@ -1,13 +1,12 @@
 module GlobalUid
   class Server
 
-    attr_accessor :connection, :name, :retry_at, :new, :allocator, :increment_by
+    attr_accessor :connection, :name, :allocator
 
-    def initialize(name, increment_by: , connection_retry:, connection_timeout:)
+    def initialize(name, increment_by:, connection_retry:, connection_timeout:)
       @connection = nil
-      @name      = name
-      @retry_at  = nil
-      @new       = true
+      @name = name
+      @retry_at = nil
       @allocator = nil
       @increment_by = increment_by
       @connection_retry = connection_retry
@@ -15,32 +14,45 @@ module GlobalUid
     end
 
     def connect
-      return unless connection.nil?
+      return @connection if active? || !retry_connection?
+      @connection = mysql2_connection(name)
 
-      if new? || ( retry_at && Time.now > retry_at )
-        @new = false
-
-        begin
-          @connection = mysql2_connection(name)
-
-          if @connection.nil?
-            @retry_at = Time.now + connection_retry
-          else
-            @allocator = Allocator.new(incrementing_by: increment_by, connection: @connection)
-          end
-        rescue InvalidIncrementException => e
-          GlobalUid::Base.notify e, "#{e.message}"
-          @connection = nil
-        end
+      begin
+        @allocator = Allocator.new(incrementing_by: increment_by, connection: @connection) if active?
+      rescue InvalidIncrementException => e
+        GlobalUid::Base.notify(e, "#{e.message}")
+        disconnect!
       end
+
+      @connection
+    end
+
+    def active?
+      !disconnected?
+    end
+
+    def disconnected?
+      @connection.nil?
+    end
+
+    def update_retry_at(seconds)
+      @retry_at = Time.now + seconds
+    end
+
+    def disconnect!
+      @connection = nil
+      @allocator = nil
     end
 
     private
 
-    attr_accessor :connection_retry, :connection_timeout
+    attr_accessor :connection_retry, :connection_timeout, :retry_at, :increment_by
 
-    def new?
-      @new
+    def retry_connection?
+      return Time.now > retry_at if retry_at
+
+      update_retry_at(connection_retry)
+      true
     end
 
     def mysql2_connection(name)
@@ -54,10 +66,10 @@ module GlobalUid
         ActiveRecord::Base.mysql2_connection(config)
       end
     rescue ConnectionTimeoutException => e
-      GlobalUid::Base.notify e, "Timed out establishing a connection to #{name}"
+      GlobalUid::Base.notify(e, "Timed out establishing a connection to #{name}")
       nil
     rescue Exception => e
-      GlobalUid::Base.notify e, "establishing a connection to #{name}: #{e.message}"
+      GlobalUid::Base.notify(e, "establishing a connection to #{name}: #{e.message}")
       nil
     end
 
