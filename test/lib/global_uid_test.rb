@@ -5,11 +5,11 @@ describe GlobalUid do
   before do
     Phenix.rise!(with_schema: false)
     ActiveRecord::Base.establish_connection(:test)
-    reset_connections!
     restore_defaults!
   end
 
   after do
+    GlobalUid::Base.disconnect!
     Phenix.burn!
   end
 
@@ -208,7 +208,6 @@ describe GlobalUid do
     end
 
     after do
-      reset_connections!
       CreateWithNoParams.down
       CreateWithoutGlobalUIDs.down
     end
@@ -271,7 +270,6 @@ describe GlobalUid do
     end
 
     after do
-      reset_connections!
       CreateWithNoParams.down
       CreateWithoutGlobalUIDs.down
     end
@@ -307,7 +305,7 @@ describe GlobalUid do
         describe "and all servers report a value other than what's configured" do
           it "raises an exception when configuration incorrect during initialization" do
             GlobalUid::Base.global_uid_options[:increment_by] = 42
-            reset_connections!
+            GlobalUid::Base.disconnect!
             assert_raises(GlobalUid::NoServersAvailableException) { test_unique_ids(10) }
             assert_includes(@notifications, GlobalUid::InvalidIncrementException)
           end
@@ -384,7 +382,7 @@ describe GlobalUid do
           ActiveRecord::Base.__minitest_stub__mysql2_connection(config)
         end
         ActiveRecord::Base.stub :mysql2_connection, modified_connection do
-          reset_connections!
+          GlobalUid::Base.disconnect!
           yield
         end
       end
@@ -482,7 +480,7 @@ describe GlobalUid do
     end
 
     after do
-      reset_connections!
+      GlobalUid::Base.disconnect!
       CreateWithNoParams.down
       CreateWithoutGlobalUIDs.down
     end
@@ -523,7 +521,7 @@ describe GlobalUid do
     end
 
     it "work" do
-      reset_connections!
+      GlobalUid::Base.disconnect!
       2.times.map do
         Thread.new do
           100.times { WithGlobalUID.create! }
@@ -567,7 +565,7 @@ describe GlobalUid do
       end
     end
     ActiveRecord::Base.stub :mysql2_connection, modified_connection do
-      reset_connections!
+      GlobalUid::Base.disconnect!
       yield
     end
   end

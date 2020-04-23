@@ -5,11 +5,11 @@ describe GlobalUid do
   before do
     Phenix.rise!(with_schema: false)
     ActiveRecord::Base.establish_connection(:test)
-    reset_connections!
     restore_defaults!
   end
 
   after do
+    GlobalUid::Base.disconnect!
     Phenix.burn!
   end
 
@@ -37,7 +37,6 @@ describe GlobalUid do
     end
 
     after do
-      reset_connections!
       CreateWithNoParams.down
       CreateWithoutGlobalUIDs.down
     end

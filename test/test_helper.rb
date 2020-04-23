@@ -33,10 +33,6 @@ def test_unique_ids(amount = 10)
   end
 end
 
-def reset_connections!
-  GlobalUid::Base.servers = nil
-end
-
 def restore_defaults!
   GlobalUid::Base.global_uid_options = {
     :id_servers => [
