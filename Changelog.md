@@ -8,11 +8,22 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 - [Breaking change] ID Validation, ensure the ID coming back has been incremented using the configured `auto_increment_increment`. (https://github.com/zendesk/global_uid/pull/63)
+- `notify` is called before raising `NoServersAvailableException` (https://github.com/zendesk/global_uid/pull/71)
+
+### Changed
+- `with_connections` has been replaced by `with_servers` which contains the connection metadata (increment_by, timeout, allocations, etc) (https://github.com/zendesk/global_uid/pull/71)
 
 ### Removed
 - Removed the `dry_run` option (https://github.com/zendesk/global_uid/pull/64)
 - Removed `GlobalUid::ServerVariables` module (https://github.com/zendesk/global_uid/pull/66)
 - Removed `options` parameter from `generate_uid` & `generate_many_uids` (https://github.com/zendesk/global_uid/pull/68)
+- The following methods on `GlobalUid::Base` are no longer accessible as they're for internal use only (https://github.com/zendesk/global_uid/pull/71)
+  - `GlobalUid::Base.setup_connections!`
+  - `GlobalUid::Base.get_uid_for_class`
+  - `GlobalUid::Base.get_many_uids_for_class`
+  - `GlobalUid::Base.create_uid_tables`
+  - `GlobalUid::Base.drop_uid_tables`
+  - `GlobalUid::Base.get_connections`
 
 ## [3.7.1] - 2020-02-06
 ### Added
