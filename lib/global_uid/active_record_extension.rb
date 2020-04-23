@@ -28,11 +28,15 @@ module GlobalUid
       end
 
       def generate_uid
-        GlobalUid::Base.get_uid_for_class(self)
+        GlobalUid::Base.with_servers do |server|
+          return server.allocate(self)
+        end
       end
 
       def generate_many_uids(count)
-        GlobalUid::Base.get_many_uids_for_class(self, count)
+        GlobalUid::Base.with_servers do |server|
+          return server.allocate(self, count: count)
+        end
       end
 
       def disable_global_uid
