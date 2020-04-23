@@ -49,14 +49,10 @@ module GlobalUid
       self.servers = nil
     end
 
-    def self.setup_connections!
-      self.servers ||= init_server_info.shuffle
-      self.servers.each(&:connect)
-    end
-
     def self.with_servers
-      servers = setup_connections!
-      servers = servers.shuffle if !self.global_uid_options[:per_process_affinity]
+      self.servers ||= init_server_info.shuffle
+      servers = self.servers.each(&:connect)
+      servers.shuffle! if !self.global_uid_options[:per_process_affinity]
 
       errors = []
       servers.each do |server|

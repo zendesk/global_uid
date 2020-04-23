@@ -508,8 +508,10 @@ describe GlobalUid do
     end
 
     it "creates new MySQL connections" do
-      # Ensure the parent has a connection
-      refute_empty GlobalUid::Base.setup_connections!
+      GlobalUid::Base.with_servers do |_server|
+        # Ensure the parent has a connection
+      end
+
       parent_value, child_value = parent_child_fork_values { GlobalUid::Base.connections.map(&:object_id) }
       refute_equal child_value, parent_value
     end
