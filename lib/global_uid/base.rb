@@ -96,14 +96,14 @@ module GlobalUid
       end
 
       self.servers.each do |server|
-        next if server.cx
+        next if server.connection
 
         if server.new? || ( server.retry_at && Time.now > server.retry_at )
           server.new = false
 
           begin
             connection = new_connection(server.name, connection_timeout)
-            server.cx = connection
+            server.connection = connection
             if connection.nil?
               server.retry_at = Time.now + self.global_uid_options[:connection_retry]
             else
@@ -111,7 +111,7 @@ module GlobalUid
             end
           rescue InvalidIncrementException => e
             notify e, "#{e.message}"
-            server.cx = nil
+            server.connection = nil
           end
         end
       end
@@ -128,24 +128,24 @@ module GlobalUid
       errors = []
       servers.each do |server|
         begin
-          yield server.cx if server.cx
+          yield server.connection if server.connection
         rescue TimeoutException, Exception => e
           notify e, "#{e.message}"
           errors << e
-          server.cx = nil
+          server.connection = nil
           server.retry_at = Time.now + 1.minute
         end
       end
 
       # in the case where all servers are gone, put everyone back in.
-      if servers.all? { |server| server.cx.nil? }
+      if servers.all? { |server| server.connection.nil? }
         servers.each do |server|
           server.retry_at = Time.now - 5.minutes
         end
         raise NoServersAvailableException, "Errors hit: #{errors.map(&:to_s).join(',')}"
       end
 
-      servers.map { |server| server.cx }.compact
+      servers.map { |server| server.connection }.compact
     end
 
     def self.notify(exception, message)

@@ -64,21 +64,21 @@ describe GlobalUid do
         end
 
         it "create the global_uids table" do
-          GlobalUid::Base.with_connections do |cx|
-            assert table_exists?(cx, 'with_global_uids_ids'), 'Table should exist'
+          GlobalUid::Base.with_connections do |connection|
+            assert table_exists?(connection, 'with_global_uids_ids'), 'Table should exist'
           end
         end
 
         it "create global_uids tables with matching ids" do
-          GlobalUid::Base.with_connections do |cx|
-            foo = cx.select_all("select id from with_global_uids_ids")
+          GlobalUid::Base.with_connections do |connection|
+            foo = connection.select_all("select id from with_global_uids_ids")
             assert_equal(foo.first['id'].to_i, 1)
           end
         end
 
         it "create tables with the given storage_engine" do
-          GlobalUid::Base.with_connections do |cx|
-            foo = cx.select_all("show create table with_global_uids_ids")
+          GlobalUid::Base.with_connections do |connection|
+            foo = connection.select_all("show create table with_global_uids_ids")
             assert_match(/ENGINE=InnoDB/, foo.first.values.join)
           end
         end
@@ -100,13 +100,13 @@ describe GlobalUid do
       describe "dropping a table" do
         it "not drop the global-uid tables" do
           CreateWithNoParams.up
-          GlobalUid::Base.with_connections do |cx|
-            assert table_exists?(cx, 'with_global_uids_ids'), 'Table should exist'
+          GlobalUid::Base.with_connections do |connection|
+            assert table_exists?(connection, 'with_global_uids_ids'), 'Table should exist'
           end
 
           CreateWithNoParams.down
-          GlobalUid::Base.with_connections do |cx|
-            assert table_exists?(cx, 'with_global_uids_ids'), 'Table should be dropped'
+          GlobalUid::Base.with_connections do |connection|
+            assert table_exists?(connection, 'with_global_uids_ids'), 'Table should be dropped'
           end
         end
       end
@@ -118,8 +118,8 @@ describe GlobalUid do
         end
 
         it "not create the global_uids table" do
-          GlobalUid::Base.with_connections do |cx|
-            assert !table_exists?(cx, 'with_global_uids_ids'), 'Table should not have been created'
+          GlobalUid::Base.with_connections do |connection|
+            assert !table_exists?(connection, 'with_global_uids_ids'), 'Table should not have been created'
           end
         end
 
@@ -133,13 +133,13 @@ describe GlobalUid do
       describe "dropping a table" do
         it "drop the global-uid tables" do
           CreateWithExplicitUidTrue.up
-          GlobalUid::Base.with_connections do |cx|
-            assert table_exists?(cx, 'with_global_uids_ids'), 'Table should exist'
+          GlobalUid::Base.with_connections do |connection|
+            assert table_exists?(connection, 'with_global_uids_ids'), 'Table should exist'
           end
 
           CreateWithExplicitUidTrue.down
-          GlobalUid::Base.with_connections do |cx|
-            assert !table_exists?(cx, 'with_global_uids_ids'), 'Table should be dropped'
+          GlobalUid::Base.with_connections do |connection|
+            assert !table_exists?(connection, 'with_global_uids_ids'), 'Table should be dropped'
           end
         end
       end
@@ -152,8 +152,8 @@ describe GlobalUid do
       end
 
       it "not create the global_uids table" do
-        GlobalUid::Base.with_connections do |cx|
-          assert !table_exists?(cx, 'without_global_uids_ids'), 'Table should not not have been created'
+        GlobalUid::Base.with_connections do |connection|
+          assert !table_exists?(connection, 'without_global_uids_ids'), 'Table should not not have been created'
         end
       end
 
@@ -285,8 +285,8 @@ describe GlobalUid do
 
     describe "normally" do
       it "create tables with the default MyISAM storage engine" do
-        GlobalUid::Base.with_connections do |cx|
-          foo = cx.select_all("show create table with_global_uids_ids")
+        GlobalUid::Base.with_connections do |connection|
+          foo = connection.select_all("show create table with_global_uids_ids")
           assert_match(/ENGINE=MyISAM/, foo.first.values.join)
         end
       end
@@ -442,8 +442,8 @@ describe GlobalUid do
       before do
         # would prefer to do the below, but need Mocha 0.9.10 to do so
         # ActiveRecord::ConnectionAdapters::MysqlAdapter.any_instance.stubs(:execute).raises(ActiveRecord::StatementInvalid)
-        GlobalUid::Base.with_connections do |cx|
-          cx.stubs(:insert).raises(ActiveRecord::StatementInvalid)
+        GlobalUid::Base.with_connections do |connection|
+          connection.stubs(:insert).raises(ActiveRecord::StatementInvalid)
         end
       end
 
