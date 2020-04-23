@@ -79,7 +79,9 @@ module GlobalUid
           server.update_retry_at(0)
         end
         message = errors.empty? ? "" : "Errors hit: #{errors.map(&:to_s).join(', ')}"
-        raise NoServersAvailableException.new(message)
+        exception = NoServersAvailableException.new(message)
+        notify(exception, message)
+        raise exception
       end
 
       servers
