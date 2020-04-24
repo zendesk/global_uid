@@ -43,5 +43,5 @@ def restore_defaults!
 
   # Randomize connections for test processes to ensure they're not
   # sticky during tests
-  GlobalUid::Base.global_uid_options[:per_process_affinity] = false
+  GlobalUid::Base.global_uid_options[:connection_shuffling] = true
 end

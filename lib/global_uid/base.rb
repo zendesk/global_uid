@@ -13,7 +13,7 @@ module GlobalUid
       :query_timeout        => 10,
       :increment_by         => 5, # This will define the maximum number of servers that you can have
       :disabled             => false,
-      :per_process_affinity => true,
+      :connection_shuffling => false,
       :suppress_increment_exceptions => false
     }
 
@@ -57,7 +57,7 @@ module GlobalUid
       self.servers ||= init_server_info
       servers = self.servers.each(&:connect)
 
-      if !self.global_uid_options[:per_process_affinity]
+      if self.global_uid_options[:connection_shuffling]
         servers.shuffle! # subsequent requests are made against different servers
       end
 

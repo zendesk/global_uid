@@ -463,7 +463,7 @@ describe GlobalUid do
 
     describe "without shuffling connections" do
       before do
-        GlobalUid::Base.global_uid_options[:per_process_affinity] = true
+        GlobalUid::Base.global_uid_options[:connection_shuffling] = false
       end
 
       it "increment sequentially" do
@@ -488,14 +488,14 @@ describe GlobalUid do
       end
 
       after do
-        GlobalUid::Base.global_uid_options[:per_process_affinity] = false
+        GlobalUid::Base.global_uid_options[:connection_shuffling] = true
       end
     end
 
 
     describe "with connection shuffling" do
       before do
-        GlobalUid::Base.global_uid_options[:per_process_affinity] = false
+        GlobalUid::Base.global_uid_options[:connection_shuffling] = true
       end
 
       it "increment sequentially" do
