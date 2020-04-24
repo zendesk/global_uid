@@ -461,7 +461,7 @@ describe GlobalUid do
       end
     end
 
-    describe "with per-process_affinity" do
+    describe "without shuffling connections" do
       before do
         GlobalUid::Base.global_uid_options[:per_process_affinity] = true
       end
@@ -472,12 +472,54 @@ describe GlobalUid do
           this_id = WithGlobalUID.create!.id
           assert_operator this_id, :>, last_id
         end
+
+        # The same allocation server is used each time `with_servers` is called
+        refute_empty(GlobalUid::Base.servers[0].send(:allocator).recent_allocations)
+        assert_empty(GlobalUid::Base.servers[1].send(:allocator).recent_allocations)
+      end
+
+      it 'still selects a connection at random on initialization' do
+        # Run multiple times, there's a 2^32 chance of failure.
+        server_init_order = 32.times.map { GlobalUid::Base.init_server_info.map(&:name) }
+
+        refute(server_init_order.all? { |order| order == ["test_id_server_1", "test_id_server_2"] } )
+        assert(server_init_order.any? { |order| order == ["test_id_server_1", "test_id_server_2"] } )
+        assert(server_init_order.any? { |order| order == ["test_id_server_2", "test_id_server_1"] } )
       end
 
       after do
         GlobalUid::Base.global_uid_options[:per_process_affinity] = false
       end
     end
+
+
+    describe "with connection shuffling" do
+      before do
+        GlobalUid::Base.global_uid_options[:per_process_affinity] = false
+      end
+
+      it "increment sequentially" do
+        last_id = 0
+        10.times do
+          this_id = WithGlobalUID.create!.id
+          assert_operator this_id, :>, last_id
+        end
+
+        # A different allocation server is used each time `with_servers` is called
+        refute_empty(GlobalUid::Base.servers[0].send(:allocator).recent_allocations)
+        refute_empty(GlobalUid::Base.servers[1].send(:allocator).recent_allocations)
+      end
+
+      it 'still selects a connection at random on initialization' do
+        # Run multiple times, there's a 2^32 chance of failure.
+        server_init_order = 32.times.map { GlobalUid::Base.init_server_info.map(&:name) }
+
+        refute(server_init_order.all? { |order| order == ["test_id_server_1", "test_id_server_2"] } )
+        assert(server_init_order.any? { |order| order == ["test_id_server_1", "test_id_server_2"] } )
+        assert(server_init_order.any? { |order| order == ["test_id_server_2", "test_id_server_1"] } )
+      end
+    end
+
 
     after do
       GlobalUid::Base.disconnect!
