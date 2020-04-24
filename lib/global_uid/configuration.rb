@@ -10,7 +10,6 @@ module GlobalUid
     attr_accessor :connection_shuffling
     attr_accessor :suppress_increment_exceptions
     attr_accessor :storage_engine
-    attr_accessor :id_servers
 
     alias_method :disabled?, :disabled
     alias_method :connection_shuffling?, :connection_shuffling
@@ -52,6 +51,16 @@ module GlobalUid
       # The storage engine used during GloblaUid table creation
       # Supported and tested: InnoDB, MyISAM
       @storage_engine = "MyISAM"
+    end
+
+    def id_servers=(value)
+      raise "More servers configured than increment_by: #{value.size} > #{increment_by} -- this will create duplicate IDs." if value.size > increment_by
+      @id_servers = value
+    end
+
+    def id_servers
+      raise "You haven't configured any id servers" if @id_servers.empty?
+      @id_servers
     end
   end
 end

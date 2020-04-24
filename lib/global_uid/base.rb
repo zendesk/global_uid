@@ -16,25 +16,14 @@ module GlobalUid
     end
 
     def self.init_server_info
-      id_servers = GlobalUid.configuration.id_servers
-      increment_by = GlobalUid.configuration.increment_by
-      connection_retry = GlobalUid.configuration.connection_retry
-      connection_timeout = GlobalUid.configuration.connection_timeout
-      query_timeout = GlobalUid.configuration.query_timeout
-
-      raise "You haven't configured any id servers" if id_servers.nil? or id_servers.empty?
-      raise "More servers configured than increment_by: #{id_servers.size} > #{increment_by} -- this will create duplicate IDs." if id_servers.size > increment_by
-
-      servers = id_servers.map do |name|
+      GlobalUid.configuration.id_servers.map do |name|
         GlobalUid::Server.new(name,
-          increment_by: increment_by,
-          connection_retry: connection_retry,
-          connection_timeout: connection_timeout,
-          query_timeout: query_timeout
+          increment_by: GlobalUid.configuration.increment_by,
+          connection_retry: GlobalUid.configuration.connection_retry,
+          connection_timeout: GlobalUid.configuration.connection_timeout,
+          query_timeout: GlobalUid.configuration.query_timeout
         )
-      end
-
-      servers.shuffle # each process uses a random server
+      end.shuffle # so each process uses a random server
     end
 
     def self.disconnect!
