@@ -2,6 +2,7 @@
 require "global_uid/base"
 require "global_uid/allocator"
 require "global_uid/server"
+require "global_uid/configuration"
 require "global_uid/active_record_extension"
 require "global_uid/has_and_belongs_to_many_builder_extension"
 require "global_uid/migration_extension"
@@ -12,6 +13,19 @@ module GlobalUid
   class ConnectionTimeoutException < StandardError ; end
   class TimeoutException < StandardError ; end
   class InvalidIncrementException < StandardError ; end
+
+  def self.configuration
+    @configuration ||= GlobalUid::Configuration.new
+  end
+
+  def self.configure
+    yield configuration if block_given?
+  end
+
+  # @private
+  def self.reset_configuration
+    @configuration = nil
+  end
 end
 
 ActiveRecord::Base.send(:include, GlobalUid::ActiveRecordExtension)

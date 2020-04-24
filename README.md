@@ -39,25 +39,13 @@ id_server_2:
 Then setup these servers, and other defaults in your environment.rb:
 
 ```rb
-GlobalUid::Base.global_uid_options = {
-  id_servers: [ 'id_server_1', 'id_server_2' ],
-  increment_by: 5
+GlobalUid.configure do |config|
+  config.id_servers = [ 'id_server_1', 'id_server_2' ]
+  config.increment_by = 5
 }
 ```
 
-The `increment_by` value configured here does not dictate the value on your alloc server and must remain in sync with the value of [`auto_increment_increment`](https://dev.mysql.com/doc/refman/5.7/en/replication-options-master.html#sysvar_auto_increment_increment)
-
-Here's a complete list of the options you can use:
-
-| Name                             | Default                                    | Description                                                                                                  |
-| -------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `:disabled`                      | `false`                                    | Disable GlobalUid entirely                                                                                   |
-| `:connection_timeout`            | 3 seconds                                  | Timeout for connecting to a global UID server                                                                |
-| `:query_timeout`                 | 10 seconds                                 | Timeout for retrieving a global UID from a server before we move on to the next server                       |
-| `:connection_retry`              | 10 minutes                                 | After failing to connect or query a UID server, how long before we retry                                     |
-| `:notifier`                      | A proc calling `ActiveRecord::Base.logger` | This proc is called with two parameters upon UID server failure -- an exception and a message                |
-| `:increment_by`                  | 5                                          | Used for validation, compared with the value on the alloc servers to prevent allocation of duplicate IDs     |
-| `:suppress_increment_exceptions` | `false`                                    | Suppress configuration validation, allowing updates to `auto_increment_increment` while alloc servers in use |
+For a full list of configuration options, and their defaults, see `GlobalUid::Configuration`
 
 ### Migration
 

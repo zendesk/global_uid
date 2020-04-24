@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 - `with_connections` has been replaced by `with_servers` which contains the connection metadata (increment_by, timeout, allocations, etc) (https://github.com/zendesk/global_uid/pull/71)
 - The `per_process_affinity` configuration has been replaced with `connection_shuffling`. The behaviour remains the same, but the default boolean value has flipped – e.g. if you had previously configured `per_process_affinity = false`, you should now set `connection_shuffling = true` to get the same behavior. `connection_shuffling` defaults to false.
+- [Breaking change] Move configuration to a class
 
 ### Removed
 - Removed the `dry_run` option (https://github.com/zendesk/global_uid/pull/64)
