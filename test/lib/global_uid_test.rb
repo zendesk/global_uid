@@ -220,8 +220,8 @@ describe GlobalUid do
 
       @notifications = []
       original = GlobalUid.configuration.notifier
-      GlobalUid.configuration.notifier = Proc.new do |exception, message|
-        original.call(exception, message)
+      GlobalUid.configuration.notifier = Proc.new do |exception|
+        original.call(exception)
         @notifications << exception.class
       end
     end
@@ -298,8 +298,8 @@ describe GlobalUid do
         before do
           @notifications = []
           original = GlobalUid.configuration.notifier
-          GlobalUid.configuration.notifier = Proc.new do |exception, message|
-            original.call(exception, message)
+          GlobalUid.configuration.notifier = Proc.new do |exception|
+            original.call(exception)
             @notifications << exception.class
           end
         end

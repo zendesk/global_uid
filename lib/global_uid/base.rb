@@ -44,7 +44,7 @@ module GlobalUid
         begin
           yield server if server.active?
         rescue TimeoutException, Exception => e
-          notify(e, e.message)
+          GlobalUid.configuration.notifier.call(e)
           errors << e
           server.disconnect!
           server.update_retry_at(1.minute)
@@ -58,17 +58,11 @@ module GlobalUid
         end
         message = errors.empty? ? "" : "Errors hit: #{errors.map(&:to_s).join(', ')}"
         exception = NoServersAvailableException.new(message)
-        notify(exception, message)
+        GlobalUid.configuration.notifier.call(exception)
         raise exception
       end
 
       servers
-    end
-
-    def self.notify(exception, message)
-      if GlobalUid.configuration.notifier
-        GlobalUid.configuration.notifier.call(exception, message)
-      end
     end
 
     def self.id_table_from_name(name)
