@@ -12,6 +12,15 @@ setting [configured globally](https://dev.mysql.com/doc/refman/5.7/en/replicatio
 
 This gem only supports MySQL databases and the documentation is written with that in mind but the concept could be applied to others.
 
+### Resilience
+
+The gem will iterate over the configured `id_servers`, choose one at random and attempt a connection, returning the ID from the first alloc server to successfully respond.
+If there's a connection failure, the server will be removed from the pool and retried after the configured `connection_retry` period.
+If there's an allocation failure, the server will be removed from the pool and retried after 60 seconds.
+
+In either failure scenario, the configured `notifier` will be called and the gem will move through the list of configured `id_servers`
+until it gets a successful response. If no ID can be retrieved, a `NoServersAvailableException` is thrown and the connection state is reset so that subsequent requests will retry immediately.
+
 ## Installation
 
 Add it to your gemfile and run `bundle install`:
@@ -20,7 +29,7 @@ Add it to your gemfile and run `bundle install`:
 gem "global_uid"
 ```
 
-### Configuration
+## Configuration
 
 First configure some databases in database.yml in the normal way.
 
@@ -61,7 +70,7 @@ class CreateFoos < ActiveRecord::Migration
     create_table :foos, use_global_uid: false do |t|
 ```
 
-## Model-level stuff
+### Model-level stuff
 
 If you want GlobalUIDs created, you don't have to do anything except set up the GlobalUID tables
 with your migration.  Everything will be taken care you.  It's calm, and soothing like aloe.
@@ -74,10 +83,9 @@ It's the Rails way.
 class Foo < ActiveRecord::Base
   disable_global_uid
 end
-````
+```
 
-
-## Taking matters into your own hands:
+### Taking matters into your own hands:
 
 ```rb
 class Foo < ActiveRecord::Base
