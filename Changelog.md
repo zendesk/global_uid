@@ -6,21 +6,22 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [4.0.0] - 2020-04-27
 ### Added
 - [Breaking change] ID Validation, ensure the ID coming back has been incremented using the configured `auto_increment_increment`. (https://github.com/zendesk/global_uid/pull/63)
 - `notify` is called before raising `NoServersAvailableException` (https://github.com/zendesk/global_uid/pull/71)
 
 ### Changed
-- `with_connections` has been replaced by `with_servers` which contains the connection metadata (increment_by, timeout, allocations, etc) (https://github.com/zendesk/global_uid/pull/71)
-- The `per_process_affinity` configuration has been replaced with `connection_shuffling`. The behaviour remains the same, but the default boolean value has flipped – e.g. if you had previously configured `per_process_affinity = false`, you should now set `connection_shuffling = true` to get the same behavior. `connection_shuffling` defaults to false.
-- [Breaking change] Move configuration to a class
-- [Breaking change] The configured `notifier` proc is now called now only with an exception, rather than an exception and a message.
+- [Breaking change] `with_connections` has been replaced by `with_servers` which contains the connection metadata (increment_by, timeout, allocations, etc) (https://github.com/zendesk/global_uid/pull/71)
+- [Breaking change] The `per_process_affinity` configuration has been replaced with `connection_shuffling`. The behaviour remains the same, but the default boolean value has flipped – e.g. if you had previously configured `per_process_affinity = false`, you should now set `connection_shuffling = true` to get the same behavior. `connection_shuffling` defaults to false. (https://github.com/zendesk/global_uid/pull/72)
+- [Breaking change] Move configuration to a class (https://github.com/zendesk/global_uid/pull/72)
+- [Breaking change] The configured `notifier` proc is now called now only with an exception, rather than an exception and a message. (https://github.com/zendesk/global_uid/pull/73)
 
 ### Removed
-- Removed the `dry_run` option (https://github.com/zendesk/global_uid/pull/64)
-- Removed `GlobalUid::ServerVariables` module (https://github.com/zendesk/global_uid/pull/66)
+- [Breaking change] Removed the `dry_run` option (https://github.com/zendesk/global_uid/pull/64)
+- [Breaking change] Removed `GlobalUid::ServerVariables` module (https://github.com/zendesk/global_uid/pull/66)
 - Removed `options` parameter from `generate_uid` & `generate_many_uids` (https://github.com/zendesk/global_uid/pull/68)
-- The following methods on `GlobalUid::Base` are no longer accessible as they're for internal use only (https://github.com/zendesk/global_uid/pull/71)
+- [Breaking change] The following methods on `GlobalUid::Base` are no longer accessible as they're for internal use only (https://github.com/zendesk/global_uid/pull/71)
   - `GlobalUid::Base.setup_connections!`
   - `GlobalUid::Base.get_uid_for_class`
   - `GlobalUid::Base.get_many_uids_for_class`
