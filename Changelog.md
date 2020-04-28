@@ -6,7 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-## [4.0.0] - 2020-04-27
+## [4.0.0.beta1] - 2020-04-27
 ### Added
 - [Breaking change] ID Validation, ensure the ID coming back has been incremented using the configured `auto_increment_increment`. (https://github.com/zendesk/global_uid/pull/63)
 - `notify` is called before raising `NoServersAvailableException` (https://github.com/zendesk/global_uid/pull/71)
