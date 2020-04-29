@@ -20,9 +20,8 @@ module GlobalUid
         GlobalUid::Base.with_servers do |server|
           server.create_uid_table!(
             name: id_table_name,
-            uid_type: options[:uid_type] || "bigint(21) UNSIGNED",
-            start_id: options[:start_id] || 1,
-            storage_engine: GlobalUid.configuration.storage_engine
+            uid_type: options[:uid_type],
+            start_id: options[:start_id]
           )
         end
       end

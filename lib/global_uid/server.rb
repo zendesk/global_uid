@@ -45,13 +45,16 @@ module GlobalUid
       @allocator = nil
     end
 
-    def create_uid_table!(name:, uid_type:, start_id:, storage_engine:)
+    def create_uid_table!(name:, uid_type: nil, start_id: nil)
+      uid_type ||= "bigint(21) UNSIGNED"
+      start_id ||= 1
+
       connection.execute("CREATE TABLE IF NOT EXISTS `#{name}` (
       `id` #{uid_type} NOT NULL AUTO_INCREMENT,
       `stub` char(1) NOT NULL DEFAULT '',
       PRIMARY KEY (`id`),
       UNIQUE KEY `stub` (`stub`)
-      ) ENGINE=#{storage_engine}")
+      ) ENGINE=#{GlobalUid.configuration.storage_engine}")
 
       # prime the pump on each server
       connection.execute("INSERT IGNORE INTO `#{name}` VALUES(#{start_id}, 'a')")

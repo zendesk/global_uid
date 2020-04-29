@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) (from 3.7.0 onwards).
 
 ## [Unreleased]
+### Added
+- A `GlobalUid::TestSupport` module has been introduced to assist with creating, droppping and recreating ID tables.
 
 ## [4.0.0.beta1] - 2020-04-27
 ### Added
