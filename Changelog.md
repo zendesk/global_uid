@@ -6,6 +6,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+- `GlobalUid.enabled?`, `GlobalUid.disabled?`, `GlobalUid.disable!` & `GlobalUid.enable!` helper methods added.
+
 ## [4.0.0.beta1] - 2020-04-27
 ### Added
 - [Breaking change] ID Validation, ensure the ID coming back has been incremented using the configured `auto_increment_increment`. (https://github.com/zendesk/global_uid/pull/63)

@@ -23,6 +23,22 @@ module GlobalUid
     yield configuration if block_given?
   end
 
+  def self.disable!
+    self.configuration.disabled = true
+  end
+
+  def self.enable!
+    self.configuration.disabled = false
+  end
+
+  def self.enabled?
+    !self.disabled?
+  end
+
+  def self.disabled?
+    self.configuration.disabled
+  end
+
   # @private
   def self.reset_configuration
     @configuration = nil

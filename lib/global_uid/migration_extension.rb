@@ -3,7 +3,7 @@ module GlobalUid
   module MigrationExtension
 
     def create_table(name, options = {}, &blk)
-      uid_enabled = !(GlobalUid.configuration.disabled? || options[:use_global_uid] == false)
+      uid_enabled = GlobalUid.enabled? && options[:use_global_uid] != false
 
       # rules for stripping out auto_increment -- enabled and not a "PK-less" table
       remove_auto_increment = uid_enabled && !(options[:id] == false)
@@ -30,7 +30,7 @@ module GlobalUid
     end
 
     def drop_table(name, options = {})
-      if !GlobalUid.configuration.disabled? && options[:use_global_uid] == true
+      if GlobalUid.enabled? && options[:use_global_uid] == true
         id_table_name = options[:global_uid_table] || GlobalUid::Base.id_table_from_name(name)
         GlobalUid::Base.with_servers do |server|
           server.drop_uid_table!(name: id_table_name)
