@@ -5,7 +5,7 @@ module GlobalUid
     # you can do so via this module
     class << self
       def create_uid_tables(tables: [], uid_type: nil, start_id: nil)
-        return if GlobalUid.configuration.disabled?
+        return if GlobalUid.disabled?
 
         GlobalUid::Base.with_servers do |server|
           tables.each do |table|
@@ -19,7 +19,7 @@ module GlobalUid
       end
 
       def drop_uid_tables(tables: [])
-        return if GlobalUid.configuration.disabled?
+        return if GlobalUid.disabled?
 
         GlobalUid::Base.with_servers do |server|
           tables.each do |table|
@@ -31,7 +31,7 @@ module GlobalUid
       end
 
       def recreate_uid_tables(tables: [], uid_type: nil, start_id: nil)
-        return if GlobalUid.configuration.disabled?
+        return if GlobalUid.disabled?
 
         drop_uid_tables(tables: tables)
         create_uid_tables(tables: tables, uid_type: nil, start_id: start_id)
