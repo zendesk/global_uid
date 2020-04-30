@@ -11,7 +11,6 @@ module GlobalUid
     attr_accessor :suppress_increment_exceptions
     attr_accessor :storage_engine
 
-    alias_method :disabled?, :disabled
     alias_method :connection_shuffling?, :connection_shuffling
     alias_method :suppress_increment_exceptions?, :suppress_increment_exceptions
 

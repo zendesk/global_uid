@@ -113,7 +113,7 @@ describe GlobalUid do
 
       describe "with global-uid disabled, globally" do
         before do
-          GlobalUid.configuration.disabled = true
+          GlobalUid.disable!
           CreateWithNoParams.up
         end
 
