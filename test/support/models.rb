@@ -6,6 +6,10 @@ class WithoutGlobalUID < ActiveRecord::Base
   disable_global_uid
 end
 
+class WithGlobalUIDAndCustomStart < ActiveRecord::Base
+  self.table_name = 'with_global_uid_and_custom_start'
+end
+
 class Parent < ActiveRecord::Base
   def self.reset
     @global_uid_disabled = nil

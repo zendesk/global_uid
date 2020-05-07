@@ -198,6 +198,23 @@ describe GlobalUid do
         refute Person.const_get(:HABTM_Account).global_uid_disabled
       end
     end
+
+    describe "Setting a start ID" do
+      it "creates records after the given start ID, respecting server offsets" do
+        CreateWithGlobalUIDAndCustomStart.up
+
+        GlobalUid::Base.with_servers do |server|
+          assert table_exists?(server.connection, 'with_global_uid_and_custom_start_ids'), 'Table should exist'
+        end
+
+        refute_operator WithGlobalUIDAndCustomStart.create!.id, :<=, 10_000
+
+        # An InvalidIncrementException would be raised if the server offset wasn't respected
+        25.times { assert_operator WithGlobalUIDAndCustomStart.create!.id, :>, 10_000 }
+
+        CreateWithGlobalUIDAndCustomStart.down
+      end
+    end
   end
 
   describe "With InnoDB engine" do
