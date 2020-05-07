@@ -47,3 +47,15 @@ class CreateWithoutGlobalUIDs < MigrationClass
     drop_table :without_global_uids, :use_global_uid => false
   end
 end
+
+class CreateWithGlobalUIDAndCustomStart < MigrationClass
+  group :change if self.respond_to?(:group)
+
+  def self.up
+    create_table(:with_global_uid_and_custom_start, start_id: 10_000) { }
+  end
+
+  def self.down
+    drop_table :with_global_uid_and_custom_start
+  end
+end
