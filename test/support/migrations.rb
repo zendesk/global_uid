@@ -20,6 +20,20 @@ class CreateWithNoParams < MigrationClass
   end
 end
 
+class CreateAnotherWithGlobalUids < MigrationClass
+  group :change if self.respond_to?(:group)
+
+  def self.up
+    create_table :another_with_global_uids do |t|
+      t.string  :description
+    end
+  end
+
+  def self.down
+    drop_table :another_with_global_uids
+  end
+end
+
 class CreateWithExplicitUidTrue < MigrationClass
   group :change if self.respond_to?(:group)
 
