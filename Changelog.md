@@ -5,8 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) (from 3.7.0 onwards).
 
 ## [Unreleased]
+
+## [4.0.0.rc1] - 2020-05-11
 ### Fixed
- - ID allocation validation now takes the table name into consideration. Prior to this change the server would allocate multiple IDs (e.g. 2 & 2) from different tables using global UIDs and incorrectly raise a InvalidIncrementException.
+ - ID allocation validation now takes the table name into consideration. Prior to this change the server would allocate multiple IDs (e.g. 2 & 2) from different tables using global UIDs and incorrectly raise a InvalidIncrementException. (https://github.com/zendesk/global_uid/pull/81)
 
 ## [4.0.0.beta2] - 2020-04-30
 ### Added
