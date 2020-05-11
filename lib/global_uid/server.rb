@@ -7,7 +7,7 @@ module GlobalUid
       @connection = nil
       @name = name
       @retry_at = nil
-      @allocator = nil
+      @allocators = {}
       @increment_by = increment_by
       @connection_retry = connection_retry
       @connection_timeout = connection_timeout
@@ -19,7 +19,7 @@ module GlobalUid
       @connection = mysql2_connection(name)
 
       begin
-        @allocator = Allocator.new(incrementing_by: increment_by, connection: @connection) if active?
+        validate_connection_increment if active?
       rescue InvalidIncrementException => e
         GlobalUid.configuration.notifier.call(e)
         disconnect!
@@ -42,7 +42,7 @@ module GlobalUid
 
     def disconnect!
       @connection = nil
-      @allocator = nil
+      @allocators = {}
     end
 
     def create_uid_table!(name:, uid_type: nil, start_id: nil)
@@ -69,16 +69,21 @@ module GlobalUid
       #   Timeout.timeout is unpredictable
       Timeout.timeout(query_timeout, TimeoutException) do
         if count == 1
-          allocator.allocate_one(klass.global_uid_table)
+          allocator(klass).allocate_one
         else
-          allocator.allocate_many(klass.global_uid_table, count: count)
+          allocator(klass).allocate_many(count: count)
         end
       end
     end
 
     private
 
-    attr_accessor :connection_retry, :connection_timeout, :retry_at, :increment_by, :query_timeout, :allocator
+    attr_accessor :connection_retry, :connection_timeout, :retry_at, :increment_by, :query_timeout, :allocators
+
+    def allocator(klass)
+      table_name = klass.global_uid_table
+      @allocators[table_name] ||= Allocator.new(incrementing_by: increment_by, connection: connection, table_name: table_name)
+    end
 
     def retry_connection?
       return Time.now > retry_at if retry_at
@@ -105,5 +110,12 @@ module GlobalUid
       nil
     end
 
+    def validate_connection_increment
+      db_increment = connection.select_value("SELECT @@auto_increment_increment")
+
+      if db_increment != increment_by
+        GlobalUid::Base.alert(InvalidIncrementException.new("Configured: '#{increment_by}', Found: '#{db_increment}' on '#{connection.current_database}'"))
+      end
+    end
   end
 end

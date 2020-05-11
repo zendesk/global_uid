@@ -1,26 +1,26 @@
 module GlobalUid
   class Allocator
-    attr_reader :recent_allocations, :max_window_size, :incrementing_by, :connection
+    attr_reader :recent_allocations, :max_window_size, :incrementing_by, :connection, :table_name
 
-    def initialize(incrementing_by:, connection:)
+    def initialize(incrementing_by:, connection:, table_name:)
       @recent_allocations = []
       @max_window_size = 5
       @incrementing_by = incrementing_by
       @connection = connection
-      validate_connection_increment
+      @table_name = table_name
     end
 
-    def allocate_one(table)
-      identifier = connection.insert("REPLACE INTO #{table} (stub) VALUES ('a')")
+    def allocate_one
+      identifier = connection.insert("REPLACE INTO #{table_name} (stub) VALUES ('a')")
       allocate(identifier)
     end
 
-    def allocate_many(table, count:)
+    def allocate_many(count:)
       return [] unless count > 0
 
-      increment_by = validate_connection_increment
+      increment_by = connection.select_value("SELECT @@auto_increment_increment")
 
-      start_id = connection.insert("REPLACE INTO #{table} (stub) VALUES " + (["('a')"] * count).join(','))
+      start_id = connection.insert("REPLACE INTO #{table_name} (stub) VALUES " + (["('a')"] * count).join(','))
       identifiers = start_id.step(start_id + (count - 1) * increment_by, increment_by).to_a
       identifiers.each { |identifier| allocate(identifier) }
       identifiers
@@ -34,8 +34,8 @@ module GlobalUid
 
       if !valid_allocation?
         db_increment = connection.select_value("SELECT @@auto_increment_increment")
-        message = "Configured: '#{incrementing_by}', Found: '#{db_increment}' on '#{connection.current_database}'. Recently allocated IDs: #{recent_allocations}"
-        alert(InvalidIncrementException.new(message))
+        message = "Configured: '#{incrementing_by}', Found: '#{db_increment}' on '#{connection.current_database}'. Recently allocated IDs: #{recent_allocations} using table '#{table_name}'"
+        GlobalUid::Base.alert(InvalidIncrementException.new(message))
       end
 
       identifier
@@ -45,24 +45,6 @@ module GlobalUid
       recent_allocations[1..-1].all? do |identifier|
         (identifier > recent_allocations[0]) &&
           (identifier - recent_allocations[0]) % incrementing_by == 0
-      end
-    end
-
-    def validate_connection_increment
-      db_increment = connection.select_value("SELECT @@auto_increment_increment")
-
-      if db_increment != incrementing_by
-        alert(InvalidIncrementException.new("Configured: '#{incrementing_by}', Found: '#{db_increment}' on '#{connection.current_database}'"))
-      end
-
-      db_increment
-    end
-
-    def alert(exception)
-      if GlobalUid.configuration.suppress_increment_exceptions?
-        GlobalUid.configuration.notifier.call(exception)
-      else
-        raise exception
       end
     end
   end

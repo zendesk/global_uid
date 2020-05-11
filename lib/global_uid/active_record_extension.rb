@@ -48,7 +48,7 @@ module GlobalUid
       end
 
       def global_uid_table
-        GlobalUid::Base.id_table_from_name(self.table_name)
+        @_global_uid_table ||= GlobalUid::Base.id_table_from_name(self.table_name)
       end
     end
   end

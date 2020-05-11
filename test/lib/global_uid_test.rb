@@ -497,8 +497,8 @@ describe GlobalUid do
         end
 
         # The same allocation server is used each time `with_servers` is called
-        refute_empty(GlobalUid::Base.servers[0].send(:allocator).recent_allocations)
-        assert_empty(GlobalUid::Base.servers[1].send(:allocator).recent_allocations)
+        refute_empty(GlobalUid::Base.servers[0].send(:allocator, WithGlobalUID).recent_allocations)
+        assert_empty(GlobalUid::Base.servers[1].send(:allocator, WithGlobalUID).recent_allocations)
       end
 
       it 'still selects a connection at random on initialization' do
@@ -529,8 +529,8 @@ describe GlobalUid do
         end
 
         # A different allocation server is used each time `with_servers` is called
-        refute_empty(GlobalUid::Base.servers[0].send(:allocator).recent_allocations)
-        refute_empty(GlobalUid::Base.servers[1].send(:allocator).recent_allocations)
+        refute_empty(GlobalUid::Base.servers[0].send(:allocator, WithGlobalUID).recent_allocations)
+        refute_empty(GlobalUid::Base.servers[1].send(:allocator, WithGlobalUID).recent_allocations)
       end
 
       it 'still selects a connection at random on initialization' do
