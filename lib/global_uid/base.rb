@@ -68,5 +68,13 @@ module GlobalUid
     def self.id_table_from_name(name)
       "#{name}_ids".to_sym
     end
+
+    def self.alert(exception)
+      if GlobalUid.configuration.suppress_increment_exceptions?
+        GlobalUid.configuration.notifier.call(exception)
+      else
+        raise exception
+      end
+    end
   end
 end

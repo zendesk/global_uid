@@ -263,14 +263,14 @@ describe GlobalUid do
 
       it "allows the increment to be updated" do
         # Prefill alloc servers with a few records, initializing a connection to both alloc servers
-        test_unique_ids(25)
+        test_unique_ids(model: WithGlobalUID, amount: 25)
         assert_empty(@notifications)
 
         # Update the active `test_id_server_1` connection, setting a `auto_increment_increment`
         # value that differs to what's configured and expected
         # The change should be noted and record creation should continue on both servers
         with_modified_connections(increment: 10, servers: ["test_id_server_1"]) do
-          test_unique_ids(25)
+          test_unique_ids(model: WithGlobalUID, amount: 25)
           assert_includes(@notifications, GlobalUid::InvalidIncrementException)
           assert_equal(2, active_connections.length)
         end
@@ -280,7 +280,7 @@ describe GlobalUid do
         # The change should be noted and record creation should continue on both servers
         @notifications = []
         with_modified_connections(increment: 10, servers: ["test_id_server_1", "test_id_server_2"]) do
-          test_unique_ids(25)
+          test_unique_ids(model: WithGlobalUID, amount: 25)
           assert_includes(@notifications, GlobalUid::InvalidIncrementException)
           assert_equal(2, active_connections.length)
         end
@@ -296,6 +296,7 @@ describe GlobalUid do
   describe "With GlobalUID" do
     before do
       CreateWithNoParams.up
+      CreateAnotherWithGlobalUids.up
       CreateWithoutGlobalUIDs.up
     end
 
@@ -308,7 +309,7 @@ describe GlobalUid do
       end
 
       it "get a unique id" do
-        test_unique_ids
+        test_unique_ids(models: [WithGlobalUID, AnotherWithGlobalUID], amount: 10)
       end
 
       describe 'when the auto_increment_increment changes' do
@@ -325,7 +326,7 @@ describe GlobalUid do
           it "raises an exception when configuration incorrect during initialization" do
             GlobalUid.configuration.increment_by = 42
             GlobalUid::Base.disconnect!
-            assert_raises(GlobalUid::NoServersAvailableException) { test_unique_ids(10) }
+            assert_raises(GlobalUid::NoServersAvailableException) { test_unique_ids(models: [WithGlobalUID, AnotherWithGlobalUID], amount: 10) }
             assert_includes(@notifications, GlobalUid::InvalidIncrementException)
           end
 
@@ -334,7 +335,7 @@ describe GlobalUid do
               server.connection.execute("SET SESSION auto_increment_increment = 42")
             end
 
-            assert_raises(GlobalUid::NoServersAvailableException) { test_unique_ids(10) }
+            assert_raises(GlobalUid::NoServersAvailableException) { test_unique_ids(models: [WithGlobalUID, AnotherWithGlobalUID], amount: 10) }
             assert_includes(@notifications, GlobalUid::InvalidIncrementException)
           end
 
@@ -355,7 +356,7 @@ describe GlobalUid do
             end
             # Due to multiple processes and threads sharing the same alloc server, identifiers may be provisioned
             # before the current thread receives its next one. We rely on the gap being divisible by the configured increment
-            test_unique_ids(10)
+            test_unique_ids(models: [WithGlobalUID, AnotherWithGlobalUID], amount: 10)
             assert_empty(@notifications)
           end
         end
@@ -365,7 +366,7 @@ describe GlobalUid do
             with_modified_connections(increment: 42, servers: ["test_id_server_1"]) do
 
               # Trigger the exception, one call may not hit the server, there's still a 1/(2^32) chance of failure.
-              test_unique_ids(32)
+              test_unique_ids(models: [WithGlobalUID, AnotherWithGlobalUID], amount: 32)
               assert_includes(@notifications, GlobalUid::InvalidIncrementException)
             end
           end
@@ -375,7 +376,7 @@ describe GlobalUid do
             con.execute("SET SESSION auto_increment_increment = 42")
 
             # Trigger the exception, one call may not hit the server, there's still a 1/(2^32) chance of failure.
-            test_unique_ids(32)
+            test_unique_ids(models: [WithGlobalUID, AnotherWithGlobalUID], amount: 32)
             assert_includes(@notifications, GlobalUid::InvalidIncrementException)
           end
 
@@ -384,7 +385,10 @@ describe GlobalUid do
             con.execute("SET SESSION auto_increment_increment = 42")
 
             # Trigger the exception, one call may not hit the server, there's still a 1/(2^32) chance of failure.
-            32.times { WithGlobalUID.generate_many_uids(10) }
+            32.times do
+              WithGlobalUID.generate_many_uids(10)
+              AnotherWithGlobalUID.generate_many_uids(10)
+            end
             assert_includes(@notifications, GlobalUid::InvalidIncrementException)
           end
         end
@@ -408,7 +412,7 @@ describe GlobalUid do
 
       it "limp along with one functioning server" do
         with_timed_out_connection(server: "test_id_server_1", end_time: Time.now + 10.minutes) do
-          test_unique_ids(10)
+          test_unique_ids(model: WithGlobalUID, amount: 10)
           assert_equal 1, active_connections.length
           assert_equal 'global_uid_test_id_server_2', active_connections[0].current_database
         end
@@ -416,14 +420,14 @@ describe GlobalUid do
 
       it "eventually retry the connection and get it back in place" do
         with_timed_out_connection(server: "test_id_server_1", end_time: Time.now + 10.minutes) do
-          test_unique_ids(10)
+          test_unique_ids(model: WithGlobalUID, amount: 10)
           assert_equal 1, active_connections.length
           assert_equal 'global_uid_test_id_server_2', active_connections[0].current_database
 
           after_timeout_end_time = Time.now + 11.minutes
           Time.stubs(:now).returns(after_timeout_end_time)
 
-          test_unique_ids(10)
+          test_unique_ids(model: WithGlobalUID, amount: 10)
           assert_equal 2, active_connections.length
         end
       end
@@ -442,7 +446,7 @@ describe GlobalUid do
       end
 
       it "get ids from the remaining server" do
-        test_unique_ids
+        test_unique_ids(model: WithGlobalUID, amount: 10)
       end
 
       it "eventually retry the connection" do
@@ -451,7 +455,7 @@ describe GlobalUid do
         awhile = Time.now + 10.minutes
         Time.stubs(:now).returns(awhile)
 
-        test_unique_ids
+        test_unique_ids(model: WithGlobalUID, amount: 10)
         assert_equal 2, active_connections.length
       end
     end
@@ -493,8 +497,8 @@ describe GlobalUid do
         end
 
         # The same allocation server is used each time `with_servers` is called
-        refute_empty(GlobalUid::Base.servers[0].send(:allocator).recent_allocations)
-        assert_empty(GlobalUid::Base.servers[1].send(:allocator).recent_allocations)
+        refute_empty(GlobalUid::Base.servers[0].send(:allocator, WithGlobalUID).recent_allocations)
+        assert_empty(GlobalUid::Base.servers[1].send(:allocator, WithGlobalUID).recent_allocations)
       end
 
       it 'still selects a connection at random on initialization' do
@@ -525,8 +529,8 @@ describe GlobalUid do
         end
 
         # A different allocation server is used each time `with_servers` is called
-        refute_empty(GlobalUid::Base.servers[0].send(:allocator).recent_allocations)
-        refute_empty(GlobalUid::Base.servers[1].send(:allocator).recent_allocations)
+        refute_empty(GlobalUid::Base.servers[0].send(:allocator, WithGlobalUID).recent_allocations)
+        refute_empty(GlobalUid::Base.servers[1].send(:allocator, WithGlobalUID).recent_allocations)
       end
 
       it 'still selects a connection at random on initialization' do
@@ -543,6 +547,7 @@ describe GlobalUid do
     after do
       GlobalUid::Base.disconnect!
       CreateWithNoParams.down
+      CreateAnotherWithGlobalUids.down
       CreateWithoutGlobalUIDs.down
     end
   end
@@ -600,16 +605,22 @@ describe GlobalUid do
   describe "generate_many_uids" do
     before do
       CreateWithNoParams.up
+      CreateAnotherWithGlobalUids.up
     end
 
     it "generates many unique ids" do
       uids = WithGlobalUID.generate_many_uids(100)
       assert_equal uids.sort, uids
       assert_equal uids.uniq, uids
+
+      uids = AnotherWithGlobalUID.generate_many_uids(100)
+      assert_equal uids.sort, uids
+      assert_equal uids.uniq, uids
     end
 
     after do
       CreateWithNoParams.down
+      CreateAnotherWithGlobalUids.down
     end
   end
 
