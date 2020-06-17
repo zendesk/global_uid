@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [4.0.0] - 2020-06-17
+
+No changes, rc1 has been used for some time without issue.
+
 ## [4.0.0.rc1] - 2020-05-11
 ### Fixed
  - ID allocation validation now takes the table name into consideration. Prior to this change the server would allocate multiple IDs (e.g. 2 & 2) from different tables using global UIDs and incorrectly raise a InvalidIncrementException. (https://github.com/zendesk/global_uid/pull/81)
