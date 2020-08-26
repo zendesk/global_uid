@@ -15,3 +15,21 @@ GlobalUid.configure do |config|
 ```
 * The `dry_run` configuration option is no longer supported and has been removed.
 * The `per_process_affinity` configuration option was replaced with `connection_shuffling` (https://github.com/zendesk/global_uid/pull/72). If you had previously configured `per_process_affinity = false`, you should now set `connection_shuffling = true` to get the same behaviour. `connection_shuffling` defaults to false.
+
+### The removal of `with_connections`
+
+Some gem clients were using `GlobalUid::Base.with_connections` to perform operations, however, the removal of `with_connections` was deliberate. It was a private API, and clients shouldn't be using those connections directly.
+
+The responsibility of this gem is to provide IDs, nothing more.
+
+If you _must_ do something with the connection, you would do it like so:
+```ruby
+GlobalUid::Base.with_servers do |server|
+  puts "Allocation server name: #{server.name}"
+  server.connection.select_all("SHOW TABLES").each do |row|
+    puts "ID table Name: #{row.values.first}"
+  end
+end; nil
+```
+
+It's not recommended though. If a client is performing an action on the connection, consider upstreaming it by opening a pull request.

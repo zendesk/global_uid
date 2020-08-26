@@ -6,9 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-## [4.0.0] - 2020-06-17
+## [4.0.0] - 2020-08-26
 
-No changes, rc1 has been used for some time without issue.
+No changes, the release candidate has been used in production without issue.
+
+A document on upgrading from 3.7.x to 4.0.0 [can be found here](https://github.com/zendesk/global_uid/blob/master/docs/upgrading-to-4-0.md).
 
 ## [4.0.0.rc1] - 2020-05-11
 ### Fixed

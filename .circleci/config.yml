@@ -3,6 +3,7 @@ version: 2
 run_tests: &run_tests
   steps:
     - checkout
+    - run: sudo apt update
     - run: sudo apt install -y default-mysql-client
     - run: bundle install
     - run: bundle exec rake test
