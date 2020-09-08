@@ -35,7 +35,7 @@ module GlobalUid
 
       def generate_many_uids(count)
         GlobalUid::Base.with_servers do |server|
-          return server.allocate(self, count: count)
+          return Array(server.allocate(self, count: count))
         end
       end
 
