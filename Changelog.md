@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) (from 3.7.0 onwards).
 
 ## [Unreleased]
+### Fixed
+ - `generate_many_ids(1)` would return the ID; It's now returned within an Array, fixing a breaking API change when clients upgraded from v3.x to v4.x.
 
 ## [4.0.0] - 2020-08-26
 

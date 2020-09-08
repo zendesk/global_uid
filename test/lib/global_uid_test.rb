@@ -618,6 +618,13 @@ describe GlobalUid do
       assert_equal uids.uniq, uids
     end
 
+    it "can be used to generate just one unique id" do
+      uids = WithGlobalUID.generate_many_uids(1)
+
+      assert_instance_of Array, uids
+      assert_equal uids.size, 1
+    end
+
     after do
       CreateWithNoParams.down
       CreateAnotherWithGlobalUids.down
