@@ -56,6 +56,8 @@ module GlobalUid
       UNIQUE KEY `stub` (`stub`)
       ) ENGINE=#{GlobalUid.configuration.storage_engine}")
 
+      create_trigger(table_name: name) if ENV['RAILS_ENV'] == 'production'
+
       # prime the pump on each server
       connection.execute("INSERT IGNORE INTO `#{name}` VALUES(#{start_id}, 'a')")
     end
@@ -83,6 +85,23 @@ module GlobalUid
     def allocator(klass)
       table_name = klass.global_uid_table
       @allocators[table_name] ||= Allocator.new(incrementing_by: increment_by, connection: connection, table_name: table_name)
+    end
+
+    def create_trigger
+      return unless ENV['CHARON_GUID_TRIGGERS_ENABLE']
+      <<~SQL
+        begin
+        declare msg varchar(128);
+        if @@global.auto_increment_increment <> #{ENV['ZENDESK_GLOBAL_UID_OPTIONS_INCREMENT_BY']}
+        or @@global.auto_increment_offset <> #{EXTREMELY_CRITICAL_VALUE}
+        or @@session.auto_increment_increment <> #{ENV['ZENDESK_GLOBAL_UID_OPTIONS_INCREMENT_BY']}
+        or @@session.auto_increment_offset <> #{EXTREMELY_CRITICAL_VALUE}
+        then
+        set msg = 'ALLOC_AUTOINC_ERROR: Bad auto increment or offset values for the alloc server';
+        signal sqlstate '99999' set message_text = msg;
+        end if;
+        end
+      SQL
     end
 
     def retry_connection?
