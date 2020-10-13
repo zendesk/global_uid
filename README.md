@@ -1,3 +1,9 @@
+**GlobalUID is deprecated and will no longer be maintained.**
+
+Zendesk is working on a [new unique ID solution](https://medium.com/zendesk-engineering/how-probable-are-collisions-with-ulids-monotonic-option-d604d3ed2de) that has made this library redundant, and will no longer be actively maintained. Internal staff are recommended to use [this private transitional library](https://github.com/zendesk/zendesk_unique_id_migration).
+
+----
+
 # Global UID Plugin
 
 [![Build status](https://circleci.com/gh/zendesk/global_uid.svg?style=svg)](https://circleci.com/gh/zendesk/global_uid)
