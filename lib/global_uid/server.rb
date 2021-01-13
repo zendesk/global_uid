@@ -106,14 +106,25 @@ module GlobalUid
       nil
     end
 
-    def mysql2_config(name)
-      raise "No id server '#{name}' configured in database.yml" unless ActiveRecord::Base.configurations.to_h.has_key?(name)
-      config = ActiveRecord::Base.configurations.to_h[name]
+    if ActiveRecord.version < Gem::Version.new('6.1.0')
+      def mysql2_config(name)
+        raise "No id server '#{name}' configured in database.yml" unless ActiveRecord::Base.configurations.to_h.has_key?(name)
+        config = ActiveRecord::Base.configurations.to_h[name]
 
-      c = config.symbolize_keys
-      raise "No global_uid support for adapter #{c[:adapter]}" if c[:adapter] != 'mysql2'
+        c = config.symbolize_keys
+        raise "No global_uid support for adapter #{c[:adapter]}" if c[:adapter] != 'mysql2'
 
-      config
+        config
+      end
+    else
+      def mysql2_config(name)
+        config = ActiveRecord::Base.configurations.configs_for(env_name: name, name: 'primary')
+
+        raise "No id server '#{name}' configured in database.yml" if config.nil?
+        raise "No global_uid support for adapter #{config.adapter}" if config.adapter != 'mysql2'
+
+        config.configuration_hash
+      end
     end
 
     def validate_connection_increment

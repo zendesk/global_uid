@@ -398,7 +398,7 @@ describe GlobalUid do
     describe "With a timing out server" do
       def with_timed_out_connection(server:, end_time:)
         modified_connection = lambda do |config|
-          if config["database"].include?(server)
+          if config.symbolize_keys[:database].include?(server)
             raise GlobalUid::ConnectionTimeoutException if end_time > Time.now
           end
 
@@ -645,7 +645,7 @@ describe GlobalUid do
   def with_modified_connections(increment:, servers:)
     modified_connection = lambda do |config|
       ActiveRecord::Base.__minitest_stub__mysql2_connection(config).tap do |connection|
-        if servers.any? { |name| config["database"].include?(name) }
+        if servers.any? { |name| config.symbolize_keys[:database].include?(name) }
           connection.execute("SET SESSION auto_increment_increment = #{increment}")
         end
       end
