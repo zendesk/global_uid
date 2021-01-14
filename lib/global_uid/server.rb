@@ -93,11 +93,7 @@ module GlobalUid
     end
 
     def mysql2_connection(name)
-      raise "No id server '#{name}' configured in database.yml" unless ActiveRecord::Base.configurations.to_h.has_key?(name)
-      config = ActiveRecord::Base.configurations.to_h[name]
-      c = config.symbolize_keys
-
-      raise "No global_uid support for adapter #{c[:adapter]}" if c[:adapter] != 'mysql2'
+      config = mysql2_config(name)
 
       Timeout.timeout(connection_timeout, ConnectionTimeoutException) do
         ActiveRecord::Base.mysql2_connection(config)
@@ -108,6 +104,16 @@ module GlobalUid
     rescue Exception => e
       GlobalUid.configuration.notifier.call(StandardError.new("establishing a connection to #{name}: #{e.message}"))
       nil
+    end
+
+    def mysql2_config(name)
+      raise "No id server '#{name}' configured in database.yml" unless ActiveRecord::Base.configurations.to_h.has_key?(name)
+      config = ActiveRecord::Base.configurations.to_h[name]
+
+      c = config.symbolize_keys
+      raise "No global_uid support for adapter #{c[:adapter]}" if c[:adapter] != 'mysql2'
+
+      config
     end
 
     def validate_connection_increment
