@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [4.1.0] - 2021-01-14
+### Added
+- Support for Rails 6.1. (https://github.com/zendesk/global_uid/pull/90)
+
 ## [4.0.1] - 2020-09-10
 ### Fixed
  - `generate_many_ids(1)` would return the ID; It's now returned within an Array, fixing a breaking API change when clients upgraded from v3.x to v4.x. (https://github.com/zendesk/global_uid/pull/86)
