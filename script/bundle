@@ -1,0 +1,22 @@
+#! /bin/sh
+
+bundle_with_gemfile() {
+  gemfile=${1:-Gemfile}
+  shift
+
+  BUNDLE_GEMFILE=$gemfile bundle ${@:-install}
+}
+
+bundle_with_gemfile Gemfile $@
+
+for railsver in 4.2 5.1 5.2 6.0 6.1
+do
+  gemfile=gemfiles/rails${railsver}.gemfile
+
+  echo
+  echo BUNDLING WITH $gemfile
+  echo
+
+  bundle_with_gemfile $gemfile $@
+done
+

@@ -6,7 +6,7 @@ Gem::Specification.new 'global_uid', '4.1.0' do |s|
   s.homepage    = 'https://github.com/zendesk/global_uid'
   s.license     = "MIT"
 
-  s.required_ruby_version = "~> 2.4"
+  s.required_ruby_version = [">= 2.4", "< 4.0"]
 
   s.add_dependency('activerecord', '>= 4.2.0', '< 6.2')
   s.add_dependency('activesupport')
