@@ -138,6 +138,36 @@ jobs:
       BUNDLE_GEMFILE: gemfiles/rails6.1.gemfile
     <<: *run_tests
 
+  # Ruby 3.0
+  test-3.0-with-5.1:
+    docker:
+      - image: circleci/ruby:3.0
+      - image: circleci/mysql:5.7
+    environment:
+      BUNDLE_GEMFILE: gemfiles/rails5.1.gemfile
+    <<: *run_tests
+  test-3.0-with-5.2:
+    docker:
+      - image: circleci/ruby:3.0
+      - image: circleci/mysql:5.7
+    environment:
+      BUNDLE_GEMFILE: gemfiles/rails5.2.gemfile
+    <<: *run_tests
+  test-3.0-with-6.0:
+    docker:
+      - image: circleci/ruby:3.0
+      - image: circleci/mysql:5.7
+    environment:
+      BUNDLE_GEMFILE: gemfiles/rails6.0.gemfile
+    <<: *run_tests
+  test-3.0-with-6.1:
+    docker:
+      - image: circleci/ruby:3.0
+      - image: circleci/mysql:5.7
+    environment:
+      BUNDLE_GEMFILE: gemfiles/rails6.1.gemfile
+    <<: *run_tests
+
 workflows:
   version: 2
   build:
@@ -163,3 +193,8 @@ workflows:
       - test-2.7-with-5.2
       - test-2.7-with-6.0
       - test-2.7-with-6.1
+
+      - test-3.0-with-5.1
+      - test-3.0-with-5.2
+      - test-3.0-with-6.0
+      - test-3.0-with-6.1
