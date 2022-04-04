@@ -10,7 +10,7 @@ module GlobalUid
 
       options.merge!(:id => false) if remove_auto_increment
 
-      super(name, options) { |t|
+      super(name, **options) { |t|
         t.column :id, "int(10) NOT NULL PRIMARY KEY" if remove_auto_increment
         blk.call(t) if blk
       }
@@ -35,7 +35,7 @@ module GlobalUid
           server.drop_uid_table!(name: id_table_name)
         end
       end
-      super(name, options)
+      super(name, **options)
     end
   end
 end
