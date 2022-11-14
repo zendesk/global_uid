@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) (from 3.7.0 onwards).
 
 ## [Unreleased]
+
+## [4.3.0] - 2022-11-14
 - Support for Ruby 3.1. (https://github.com/zendesk/global_uid/pull/96)
 - Support for Rails 7.0. (https://github.com/zendesk/global_uid/pull/95)
 
