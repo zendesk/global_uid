@@ -14,7 +14,7 @@ Gem::Specification.new 'global_uid', '4.2.0' do |s|
 
   s.add_development_dependency('rake')
   s.add_development_dependency('bundler')
-  s.add_development_dependency('minitest')
+  s.add_development_dependency('minitest', '~> 5.15.0')
   s.add_development_dependency('minitest-rg')
   s.add_development_dependency('minitest-line')
   s.add_development_dependency('mocha')
